@@ -30,7 +30,10 @@
     - [常见问题](#常见问题)
     - [诊断工具](#诊断工具)
   - [版本信息](#版本信息)
+    - [Kubernetes 1.30 新特性](#kubernetes-130-新特性)
+    - [升级建议](#升级建议)
   - [相关资源](#相关资源)
+  - [相关更新报告](#相关更新报告)
   - [贡献指南](#贡献指南)
 
 ## 目录结构
@@ -278,10 +281,39 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 
 ## 版本信息
 
-- **Kubernetes版本**: 1.28+
-- **文档版本**: 2025.1
-- **最后更新**: 2025-01-XX
+- **Kubernetes版本**: 1.30 (最新稳定版)
+- **文档版本**: 2025.2
+- **最后更新**: 2025-10-24
 - **兼容性**: Linux, Windows, macOS
+
+### Kubernetes 1.30 新特性
+
+- ✅ **上下文日志（Contextual Logging）**: 简化跨分布式系统的日志数据关联和分析
+- ✅ **用户命名空间支持**: 测试版支持，增强安全性
+- ✅ **PreStop Hook睡眠模式**: 允许在容器终止前暂停指定时间
+- ✅ **Sidecar容器**: Beta版本，支持独立启动、停止或重启
+- ✅ **递归只读挂载**: 支持递归只读挂载
+- ✅ **作业完成策略**: 改进作业管理
+- ✅ **快速递归SELinux标签更改**: 提升性能
+- ✅ **Linux节点内存交换支持**: 增强系统稳定性
+- ✅ **CEL准入控制**: 通用表达语言用于准入控制
+- ✅ **调度改进**: PodAffinity和PodAntiAffinity的MatchLabelKeys
+
+### 升级建议
+
+```bash
+# 使用kubeadm升级
+apt-mark unhold kubeadm
+apt-get update
+apt-get install -y kubeadm=1.30.0-00
+apt-mark hold kubeadm
+
+# 升级控制节点
+kubeadm upgrade plan
+kubeadm upgrade apply v1.30.0
+```
+
+详细更新内容请参考：[Kubernetes 1.30完整更新报告](../../2025年技术处理与分析/06_版本更新实施/Kubernetes_1.30更新报告.md)
 
 ## 相关资源
 
@@ -289,6 +321,13 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 - [Kubernetes API参考](https://kubernetes.io/docs/reference/)
 - [Kubernetes最佳实践](https://kubernetes.io/docs/concepts/configuration/overview/)
 - [CNCF Landscape](https://landscape.cncf.io/)
+
+## 相关更新报告
+
+- [Kubernetes 1.30更新报告](../../2025年技术处理与分析/06_版本更新实施/Kubernetes_1.30更新报告.md) - Kubernetes 1.30完整更新内容
+- [Docker 25.0更新报告](../../2025年技术处理与分析/06_版本更新实施/Docker_25.0完整更新报告.md) - Docker 25.0完整更新内容
+- [vSphere 8.0.2更新报告](../../2025年技术处理与分析/06_版本更新实施/vSphere_8.0.2更新报告.md) - vSphere 8.0.2完整更新内容
+- [版本更新实施综合报告](../../2025年技术处理与分析/06_版本更新实施/版本更新实施综合报告_第3周.md) - 版本更新实施综合报告
 
 ## 贡献指南
 
