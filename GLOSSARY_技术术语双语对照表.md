@@ -949,7 +949,7 @@
 
 ### 常用缩写速查 (Quick Reference)
 
-```
+```text
 AI - Artificial Intelligence (人工智能)
 API - Application Programming Interface (应用程序接口)
 APM - Application Performance Monitoring (应用性能监控)

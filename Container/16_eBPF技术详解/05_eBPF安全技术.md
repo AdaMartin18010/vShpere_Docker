@@ -16,6 +16,17 @@
     - [Seccomp-BPF概述](#seccomp-bpf概述)
     - [系统调用过滤](#系统调用过滤)
     - [容器安全加固](#容器安全加固)
+  - [Falco - 运行时安全](#falco---运行时安全)
+    - [Falco概述](#falco概述)
+  - [Tetragon - Cilium安全](#tetragon---cilium安全)
+    - [Tetragon概述](#tetragon概述)
+  - [实战案例](#实战案例)
+    - [案例1: 容器逃逸检测](#案例1-容器逃逸检测)
+    - [案例2: 异常进程监控](#案例2-异常进程监控)
+  - [最佳实践](#最佳实践)
+    - [安全策略设计](#安全策略设计)
+    - [性能影响评估](#性能影响评估)
+  - [参考资料](#参考资料)
 
 ---
 
@@ -533,19 +544,197 @@ spec:
 
 ---
 
-**文档版本**: v1.0 (进行中, 40%完成)  
+## Falco - 运行时安全
+
+### Falco概述
+
+**Falco** 是CNCF的运行时安全检测工具，基于eBPF实现实时威胁检测。
+
+```yaml
+Falco特点:
+  ✅ 实时威胁检测 (毫秒级)
+  ✅ eBPF/Kernel Module双模式
+  ✅ Kubernetes原生集成
+  ✅ 丰富的规则库 (100+规则)
+  ✅ 多种输出方式
+  ✅ 自定义规则支持
+
+使用场景:
+  - Kubernetes集群安全监控
+  - 容器运行时威胁检测
+  - 合规性审计
+  - 事件响应
+```
+
+**Falco规则示例**:
+
+```yaml
+# 检测容器中启动Shell
+- rule: Terminal shell in container
+  desc: A shell was spawned in a container
+  condition: >
+    spawned_process and container and shell_procs and proc.tty != 0
+  output: >
+    Shell spawned in container (user=%user.name container=%container.id
+    image=%container.image.repository shell=%proc.name)
+  priority: NOTICE
+
+# 检测读取敏感文件
+- rule: Read sensitive file
+  desc: Attempt to read sensitive files
+  condition: >
+    open_read and sensitive_files and not trusted_containers
+  output: >
+    Sensitive file read (user=%user.name file=%fd.name
+    container=%container.id)
+  priority: WARNING
+```
+
+---
+
+## Tetragon - Cilium安全
+
+### Tetragon概述
+
+**Tetragon** 是Cilium的安全可观测性组件，提供深度安全能力。
+
+```yaml
+Tetragon特点:
+  ✅ 深度可观测性 (进程/文件/网络)
+  ✅ 策略执行 (实时阻止)
+  ✅ 无Sidecar (基于eBPF)
+  ✅ Kubernetes原生 (CRD策略)
+  ✅ 与Cilium集成
+
+使用场景:
+  - Kubernetes安全审计
+  - 运行时威胁检测
+  - 合规性监控
+  - 零信任架构
+```
+
+**Tetragon TracingPolicy**:
+
+```yaml
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-file-access
+spec:
+  kprobes:
+  - call: "security_file_open"
+    args:
+    - index: 0
+      type: "file"
+    selectors:
+    - matchArgs:
+      - index: 0
+        operator: "Prefix"
+        values:
+        - "/etc/"
+      matchActions:
+      - action: Post
+```
+
+---
+
+## 实战案例
+
+### 案例1: 容器逃逸检测
+
+```yaml
+# Falco规则: 检测容器逃逸
+- rule: Container Escape Attempt
+  desc: Detect container escape attempts
+  condition: >
+    spawned_process and container and
+    (proc.name in (nsenter, unshare) or
+    proc.cmdline contains "docker.sock")
+  output: >
+    Container escape detected (command=%proc.cmdline
+    container=%container.id)
+  priority: CRITICAL
+```
+
+### 案例2: 异常进程监控
+
+```yaml
+# 检测加密货币挖矿
+- rule: Detect crypto miners
+  desc: Cryptocurrency mining detection
+  condition: >
+    spawned_process and
+    (proc.name in (xmrig, minerd) or
+    proc.cmdline contains "stratum+tcp")
+  output: >
+    Crypto miner detected (command=%proc.cmdline)
+  priority: CRITICAL
+```
+
+---
+
+## 最佳实践
+
+### 安全策略设计
+
+```yaml
+分层防御:
+  1. 镜像扫描 (构建时)
+  2. Admission Control (部署时)
+  3. Runtime Security (运行时)
+  4. 网络安全 (持续)
+
+零信任原则:
+  ✅ 最小权限
+  ✅ 默认拒绝
+  ✅ 持续验证
+  ✅ 假设入侵
+```
+
+### 性能影响评估
+
+```yaml
+CPU开销:
+  LSM BPF: <1%
+  Seccomp-BPF: <0.5%
+  Falco: 1-3%
+  Tetragon: 1-2%
+  总计: <5%
+
+最佳实践:
+  ✅ 在eBPF中过滤事件
+  ✅ 使用采样技术
+  ✅ 限制规则数量
+  ✅ 监控资源使用
+```
+
+---
+
+## 参考资料
+
+**官方文档**:
+
+- [LSM BPF Documentation](https://www.kernel.org/doc/html/latest/bpf/prog_lsm.html)
+- [Falco Documentation](https://falco.org/docs/)
+- [Tetragon Documentation](https://tetragon.io/)
+
+---
+
+**文档版本**: v1.0  
 **最后更新**: 2025-10-19  
 **维护者**: 虚拟化容器化技术知识库项目组
 
-**已完成章节**:
+**本章总结**:
 
-- ✅ 概述 (eBPF安全革命)
-- ✅ LSM BPF (完整)
-- ✅ Seccomp-BPF (完整)
-- ⏳ Falco (待续)
-- ⏳ Tetragon (待续)
-- ⏳ 实战案例 (待续)
-- ⏳ 最佳实践 (待续)
+本章深入介绍了eBPF安全技术，包括：
+
+- ✅ **概述**: eBPF安全革命，<2% CPU开销
+- ✅ **LSM BPF**: 内核级安全策略执行
+- ✅ **Seccomp-BPF**: 系统调用过滤
+- ✅ **Falco**: 运行时威胁检测
+- ✅ **Tetragon**: 深度安全可观测性
+- ✅ **实战案例**: 容器逃逸、异常进程监控
+- ✅ **最佳实践**: 分层防御、零信任原则
 
 **下一步阅读**:
 
