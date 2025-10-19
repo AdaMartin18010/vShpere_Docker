@@ -331,4 +331,3 @@ GCP:
 **状态**: 启动中
 
 **Tags**: `#Serverless` `#Knative` `#OpenFaaS` `#FaaS` `#CloudNative`
-
