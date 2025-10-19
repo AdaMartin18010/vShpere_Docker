@@ -30,6 +30,7 @@
     - [常见问题](#常见问题)
     - [诊断工具](#诊断工具)
   - [版本信息](#版本信息)
+    - [Kubernetes 1.31 重大更新 ⭐](#kubernetes-131-重大更新-)
     - [Kubernetes 1.30 新特性](#kubernetes-130-新特性)
     - [升级建议](#升级建议)
   - [相关资源](#相关资源)
@@ -43,15 +44,12 @@
 ├── README.md                                    # Kubernetes技术总览（本文件）
 ├── 01_Kubernetes架构原理.md                     # Kubernetes架构深度解析
 ├── 02_Pod管理技术.md                            # Pod管理技术详解
-├── 02_Pod管理技术深度解析.md                    # Pod管理技术深度解析
 ├── 03_服务发现与负载均衡.md                     # 服务发现与负载均衡详解
-├── 03_服务发现与负载均衡深度解析.md             # 服务发现与负载均衡深度解析
 ├── 04_存储管理技术.md                           # 存储管理技术详解
-├── 04_存储管理技术深度解析.md                   # 存储管理技术深度解析
 ├── 05_网络策略与安全.md                         # 网络策略与安全详解
-├── 05_网络策略与安全深度解析.md                 # 网络策略与安全深度解析
 ├── 06_监控与日志管理.md                         # 监控与日志管理详解
-└── 06_监控与日志管理深度解析.md                 # 监控与日志管理深度解析
+├── 07_Kubernetes_1.30新特性详解.md             # Kubernetes 1.30新特性详解
+└── 08_Kubernetes_1.31新特性详解.md             # Kubernetes 1.31新特性详解 ⭐NEW
 ```
 
 ## 技术覆盖范围
@@ -281,10 +279,21 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 
 ## 版本信息
 
-- **Kubernetes版本**: 1.30 (最新稳定版)
-- **文档版本**: 2025.2
-- **最后更新**: 2025-10-24
+- **Kubernetes版本**: 1.31 (最新稳定版,2024年8月发布)
+- **文档版本**: 2025.3
+- **最后更新**: 2025-10-19
 - **兼容性**: Linux, Windows, macOS
+
+### Kubernetes 1.31 重大更新 ⭐
+
+- ✅ **Sidecar Containers (GA)**: 原生Sidecar支持,简化服务网格
+- ✅ **AppArmor (GA)**: 新语法,安全配置稳定
+- ✅ **PersistentVolume迁移 (Beta)**: 在线存储转换
+- ✅ **Pod Failure Policy (Beta)**: 灵活失败处理
+- ✅ **DRA (Alpha)**: 动态资源分配,GPU支持
+- ✅ **性能提升**: API服务器+30%,调度器-25%延迟
+
+详细内容请参考：[Kubernetes 1.31新特性详解](./08_Kubernetes_1.31新特性详解.md)
 
 ### Kubernetes 1.30 新特性
 
@@ -299,21 +308,21 @@ kubectl get events --sort-by=.metadata.creationTimestamp
 - ✅ **CEL准入控制**: 通用表达语言用于准入控制
 - ✅ **调度改进**: PodAffinity和PodAntiAffinity的MatchLabelKeys
 
+详细内容请参考：[Kubernetes 1.30新特性详解](./07_Kubernetes_1.30新特性详解.md)
+
 ### 升级建议
 
 ```bash
-# 使用kubeadm升级
+# 使用kubeadm升级到1.31
 apt-mark unhold kubeadm
 apt-get update
-apt-get install -y kubeadm=1.30.0-00
+apt-get install -y kubeadm=1.31.0-00
 apt-mark hold kubeadm
 
 # 升级控制节点
 kubeadm upgrade plan
-kubeadm upgrade apply v1.30.0
+kubeadm upgrade apply v1.31.0
 ```
-
-详细更新内容请参考：[Kubernetes 1.30完整更新报告](../../2025年技术处理与分析/06_版本更新实施/Kubernetes_1.30更新报告.md)
 
 ## 相关资源
 

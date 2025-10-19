@@ -9,9 +9,9 @@
   - [概述](#概述)
   - [目录结构](#目录结构)
   - [技术覆盖范围](#技术覆盖范围)
-    - [核心技术](#核心技术)
+    - [核心技术 (2025年10月更新)](#核心技术-2025年10月更新)
     - [技术领域](#技术领域)
-    - [应用场景](#应用场景)
+    - [应用场景 (2025年实际案例)](#应用场景-2025年实际案例)
   - [学习路径](#学习路径)
     - [初学者路径](#初学者路径)
     - [进阶路径](#进阶路径)
@@ -24,7 +24,7 @@
   - [与容器技术对比](#与容器技术对比)
   - [使用方式](#使用方式)
   - [版本与兼容策略](#版本与兼容策略)
-    - [WebAssembly 2.0 新特性](#webassembly-20-新特性)
+    - [WebAssembly/WASI 2025年10月重大更新 ⭐](#webassemblywasi-2025年10月重大更新-)
     - [升级建议](#升级建议)
   - [文档约定](#文档约定)
   - [进度追踪](#进度追踪)
@@ -49,21 +49,23 @@ WebAssembly（WASM）是一种新的字节码格式，可以在浏览器和服�
 
 ```text
 Container/10_WebAssembly技术详解/
-├── README.md                    # WebAssembly技术总览
-├── 01_WebAssembly架构原理.md    # WebAssembly架构深度解析
-├── 02_WebAssembly运行时技术.md  # WebAssembly运行时详解
-└── 03_WebAssembly安全机制.md    # WebAssembly安全技术
+├── README.md                     # WebAssembly技术总览
+├── 01_WebAssembly架构原理.md     # WebAssembly架构深度解析 (⭐2025年10月更新)
+├── 02_WebAssembly运行时技术.md   # WebAssembly运行时详解
+├── 03_WebAssembly安全机制.md     # WebAssembly安全技术
+└── 04_WebAssembly_2.0新特性详解.md # WebAssembly 2.0新特性详解
 ```
 
 ## 技术覆盖范围
 
-### 核心技术
+### 核心技术 (2025年10月更新)
 
 - **WebAssembly 2.0**: 最新WebAssembly标准
-- **WASI 2.0**: WebAssembly系统接口
-- **组件模型**: WebAssembly组件系统
-- **多线程支持**: WebAssembly多线程技术
-- **SIMD指令**: 单指令多数据支持
+- **WASI 2.0**: WebAssembly系统接口完整规范 ⭐NEW
+- **组件模型**: WebAssembly组件系统(WIT语言) ⭐NEW
+- **垃圾回收(GC)**: 自动内存管理支持 ⭐NEW
+- **多线程支持**: SharedArrayBuffer、Atomics、性能优化
+- **SIMD指令**: v128向量类型,4-16倍性能提升
 
 ### 技术领域
 
@@ -72,13 +74,13 @@ Container/10_WebAssembly技术详解/
 - **性能技术**: 优化算法、JIT编译、AOT编译
 - **集成技术**: 容器集成、边缘计算、云原生
 
-### 应用场景
+### 应用场景 (2025年实际案例)
 
-- **边缘计算**: 轻量级函数执行
-- **插件系统**: 安全的第三方代码执行
-- **数据处理**: 高性能计算任务
-- **游戏引擎**: 跨平台游戏开发
-- **AI推理**: 模型推理优化
+- **边缘计算**: Cloudflare Workers(200+数据中心)、Fastly Compute、Deno Deploy
+- **插件系统**: 浏览器扩展、Envoy WASM filter、VS Code扩展
+- **AI推理**: ONNX Runtime WASM、TensorFlow.js、WasmEdge TensorFlow
+- **游戏引擎**: Unity WebGL、Unreal Engine Web、Godot WASM
+- **容器运行时**: containerd WASM shim、Docker WASM、Kubernetes RuntimeClass
 
 ## 学习路径
 
@@ -158,18 +160,36 @@ Container/10_WebAssembly技术详解/
 - 平台：支持浏览器、Node.js、边缘设备
 - 语言：支持Rust、C/C++、Go、AssemblyScript等
 
-### WebAssembly 2.0 新特性
+### WebAssembly/WASI 2025年10月重大更新 ⭐
 
-- ✅ **垃圾回收（GC）**: 支持自动内存管理
+**WASI 2.0完整发布**:
+
+- ✅ **完整系统接口**: 文件系统、网络、时间、随机数、环境变量API
+- ✅ **组件模型成熟**: WIT接口类型系统,跨语言互操作
+- ✅ **安全性增强**: 细粒度权限控制,Capability-based安全模型
+- ✅ **生态成熟**: wasmCloud、Fermyon Spin、Docker WASM集成
+
+**WebAssembly 2.0核心特性**:
+
+- ✅ **垃圾回收（GC）**: anyref、funcref、struct、array,支持Java/Python/C#
 - ✅ **引用类型（Reference Types）**: 支持引用类型和外部引用
-- ✅ **多线程支持**: 支持SharedArrayBuffer和Atomics
-- ✅ **SIMD增强**: 扩展SIMD指令集
-- ✅ **组件模型（Component Model）**: 支持模块化组件系统
-- ✅ **WASI 2.0**: 增强的系统接口
+- ✅ **多线程支持**: SharedArrayBuffer、Atomics、接近原生性能
+- ✅ **SIMD增强**: v128向量类型,i8x16/i16x8/i32x4/f32x4,4-16倍加速
+- ✅ **组件模型（Component Model）**: 模块化组件,多组件依赖自动解析
 - ✅ **尾调用优化**: 提升递归函数性能
 - ✅ **异常处理**: 支持异常处理机制
 - ✅ **多值返回**: 支持函数返回多个值
 - ✅ **内存64位**: 支持64位内存寻址
+
+**主流运行时支持**:
+
+- Wasmtime 14.0+: WASI 2.0完整支持,组件模型稳定
+- WasmEdge 0.13+: AI推理优化,TensorFlow/PyTorch插件
+- Wasmer 4.0+: 跨平台支持,JavaScript API完善
+- containerd WASM shim: Kubernetes WASM Pod支持
+- Docker WASM: Docker Desktop技术预览
+
+详细内容请参考：[WebAssembly架构原理(2025年10月更新)](./01_WebAssembly架构原理.md#2025年10月最新技术动态)
 
 ### 升级建议
 
