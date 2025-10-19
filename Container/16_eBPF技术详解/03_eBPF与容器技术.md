@@ -53,50 +53,50 @@
 传统容器网络 vs eBPF容器网络:
 
 ┌────────────────────────────────────────────────────────────────┐
-│ 传统容器网络架构 (iptables-based)                              │
+│ 传统容器网络架构 (iptables-based)                               │
 ├────────────────────────────────────────────────────────────────┤
-│                                                                 │
+│                                                                │
 │  Pod A                Pod B                                    │
 │   ↓                    ↓                                       │
 │  veth pair            veth pair                                │
 │   ↓                    ↓                                       │
 │  bridge/routing       bridge/routing                           │
 │   ↓                    ↓                                       │
-│  iptables rules (1000s+规则)                                  │
+│  iptables rules (1000s+规则)                                   │
 │   - PREROUTING                                                 │
 │   - FORWARD                                                    │
 │   - POSTROUTING                                                │
 │   - NAT                                                        │
 │   ↓                                                            │
 │  网卡                                                          │
-│                                                                 │
+│                                                                │
 │  问题:                                                         │
-│    ❌ iptables规则线性匹配 (O(n))                             │
-│    ❌ 大量规则导致性能下降                                     │
-│    ❌ 每个数据包都要遍历所有规则                              │
-│    ❌ Service延迟: 1-2ms                                      │
-│    ❌ 吞吐量: ~5Gbps                                          │
+│    ❌ iptables规则线性匹配 (O(n))                              │
+│    ❌ 大量规则导致性能下降                                      │
+│    ❌ 每个数据包都要遍历所有规则                                 │
+│    ❌ Service延迟: 1-2ms                                       │
+│    ❌ 吞吐量: ~5Gbps                                           │
 └────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────┐
-│ eBPF容器网络架构 (Cilium)                                      │
+│ eBPF容器网络架构 (Cilium)                                       │
 ├────────────────────────────────────────────────────────────────┤
-│                                                                 │
+│                                                                │
 │  Pod A                Pod B                                    │
-│   ↓ (eBPF prog)       ↓ (eBPF prog)                           │
+│   ↓ (eBPF prog)       ↓ (eBPF prog)                            │
 │  veth eBPF           veth eBPF                                 │
 │   ↓                    ↓                                       │
-│  eBPF Socket LB ──> Direct Pod-to-Pod (零拷贝)                │
+│  eBPF Socket LB ──> Direct Pod-to-Pod (零拷贝)                 │
 │   ↓                    ↓                                       │
-│  网卡 XDP/TC         网卡 XDP/TC                               │
-│                                                                 │
+│  网卡 XDP/TC         网卡 XDP/TC                                │
+│                                                                │
 │  优势:                                                         │
-│    ✅ eBPF Map哈希查找 (O(1))                                 │
-│    ✅ Bypass iptables (性能提升10x)                           │
-│    ✅ 零拷贝Socket重定向                                      │
-│    ✅ Service延迟: 20-50μs (50-100x faster!)                 │
-│    ✅ 吞吐量: 10Gbps+ (2x faster)                            │
-│    ✅ 深度可观测性 (Hubble)                                   │
+│    ✅ eBPF Map哈希查找 (O(1))                                  │
+│    ✅ Bypass iptables (性能提升10x)                            │
+│    ✅ 零拷贝Socket重定向                                       │
+│    ✅ Service延迟: 20-50μs (50-100x faster!)                  │
+│    ✅ 吞吐量: 10Gbps+ (2x faster)                              │
+│    ✅ 深度可观测性 (Hubble)                                    │
 └────────────────────────────────────────────────────────────────┘
 ```
 

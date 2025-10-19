@@ -2,11 +2,6 @@
 
 > 业界最全面的eBPF技术指南 - 从原理到实践
 
-[![版本](https://img.shields.io/badge/版本-v1.0-blue.svg)](https://github.com/yourusername/yourrepo)
-[![完成度](https://img.shields.io/badge/完成度-100%25-success.svg)](./00_eBPF技术内容规划.md)
-[![字数](https://img.shields.io/badge/字数-70K+-orange.svg)](#)
-[![代码示例](https://img.shields.io/badge/代码示例-120+-green.svg)](#)
-
 ---
 
 ## 📚 专题概述
