@@ -41,13 +41,20 @@
 | 03. | [容器网络](03_容器网络/README.md) | ✅ 已增强 | Cilium 1.14+、Gateway API、Tetragon |
 | 04. | [容器存储](04_容器存储/README.md) | ✅ 已增强 | Rook 1.13+、Longhorn 1.6+、OpenEBS 4.0+ ⭐ **2025新增** |
 | 05. | [服务网格](05_服务网格/README.md) | ✅ 已增强 | Istio Ambient、Linkerd 2.14+、Gateway API |
-| 06. | [新兴技术2025](06_新兴技术2025/README.md) | ✅ 已完成 | Wasm、AI/ML、边缘计算、FinOps、安全、权限管理 ⭐ **2025前沿** |
+| 06. | [新兴技术2025](06_新兴技术2025/README.md) | ✅ 已完成 | Wasm、AI/ML、边缘计算、FinOps、安全、权限管理、区块链 ⭐ **2025前沿** |
 
-**模块总览**: ✅ **100%** 完成 (33/33文档, ~47,400行+) **↑21%**
+**模块总览**: ✅ **100%** 完成 (35/35文档, ~52,350行+) **↑31%**
 
 **最新完成** (2025-10-20):
 
-- ✅ **新兴技术2025模块**: 6篇文档全部完成 (~8,350行)
+- ✅ **区块链与容器化**: 全面覆盖企业联盟链、公链、Layer 2 (~4,934行) ⭐ **最新**
+  - Hyperledger Fabric: Operator部署、链码容器化、多组织网络
+  - Ethereum: Geth/Lighthouse全节点、验证器HA、RPC服务
+  - Layer 2: Optimism/Arbitrum/zkSync容器化、GPU加速证明
+  - Web3基础设施: IPFS Cluster、The Graph、Chainlink节点
+  - 跨链技术: Cosmos IBC、Polkadot Parachain、跨链桥
+
+- ✅ **新兴技术2025模块**: 7篇文档全部完成 (~13,280行)
   - WebAssembly容器化: Docker+Wasm、WasmEdge、Kubernetes集成
   - AI/ML工作负载: GPU调度、KubeFlow、Ray分布式训练
   - 边缘计算: K3s、KubeEdge、OpenYurt全面对比
