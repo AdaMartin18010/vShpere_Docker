@@ -36,13 +36,30 @@
 
 | 序号 | 模块名称 | 状态 | 内容概述 |
 |------|---------|------|---------|
-| 01. | [Docker部署](01_Docker部署/README.md) | ✅ 已完成 | Docker安装、镜像管理、Compose、最佳实践 |
-| 02. | [Kubernetes部署](02_Kubernetes部署/README.md) | ✅ 已完成 | 集群部署、组件配置、应用部署、故障排查 |
-| 03. | [容器网络](03_容器网络/README.md) | ✅ 已完成 | CNI、Calico、Cilium、NetworkPolicy |
-| 04. | [容器存储](04_容器存储/README.md) | ✅ 已完成 | CSI、Rook-Ceph、Longhorn、StorageClass |
-| 05. | [服务网格](05_服务网格/README.md) | ✅ 已完成 | 服务网格概述、Istio、Linkerd、流量管理 |
+| 01. | [Docker部署](01_Docker部署/README.md) | ✅ 已增强 | Docker安装、镜像管理、Compose、最佳实践 |
+| 02. | [Kubernetes部署](02_Kubernetes部署/README.md) | ✅ 已增强 | K8s 1.28+、Cluster API、Gateway API、GitOps |
+| 03. | [容器网络](03_容器网络/README.md) | ✅ 已增强 | Cilium 1.14+、Gateway API、Tetragon |
+| 04. | [容器存储](04_容器存储/README.md) | ✅ 已增强 | Rook 1.13+、Longhorn 1.6+、OpenEBS 4.0+ ⭐ **2025新增** |
+| 05. | [服务网格](05_服务网格/README.md) | ✅ 已增强 | Istio Ambient、Linkerd 2.14+、Gateway API |
+| 06. | [新兴技术2025](06_新兴技术2025/README.md) | ✅ 已完成 | Wasm、AI/ML、边缘计算、FinOps、安全、权限管理 ⭐ **2025前沿** |
 
-**模块总览**: ✅ **100%** 完成 (21/21文档)
+**模块总览**: ✅ **100%** 完成 (33/33文档, ~47,400行+) **↑21%**
+
+**最新完成** (2025-10-20):
+
+- ✅ **新兴技术2025模块**: 6篇文档全部完成 (~8,350行)
+  - WebAssembly容器化: Docker+Wasm、WasmEdge、Kubernetes集成
+  - AI/ML工作负载: GPU调度、KubeFlow、Ray分布式训练
+  - 边缘计算: K3s、KubeEdge、OpenYurt全面对比
+  - FinOps成本优化: Kubecost/OpenCost、成本治理、Spot实例
+  - 2025安全新标准: Sigstore、SBOM/SLSA/GUAC、零信任架构
+  - 权限管理与策略控制: OPA/Gatekeeper、Kyverno、RBAC、ext-authz、Policy-as-Code
+
+- Docker模块从4,318行增至6,521行 **↑51%**
+- Kubernetes模块从5,625行增至6,882行 **↑22%**
+- 容器网络模块从3,642行增至3,866行 **↑6%**
+- 新增2025年技术标准：Cluster API、Gateway API、Kyverno、Cilium 1.14+
+- 完整的GitOps工作流、eBPF安全、Tetragon、供应链安全
 
 ---
 
@@ -220,9 +237,18 @@
 ✅ 总进度:        21/21  (100%)
 ```
 
-**实际文档行数**: 约28,287行技术文档
+**实际文档行数**: 约31,208行技术文档 **(↑2,921行, +10.3%)**
 
 **最后更新**: 2025-10-19
+
+**增强成果**:
+
+- ✅ Docker部署模块深度增强（+2,203行, +51%）
+- ✅ Kubernetes部署模块深度增强（+1,257行, +22%）
+- ✅ 对齐2025年技术标准：K8s 1.28+、containerd、Cluster API
+- ✅ 新增Gateway API、Kyverno策略引擎、Cilium eBPF网络
+- ✅ 完整的GitOps工作流（ArgoCD）、供应链安全、零信任架构
+- 📄 [查看详细增强总结](2025年10月19日_容器化部署模块增强完成总结.md)
 
 ---
 

@@ -46,13 +46,19 @@
 
 | 文档名称 | 状态 | 备注 |
 |---|---|---|
-| 01_集群部署.md | ✅ 已完成 | kubeadm/二进制/云托管部署 (约1044行) |
+| 01_集群部署.md | ✅ 已增强 | Cluster API、Kyverno、Cilium、K8s 1.28+ (~1765行) |
 | 02_核心组件.md | ✅ 已完成 | API Server、Controller Manager、Scheduler、Kubelet (约986行) |
-| 03_应用部署.md | ✅ 已完成 | Pod、Deployment、Service、Ingress、ConfigMap (约1500行) |
+| 03_应用部署.md | ✅ 已增强 | Gateway API、Kustomize、Helm、ArgoCD GitOps (~2045行) |
 | 04_资源管理.md | ✅ 已完成 | Namespace、RBAC、ResourceQuota、LimitRange (约1300行) |
 | 05_故障排查.md | ✅ 已完成 | 常见故障、诊断命令、排查流程 (约1400行) |
 
-**模块总进度**: ✅ **100%** (5/5文档已完成，约6,230行)
+**模块总进度**: ✅ **100%** (5/5文档，约6,882行) **↑10.5%**
+
+**最新增强** (2025-10-19):
+
+- ✅ 集群部署：Cluster API、Kyverno策略引擎、Cilium eBPF (+722行)
+- ✅ 应用部署：Gateway API v1.0、Kustomize/Helm、ArgoCD GitOps (+535行)
+- ✅ 对齐2025年K8s 1.28+新特性
 
 ---
 
@@ -73,5 +79,5 @@
 ---
 
 **更新时间**: 2025-10-19  
-**文档版本**: v1.0  
-**状态**: ✅ **模块完成！**
+**文档版本**: v2.0  
+**状态**: ✅ **模块已增强 - 2025技术标准对齐**

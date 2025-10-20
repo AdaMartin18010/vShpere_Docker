@@ -23,6 +23,18 @@
   - [6. Compose最佳实践](#6-compose最佳实践)
   - [7. 生产环境使用](#7-生产环境使用)
   - [8. 故障排查](#8-故障排查)
+  - [9. Compose v2新特性 (2025)](#9-compose-v2新特性-2025)
+    - [9.1 Compose Watch实战](#91-compose-watch实战)
+  - [10. 高级配置技巧](#10-高级配置技巧)
+    - [10.1 使用扩展字段 (x-\*)](#101-使用扩展字段-x-)
+    - [10.2 动态配置与插值](#102-动态配置与插值)
+    - [10.3 多环境配置](#103-多环境配置)
+  - [11. CI/CD集成](#11-cicd集成)
+    - [11.1 GitLab CI集成](#111-gitlab-ci集成)
+    - [11.2 GitHub Actions集成](#112-github-actions集成)
+  - [12. 性能优化](#12-性能优化)
+  - [13. 安全加固](#13-安全加固)
+  - [14. 监控与观测](#14-监控与观测)
   - [相关文档](#相关文档)
 
 ---
@@ -1160,6 +1172,635 @@ docker volume ls | grep $(basename $(pwd))
 
 echo -e "\n=== 配置验证 ==="
 docker compose config --quiet && echo "✅ 配置正确" || echo "❌ 配置错误"
+```
+
+---
+
+## 9. Compose v2新特性 (2025)
+
+```yaml
+Compose_V2_Features:
+  1_Compose_Specification:
+    版本: Compose Specification (取代version字段)
+    特性:
+      - 不再需要version字段
+      - 统一规范
+      - 向后兼容
+    
+    示例:
+      # Compose v2 - 不需要version
+      services:
+        web:
+          image: nginx:latest
+  
+  2_Profiles:
+    功能: 选择性启动服务
+    
+    配置:
+      services:
+        web:
+          image: nginx
+        
+        debug:
+          image: busybox
+          profiles: ["debug"]
+        
+        test:
+          image: test-runner
+          profiles: ["test"]
+    
+    使用:
+      # 启动默认服务
+      docker compose up
+      
+      # 启动debug profile
+      docker compose --profile debug up
+      
+      # 启动多个profile
+      docker compose --profile debug --profile test up
+  
+  3_Watch_Mode:
+    功能: 自动重载代码变更
+    
+    配置:
+      services:
+        web:
+          build: .
+          develop:
+            watch:
+              - action: sync
+                path: ./src
+                target: /app/src
+              
+              - action: rebuild
+                path: ./package.json
+              
+              - action: sync+restart
+                path: ./config
+                target: /app/config
+    
+    使用:
+      docker compose watch
+  
+  4_Include:
+    功能: 包含其他Compose文件
+    
+    配置:
+      include:
+        - path: ./common/database.yml
+        - path: ./common/cache.yml
+      
+      services:
+        web:
+          image: nginx
+  
+  5_Extends_增强:
+    功能: 服务继承和覆盖
+    
+    基础文件 (base.yml):
+      services:
+        common:
+          image: alpine
+          environment:
+            - ENV=base
+    
+    扩展文件:
+      services:
+        web:
+          extends:
+            file: base.yml
+            service: common
+          environment:
+            - ENV=production
+```
+
+### 9.1 Compose Watch实战
+
+```yaml
+# compose.yaml - 开发环境配置
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    develop:
+      watch:
+        # 同步源代码变更
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+          ignore:
+            - node_modules/
+        
+        # package.json变更时重建
+        - action: rebuild
+          path: ./frontend/package.json
+  
+  backend:
+    build:
+      context: ./backend
+    develop:
+      watch:
+        # Python代码变更后同步并重启
+        - action: sync+restart
+          path: ./backend/app
+          target: /app
+          ignore:
+            - __pycache__/
+            - "*.pyc"
+        
+        # requirements变更时重建
+        - action: rebuild
+          path: ./backend/requirements.txt
+
+# 启动开发环境
+# docker compose watch
+```
+
+---
+
+## 10. 高级配置技巧
+
+### 10.1 使用扩展字段 (x-*)
+
+```yaml
+# 定义可复用的配置块
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
+x-deploy-resources: &default-resources
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 1G
+      reservations:
+        cpus: '0.5'
+        memory: 512M
+
+services:
+  web:
+    image: nginx
+    logging: *default-logging
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost"]
+    <<: *default-resources
+  
+  api:
+    image: api:latest
+    logging: *default-logging
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+    <<: *default-resources
+```
+
+### 10.2 动态配置与插值
+
+```yaml
+# 使用环境变量和默认值
+services:
+  web:
+    image: nginx:${NGINX_VERSION:-latest}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    environment:
+      - ENV=${APP_ENV:-development}
+      - API_URL=${API_URL:?API_URL is required}
+    
+    # 条件配置
+    profiles:
+      - ${DEPLOY_PROFILE:-default}
+
+# .env文件
+# NGINX_VERSION=1.25
+# WEB_PORT=8080
+# APP_ENV=production
+# API_URL=https://api.example.com
+# DEPLOY_PROFILE=production
+```
+
+### 10.3 多环境配置
+
+```bash
+#!/bin/bash
+# 多环境配置策略
+
+# 目录结构:
+# ├── docker-compose.yml         # 基础配置
+# ├── docker-compose.dev.yml     # 开发环境
+# ├── docker-compose.prod.yml    # 生产环境
+# ├── .env.dev                   # 开发环境变量
+# └── .env.prod                  # 生产环境变量
+
+# 开发环境
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.dev.yml \
+  --env-file .env.dev \
+  up
+
+# 生产环境
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.prod.yml \
+  --env-file .env.prod \
+  up -d
+```
+
+```yaml
+# docker-compose.yml (基础)
+services:
+  web:
+    image: myapp:${VERSION}
+    environment:
+      - APP_ENV=${APP_ENV}
+
+# docker-compose.dev.yml (开发覆盖)
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+    command: npm run dev
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+
+# docker-compose.prod.yml (生产覆盖)
+services:
+  web:
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+```
+
+---
+
+## 11. CI/CD集成
+
+### 11.1 GitLab CI集成
+
+```yaml
+# .gitlab-ci.yml
+variables:
+  DOCKER_DRIVER: overlay2
+  COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker compose build
+    - docker compose push
+  only:
+    - main
+
+test:
+  stage: test
+  script:
+    - docker compose up -d
+    - docker compose exec -T web npm test
+    - docker compose down
+  coverage: '/Coverage: \d+\.\d+%/'
+
+deploy_staging:
+  stage: deploy
+  script:
+    - docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+  environment:
+    name: staging
+    url: https://staging.example.com
+  only:
+    - main
+
+deploy_production:
+  stage: deploy
+  script:
+    - docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+  environment:
+    name: production
+    url: https://example.com
+  when: manual
+  only:
+    - main
+```
+
+### 11.2 GitHub Actions集成
+
+```yaml
+# .github/workflows/docker-compose.yml
+name: Docker Compose CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build services
+      run: docker compose build
+    
+    - name: Start services
+      run: docker compose up -d
+    
+    - name: Wait for services
+      run: |
+        timeout 60 sh -c 'until docker compose ps | grep healthy; do sleep 1; done'
+    
+    - name: Run tests
+      run: docker compose exec -T web npm test
+    
+    - name: Check logs
+      if: failure()
+      run: docker compose logs
+    
+    - name: Stop services
+      if: always()
+      run: docker compose down -v
+  
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+---
+
+## 12. 性能优化
+
+```yaml
+Performance_Optimization:
+  1_并行启动:
+    # Compose默认并行启动服务
+    配置:
+      COMPOSE_PARALLEL_LIMIT: 10  # 并行数
+    
+    命令:
+      docker compose up -d --parallel
+  
+  2_构建缓存:
+    策略:
+      - 使用BuildKit
+      - 多阶段构建
+      - 缓存挂载
+    
+    配置:
+      services:
+        web:
+          build:
+            context: .
+            cache_from:
+              - myapp:latest
+              - myapp:cache
+  
+  3_资源限制:
+    配置:
+      services:
+        web:
+          deploy:
+            resources:
+              limits:
+                cpus: '2'
+                memory: 2G
+                pids: 100
+              reservations:
+                cpus: '1'
+                memory: 1G
+  
+  4_网络优化:
+    配置:
+      networks:
+        frontend:
+          driver: bridge
+          driver_opts:
+            com.docker.network.driver.mtu: 1450
+        
+        backend:
+          internal: true  # 不连接外网
+  
+  5_日志管理:
+    配置:
+      services:
+        web:
+          logging:
+            driver: "json-file"
+            options:
+              max-size: "10m"
+              max-file: "3"
+              compress: "true"
+```
+
+---
+
+## 13. 安全加固
+
+```yaml
+# compose-secure.yml - 安全加固示例
+services:
+  web:
+    image: nginx:alpine
+    
+    # 只读根文件系统
+    read_only: true
+    
+    # 临时文件系统
+    tmpfs:
+      - /tmp
+      - /var/run
+    
+    # 删除特权
+    cap_drop:
+      - ALL
+    
+    # 添加必要权限
+    cap_add:
+      - NET_BIND_SERVICE
+    
+    # 使用非root用户
+    user: "1000:1000"
+    
+    # 安全选项
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    
+    # 禁用特权模式
+    privileged: false
+    
+    # PID限制
+    pids_limit: 100
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    
+    # 网络隔离
+    networks:
+      - frontend
+    
+    # 不暴露不必要的端口
+    # ports:
+    #   - "8080:80"  # 仅在需要时暴露
+  
+  db:
+    image: postgres:16-alpine
+    
+    # 使用secrets
+    secrets:
+      - db_password
+    
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    
+    # 数据持久化
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    
+    # 内部网络
+    networks:
+      - backend
+    
+    # 不暴露到宿主机
+    expose:
+      - "5432"
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+
+volumes:
+  db-data:
+    driver: local
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+```
+
+---
+
+## 14. 监控与观测
+
+```yaml
+# docker-compose.monitoring.yml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+  
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+  
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    networks:
+      - monitoring
+  
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - monitoring
+    depends_on:
+      - loki
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+
+networks:
+  monitoring:
+    driver: bridge
 ```
 
 ---

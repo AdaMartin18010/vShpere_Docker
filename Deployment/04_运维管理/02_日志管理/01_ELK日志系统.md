@@ -114,6 +114,7 @@ spec:
 ```
 
 **索引模式配置**:
+
 1. Stack Management → Index Patterns
 2. 创建模式: `filebeat-*`
 3. 时间字段: `@timestamp`
@@ -123,4 +124,3 @@ spec:
 **更新时间**: 2025-10-19  
 **文档版本**: v1.0  
 **状态**: ✅ 完成
-

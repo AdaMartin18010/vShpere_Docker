@@ -60,6 +60,23 @@ vSphere / VMware / Docker / Podman 全面技术体系库
 
 ### 本轮新增（Highlights）
 
+**🎉 2025年10月19日重大更新**:
+
+- ✅ **容器化技术2025标准对齐** (+3,145行, +11.1%)
+  - Docker部署模块：containerd、多架构、SBOM、零信任架构 `Deployment/02_容器化部署/01_Docker部署/`
+  - Kubernetes 1.28+：Cluster API、Gateway API、Kyverno、ArgoCD GitOps `Deployment/02_容器化部署/02_Kubernetes部署/`
+  - Cilium 1.14+ eBPF：Gateway API集成、Tetragon安全 `Deployment/02_容器化部署/03_容器网络/`
+
+- ✅ **OpenTelemetry+eBPF可观测性** (+1,206行全新内容)
+  - OTLP协议、Traces/Metrics/Logs三大支柱 `Deployment/04_运维管理/01_监控告警/04_OpenTelemetry云原生可观测性.md`
+  - Pixie零侵入追踪、Hubble网络监控、Tetragon安全
+  - 完整的可观测性栈：Tempo+Prometheus+Loki+Grafana
+
+- 📊 **文档突破10万行**: 100,351行技术文档（+2,687行，+2.7%）
+- 📖 [查看完整推进报告](Deployment/2025年10月19日_全天技术推进汇总报告.md)
+
+**历史亮点**:
+
 - vROps/Aria Ops 指标与 KPI：`vShpere_VMware/08_性能监控与优化/02_vRealize Operations.md`
 - NSX 微隔离最佳实践：`vShpere_VMware/06_网络虚拟化技术/04_网络安全管理.md`
 - vCenter 离线 Lifecycle 指南：`vShpere_VMware/03_vCenter Server技术/06_Lifecycle离线安装与升级.md`

@@ -18,6 +18,14 @@
   - [8. 密钥管理](#8-密钥管理)
   - [9. 生产环境最佳实践](#9-生产环境最佳实践)
   - [10. 安全检查清单](#10-安全检查清单)
+  - [11. 零信任安全架构](#11-零信任安全架构)
+    - [11.1 实施OPA策略](#111-实施opa策略)
+    - [11.2 使用Falco进行运行时检测](#112-使用falco进行运行时检测)
+  - [12. 供应链安全进阶](#12-供应链安全进阶)
+    - [12.1 实施SLSA构建](#121-实施slsa构建)
+  - [13. 合规性框架](#13-合规性框架)
+    - [13.1 自动化合规检查](#131-自动化合规检查)
+  - [14. 2025容器安全趋势](#14-2025容器安全趋势)
   - [相关文档](#相关文档)
 
 ---
@@ -927,6 +935,572 @@ for image in $(docker images --format "{{.Repository}}:{{.Tag}}"); do
 done
 
 echo -e "\n✅ 安全检查完成！"
+```
+
+---
+
+## 11. 零信任安全架构
+
+```yaml
+Zero_Trust_Security:
+  原则:
+    - 永不信任，始终验证
+    - 最小权限原则
+    - 微隔离
+    - 持续验证
+  
+  实施策略:
+    1_身份验证:
+      容器身份:
+        - 使用Workload Identity
+        - mTLS认证
+        - 服务账户令牌
+      
+      用户身份:
+        - 多因素认证(MFA)
+        - RBAC权限控制
+        - API密钥轮换
+    
+    2_网络隔离:
+      微隔离:
+        - NetworkPolicy
+        - 服务网格(Istio/Linkerd)
+        - 防火墙规则
+      
+      加密通信:
+        - TLS 1.3
+        - mTLS (双向TLS)
+        - IPsec
+    
+    3_访问控制:
+      最小权限:
+        - Drop所有Capabilities
+        - 只读文件系统
+        - 非root用户
+        - SELinux/AppArmor
+      
+      动态授权:
+        - OPA (Open Policy Agent)
+        - 动态策略评估
+        - 上下文感知授权
+    
+    4_监控审计:
+      实时监控:
+        - Falco运行时检测
+        - Auditd系统审计
+        - 日志聚合分析
+      
+      异常检测:
+        - 行为基线
+        - 机器学习检测
+        - 自动响应
+```
+
+### 11.1 实施OPA策略
+
+```bash
+#!/bin/bash
+# Open Policy Agent (OPA) 策略示例
+
+# 1. 安装OPA
+curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+chmod +x opa
+sudo mv opa /usr/local/bin/
+
+# 2. 编写Rego策略 (policy.rego)
+cat > policy.rego <<'EOF'
+package docker.authz
+
+# 默认拒绝
+default allow = false
+
+# 允许非特权容器
+allow {
+    not input.Privileged
+    not has_capability("SYS_ADMIN")
+}
+
+# 拒绝挂载敏感路径
+deny[msg] {
+    volume := input.Volumes[_]
+    startswith(volume, "/")
+    sensitive_paths := ["/etc", "/sys", "/proc"]
+    sensitive := sensitive_paths[_]
+    startswith(volume, sensitive)
+    msg := sprintf("不允许挂载敏感路径: %v", [volume])
+}
+
+# 拒绝以root运行
+deny[msg] {
+    input.User == "root"
+    msg := "不允许以root用户运行容器"
+}
+
+# 检查Capability
+has_capability(cap) {
+    input.CapAdd[_] == cap
+}
+EOF
+
+# 3. 测试策略
+opa test policy.rego
+```
+
+### 11.2 使用Falco进行运行时检测
+
+```bash
+#!/bin/bash
+# Falco运行时安全监控
+
+# 1. 安装Falco
+curl -s https://falco.org/repo/falcosecurity-3672BA8F.asc | apt-key add -
+echo "deb https://download.falco.org/packages/deb stable main" | tee -a /etc/apt/sources.list.d/falcosecurity.list
+apt-get update
+apt-get install -y falco
+
+# 2. 自定义规则 (/etc/falco/rules.d/custom_rules.yaml)
+cat > /etc/falco/rules.d/custom_rules.yaml <<'EOF'
+- rule: Unauthorized Process in Container
+  desc: Detect unauthorized process execution
+  condition: >
+    spawned_process and
+    container and
+    not proc.name in (nginx, node, python, java)
+  output: >
+    Unauthorized process started in container
+    (user=%user.name command=%proc.cmdline container=%container.name)
+  priority: WARNING
+
+- rule: Write below /etc in Container
+  desc: Detect writes to /etc directory
+  condition: >
+    write and
+    container and
+    fd.name startswith /etc
+  output: >
+    File written below /etc in container
+    (user=%user.name file=%fd.name container=%container.name)
+  priority: WARNING
+
+- rule: Container Drift Detected
+  desc: New executable created in container
+  condition: >
+    spawned_process and
+    container and
+    proc.is_exe_writable=true
+  output: >
+    Executable created in container
+    (user=%user.name exe=%proc.exe container=%container.name)
+  priority: ERROR
+EOF
+
+# 3. 启动Falco
+systemctl start falco
+systemctl enable falco
+
+# 4. 查看Falco日志
+journalctl -fu falco
+```
+
+---
+
+## 12. 供应链安全进阶
+
+```yaml
+Supply_Chain_Security:
+  1_构建安全:
+    可信构建环境:
+      - 隔离构建环境
+      - 使用专用构建节点
+      - 构建环境加固
+    
+    构建证明 (Build Attestation):
+      工具: SLSA Framework
+      
+      Level_1:
+        - 自动化构建
+        - 版本控制
+      
+      Level_2:
+        - 托管构建服务
+        - 构建证明签名
+      
+      Level_3:
+        - 不可变构建环境
+        - 完整的依赖追踪
+      
+      Level_4:
+        - 双方审查
+        - 可重现构建
+    
+    依赖管理:
+      - 锁定依赖版本
+      - 私有依赖镜像
+      - 定期更新扫描
+      - SBOM生成
+  
+  2_镜像签名与验证:
+    Cosign:
+      签名:
+        cosign sign --key cosign.key image:tag
+      
+      验证:
+        cosign verify --key cosign.pub image:tag
+      
+      无密钥签名 (Keyless):
+        cosign sign image:tag  # 使用OIDC
+    
+    Notary_v2:
+      - OCI Artifacts标准
+      - 分布式信任
+      - 多签名支持
+  
+  3_漏洞管理:
+    扫描频率:
+      - CI/CD: 每次构建
+      - Registry: 每日扫描
+      - Runtime: 实时监控
+    
+    漏洞响应:
+      Critical:
+        - 24小时内修复
+        - 立即通知
+        - 自动隔离
+      
+      High:
+        - 7天内修复
+        - 告警通知
+        - 计划更新
+      
+      Medium_Low:
+        - 30天内修复
+        - 定期审查
+  
+  4_软件物料清单 (SBOM):
+    生成:
+      - Syft
+      - Docker Scout
+      - Trivy
+    
+    管理:
+      - 存储在Registry
+      - 版本追踪
+      - 漏洞关联
+    
+    审计:
+      - 许可证合规
+      - 依赖审查
+      - 漏洞追踪
+```
+
+### 12.1 实施SLSA构建
+
+```yaml
+# GitHub Actions - SLSA Level 3构建
+name: SLSA Build and Provenance
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write  # For OIDC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build with provenance
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+        provenance: true
+        sbom: true
+    
+    - name: Sign image with Cosign
+      uses: sigstore/cosign-installer@v3
+    
+    - name: Sign the image
+      run: |
+        cosign sign --yes ghcr.io/${{ github.repository }}:${{ github.sha }}
+    
+    - name: Verify signature
+      run: |
+        cosign verify ghcr.io/${{ github.repository }}:${{ github.sha }} \
+          --certificate-identity=https://github.com/${{ github.repository }}/.github/workflows/build.yml@refs/heads/main \
+          --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+```
+
+---
+
+## 13. 合规性框架
+
+```yaml
+Compliance_Frameworks:
+  1_CIS_Docker_Benchmark:
+    版本: v1.6.0 (2023)
+    
+    主要检查项:
+      Host_Configuration:
+        - 1.1 Linux内核加固
+        - 1.2 Docker守护进程配置
+      
+      Docker_Daemon:
+        - 2.1 限制网络流量
+        - 2.2 日志级别设置
+        - 2.3 Docker文件权限
+      
+      Docker_Files:
+        - 3.1 /etc/docker目录权限
+        - 3.2 daemon.json权限
+        - 3.3 证书文件权限
+      
+      Container_Images:
+        - 4.1 使用可信镜像
+        - 4.2 不使用latest标签
+        - 4.3 定期更新基础镜像
+      
+      Container_Runtime:
+        - 5.1 只读根文件系统
+        - 5.2 资源限制
+        - 5.3 非root用户
+        - 5.4 最小权限
+    
+    自动化检查:
+      docker run --rm --net host --pid host --userns host \
+        --cap-add audit_control \
+        -v /etc:/etc:ro \
+        -v /var/lib:/var/lib:ro \
+        -v /var/run/docker.sock:/var/run/docker.sock:ro \
+        docker/docker-bench-security
+  
+  2_PCI_DSS:
+    适用场景: 处理支付卡信息
+    
+    要求:
+      - 网络隔离
+      - 数据加密
+      - 访问控制
+      - 日志审计
+      - 漏洞管理
+    
+    实施:
+      - 容器网络隔离
+      - 静态数据加密
+      - 传输加密(TLS)
+      - RBAC权限
+      - 集中日志管理
+      - 定期漏洞扫描
+  
+  3_HIPAA:
+    适用场景: 医疗健康数据
+    
+    要求:
+      - 数据隐私
+      - 访问控制
+      - 审计日志
+      - 数据备份
+      - 灾难恢复
+    
+    实施:
+      - 数据脱敏
+      - 加密存储
+      - 细粒度访问控制
+      - 完整审计追踪
+      - 自动备份
+      - 异地容灾
+  
+  4_SOC_2:
+    适用场景: SaaS服务提供商
+    
+    信任服务准则:
+      Security: 安全性
+      Availability: 可用性
+      Processing_Integrity: 处理完整性
+      Confidentiality: 机密性
+      Privacy: 隐私性
+    
+    实施:
+      - 多层安全防护
+      - 高可用架构
+      - 数据完整性验证
+      - 数据加密
+      - 隐私保护措施
+```
+
+### 13.1 自动化合规检查
+
+```bash
+#!/bin/bash
+# ========================================
+# Docker合规性自动化检查脚本
+# ========================================
+
+set -e
+
+echo "===== Docker合规性检查 ====="
+
+# 1. CIS Benchmark检查
+echo -e "\n➤ 运行CIS Benchmark..."
+docker run --rm --net host --pid host --userns host \
+  --cap-add audit_control \
+  -v /etc:/etc:ro \
+  -v /var/lib:/var/lib:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  docker/docker-bench-security | tee cis-benchmark-result.txt
+
+# 2. 检查镜像签名
+echo -e "\n➤ 检查镜像签名..."
+for image in $(docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>"); do
+  echo "验证 $image..."
+  cosign verify --key cosign.pub $image 2>/dev/null && echo "✅ 已签名" || echo "⚠️  未签名"
+done
+
+# 3. 检查SBOM
+echo -e "\n➤ 检查SBOM..."
+for image in $(docker images --format "{{.Repository}}:{{.Tag}}" | head -5); do
+  echo "生成 $image 的SBOM..."
+  syft $image -o spdx-json > "${image//\//_}-sbom.json"
+done
+
+# 4. 检查容器配置
+echo -e "\n➤ 检查容器配置..."
+for container in $(docker ps -q); do
+  NAME=$(docker inspect --format='{{.Name}}' $container)
+  
+  # 检查是否使用root
+  USER=$(docker inspect --format='{{.Config.User}}' $container)
+  if [ -z "$USER" ]; then
+    echo "⚠️  $NAME: 使用root用户"
+  fi
+  
+  # 检查是否只读根文件系统
+  READONLY=$(docker inspect --format='{{.HostConfig.ReadonlyRootfs}}' $container)
+  if [ "$READONLY" != "true" ]; then
+    echo "⚠️  $NAME: 根文件系统非只读"
+  fi
+  
+  # 检查资源限制
+  MEM=$(docker inspect --format='{{.HostConfig.Memory}}' $container)
+  if [ "$MEM" == "0" ]; then
+    echo "⚠️  $NAME: 未设置内存限制"
+  fi
+done
+
+# 5. 生成合规报告
+echo -e "\n➤ 生成合规报告..."
+cat > compliance-report-$(date +%Y%m%d).txt <<EOF
+======================================
+Docker合规性检查报告
+生成时间: $(date)
+======================================
+
+CIS Benchmark结果:
+$(cat cis-benchmark-result.txt | grep -E "PASS|WARN|FAIL" | sort | uniq -c)
+
+镜像扫描结果:
+$(docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}")
+
+容器配置审查:
+$(docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}")
+
+建议:
+1. 修复CIS Benchmark中的WARN和FAIL项
+2. 为所有镜像添加签名
+3. 启用只读根文件系统
+4. 设置资源限制
+5. 使用非root用户
+EOF
+
+echo -e "\n✅ 合规性检查完成！报告已保存。"
+```
+
+---
+
+## 14. 2025容器安全趋势
+
+```yaml
+Container_Security_Trends_2025:
+  1_eBPF安全:
+    特性:
+      - 内核级监控
+      - 零开销性能
+      - 实时威胁检测
+    
+    工具:
+      Cilium: 网络安全和可观测性
+      Falco: 运行时安全
+      Tetragon: 安全可观测性
+    
+    应用:
+      - 网络策略执行
+      - 系统调用过滤
+      - 进程监控
+      - 文件完整性监控
+  
+  2_机密计算 (Confidential Computing):
+    技术:
+      SGX: Intel Software Guard Extensions
+      SEV: AMD Secure Encrypted Virtualization
+      TDX: Intel Trust Domain Extensions
+    
+    应用:
+      - 敏感数据处理
+      - 加密计算
+      - 多方安全计算
+    
+    容器支持:
+      - Kata Containers
+      - gVisor
+      - Confidential Containers
+  
+  3_供应链透明化:
+    SLSA_Framework:
+      - Build Provenance
+      - Dependency Tracking
+      - Reproducible Builds
+    
+    SBOM_标准化:
+      - SPDX
+      - CycloneDX
+      - SWID Tags
+    
+    Sigstore_生态:
+      Cosign: 镜像签名
+      Rekor: 透明日志
+      Fulcio: 证书颁发
+  
+  4_零信任容器:
+    SPIFFE_SPIRE:
+      - Workload Identity
+      - 自动证书轮换
+      - 细粒度授权
+    
+    Service_Mesh:
+      - mTLS通信
+      - 动态访问控制
+      - 流量加密
+  
+  5_AI驱动安全:
+    威胁检测:
+      - 异常行为检测
+      - 模式识别
+      - 自动响应
+    
+    漏洞预测:
+      - 风险评分
+      - 攻击路径分析
+      - 优先级排序
 ```
 
 ---

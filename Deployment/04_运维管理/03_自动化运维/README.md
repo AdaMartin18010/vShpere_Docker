@@ -23,9 +23,9 @@
 
 ## 文档列表
 
-1.  [Ansible自动化](01_Ansible自动化.md)
-2.  [Terraform基础设施即代码](02_Terraform基础设施即代码.md)
-3.  [CI/CD流水线](03_CICD流水线.md)
+1. [Ansible自动化](01_Ansible自动化.md)
+2. [Terraform基础设施即代码](02_Terraform基础设施即代码.md)
+3. [CI/CD流水线 2025](03_CICD流水线2025.md) ⭐ **2025更新**
 
 ---
 
@@ -35,9 +35,22 @@
 |---|---|---|
 | 01_Ansible自动化.md | ✅ 已完成 | Ansible Playbook、Inventory (~450行) |
 | 02_Terraform基础设施即代码.md | ✅ 已完成 | Terraform Provider、资源管理 (~500行) |
-| 03_CICD流水线.md | ✅ 已完成 | GitLab CI、ArgoCD、GitOps (~550行) |
+| 03_CICD流水线2025.md | ✅ 已完成 | GitHub Actions、GitLab CI 17.x、Tekton、GitOps、SLSA (~1,859行) ⭐ **2025更新** |
 
-**模块总进度**: ✅ **100%** (3/3文档已完成，约1,500行)
+**模块总进度**: ✅ **100%** (3/3文档已完成，约2,809行) **↑87%**
+
+**最新完成** (2025-10-20):
+
+- ✅ **CI/CD流水线2025**: 全面增强到2025标准
+  - GitHub Actions 2025新特性 (Larger Runners、OIDC、Reusable Workflows)
+  - GitLab CI/CD 17.x新特性 (CI/CD Catalog、Value Stream)
+  - Tekton Pipelines云原生CI/CD
+  - 镜像安全扫描 (Trivy、SBOM、Cosign签名)
+  - GitOps工作流 (ArgoCD、Flux CD、Kustomize)
+  - 渐进式交付 (Argo Rollouts金丝雀、Flagger)
+  - Policy-as-Code (Conftest、OPA Gatekeeper)
+  - 供应链安全 (SLSA框架)
+  - 容器化构建 (BuildKit、Kaniko无特权)
 
 ---
 
@@ -47,7 +60,6 @@
 
 ---
 
-**更新时间**: 2025-10-19  
-**文档版本**: v1.0  
-**状态**: ✅ **模块完成！**
-
+**更新时间**: 2025-10-20  
+**文档版本**: v2.0  
+**状态**: ✅ **模块完成 - 2025标准对齐！**

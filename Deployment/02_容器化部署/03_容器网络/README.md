@@ -45,12 +45,18 @@
 
 | 文档名称 | 状态 | 备注 |
 |---|---|---|
-| 01_CNI网络概述.md | ✅ 已完成 | CNI规范、插件对比、网络模型 (约1300行) |
-| 02_Calico网络配置.md | ✅ 已完成 | Calico架构、BGP、IPAM (约1400行) |
-| 03_Cilium_eBPF网络.md | ✅ 已完成 | Cilium架构、eBPF、Hubble (约1500行) |
-| 04_NetworkPolicy策略.md | ✅ 已完成 | 网络策略、Ingress/Egress规则 (约1400行) |
+| 01_CNI网络概述.md | ✅ 已完成 | CNI规范、插件对比、网络模型 (~821行) |
+| 02_Calico网络配置.md | ✅ 已完成 | Calico架构、BGP、IPAM (~917行) |
+| 03_Cilium_eBPF网络.md | ✅ 已增强 | Cilium 1.14+、Gateway API、Tetragon (~1,140行) |
+| 04_NetworkPolicy策略.md | ✅ 已完成 | 网络策略、Ingress/Egress规则 (~988行) |
 
-**模块总进度**: ✅ **100%** (4/4文档已完成，约5,600行)
+**模块总进度**: ✅ **100%** (4/4文档，约3,866行) **↑6.2%**
+
+**最新增强** (2025-10-19):
+
+- ✅ Cilium模块：新增Cilium 1.14+新特性（+224行，+24%）
+- ✅ Gateway API集成、Service Mesh增强、Tetragon安全
+- ✅ BGP Control Plane、Cluster Mesh、性能优化
 
 ---
 
@@ -71,5 +77,5 @@
 ---
 
 **更新时间**: 2025-10-19  
-**文档版本**: v1.0  
-**状态**: ✅ **模块完成！**
+**文档版本**: v2.0  
+**状态**: ✅ **模块已增强 - 2025技术标准对齐**

@@ -20,6 +20,8 @@
   - [8. 服务网格功能](#8-服务网格功能)
   - [9. 故障排查](#9-故障排查)
   - [10. 最佳实践](#10-最佳实践)
+  - [11. 2025年新特性](#11-2025年新特性)
+    - [11.1 部署Cilium 1.14+完整示例](#111-部署cilium-114完整示例)
   - [相关文档](#相关文档)
 
 ---
@@ -902,15 +904,237 @@ Best_Practices:
 
 ---
 
+## 11. 2025年新特性
+
+```yaml
+Cilium_1.14_1.15_Features:
+  Gateway_API集成:
+    状态: GA (General Availability)
+    特性:
+      - 原生Gateway API支持
+      - 取代Ingress Controller
+      - 统一的流量管理
+    配置:
+      yaml
+      # 启用Gateway API
+      helm upgrade cilium cilium/cilium --version 1.14.5 \
+        --namespace kube-system \
+        --set gatewayAPI.enabled=true
+  
+  Service_Mesh增强:
+    Ingress_Controller:
+      - 完整的Ingress实现
+      - TLS termination
+      - 高性能负载均衡
+    
+    Envoy集成:
+      - 可选Envoy sidecar
+      - 高级L7代理功能
+      - 与Istio兼容
+    
+    mTLS支持:
+      - 透明的服务间加密
+      - 自动证书管理
+      - 与SPIFFE/SPIRE集成
+  
+  Tetragon安全可观测性:
+    简介:
+      - 基于eBPF的运行时安全
+      - 实时威胁检测
+      - 零开销监控
+    
+    能力:
+      - 进程执行跟踪
+      - 网络活动监控
+      - 文件访问审计
+      - 系统调用过滤
+    
+    部署:
+      bash
+      # 安装Tetragon
+      helm repo add cilium https://helm.cilium.io
+      helm install tetragon cilium/tetragon -n kube-system
+      
+      # 查看安全事件
+      kubectl logs -n kube-system -l app.kubernetes.io/name=tetragon -c export-stdout -f
+  
+  BGP_Control_Plane:
+    状态: Beta
+    特性:
+      - 声明式BGP配置
+      - 动态路由管理
+      - 多协议支持 (IPv4/IPv6)
+    
+    配置示例:
+      yaml
+      apiVersion: cilium.io/v2alpha1
+      kind: CiliumBGPPeeringPolicy
+      metadata:
+        name: bgp-peering
+      spec:
+        nodeSelector:
+          matchLabels:
+            bgp: "true"
+        virtualRouters:
+        - localASN: 64512
+          exportPodCIDR: true
+          neighbors:
+          - peerAddress: "10.0.0.1/32"
+            peerASN: 64513
+  
+  多集群支持:
+    Cluster_Mesh增强:
+      - 跨集群服务发现
+      - 全局负载均衡
+      - 高可用故障转移
+    
+    配置:
+      bash
+      # 启用Cluster Mesh
+      cilium clustermesh enable --context cluster1
+      cilium clustermesh connect --context cluster1 --destination-context cluster2
+  
+  性能优化:
+    Big_TCP:
+      - 支持大于64KB的数据包
+      - 显著提升吞吐量
+      - 需要内核5.19+
+    
+    XDP加速:
+      - 更快的数据包处理
+      - 减少CPU使用
+      - DDoS防护
+  
+  可观测性增强:
+    Hubble_UI改进:
+      - 更直观的服务地图
+      - 实时流量分析
+      - 策略可视化
+    
+    OpenTelemetry集成:
+      - 分布式追踪
+      - 指标导出
+      - 统一可观测性栈
+
+2025年部署推荐:
+  基础配置:
+    bash
+    helm install cilium cilium/cilium --version 1.14.5 \
+      --namespace kube-system \
+      --set kubeProxyReplacement=strict \
+      --set gatewayAPI.enabled=true \
+      --set hubble.enabled=true \
+      --set hubble.relay.enabled=true \
+      --set hubble.ui.enabled=true \
+      --set bgpControlPlane.enabled=true \
+      --set envoy.enabled=true \
+      --set encryption.enabled=true \
+      --set encryption.type=wireguard
+  
+  生产环境最佳实践:
+    ✅ 使用Cilium 1.14+版本
+    ✅ 启用Gateway API（取代Ingress）
+    ✅ 启用Hubble可观测性
+    ✅ 配置WireGuard加密
+    ✅ 启用Tetragon安全监控
+    ✅ 使用BGP Control Plane（裸金属）
+    ✅ 配置Cluster Mesh（多集群）
+```
+
+### 11.1 部署Cilium 1.14+完整示例
+
+```bash
+#!/bin/bash
+# ========================================
+# Cilium 1.14+ 生产环境部署脚本
+# ========================================
+
+echo "===== 1. 安装Cilium CLI ====="
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+echo "===== 2. 安装Cilium 1.14+ ====="
+cilium install --version 1.14.5 \
+  --set kubeProxyReplacement=strict \
+  --set gatewayAPI.enabled=true \
+  --set hubble.enabled=true \
+  --set hubble.relay.enabled=true \
+  --set hubble.ui.enabled=true \
+  --set bgpControlPlane.enabled=true \
+  --set envoy.enabled=true \
+  --set encryption.enabled=true \
+  --set encryption.type=wireguard
+
+echo "===== 3. 等待Cilium就绪 ====="
+cilium status --wait
+
+echo "===== 4. 安装Tetragon安全监控 ====="
+helm repo add cilium https://helm.cilium.io
+helm install tetragon cilium/tetragon -n kube-system \
+  --set tetragon.enabled=true
+
+echo "===== 5. 启用Hubble UI ====="
+cilium hubble enable --ui
+kubectl port-forward -n kube-system svc/hubble-ui 12000:80 &
+
+echo "===== 6. 部署Gateway API示例 ====="
+# 安装Gateway API CRDs
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
+
+# 创建Gateway
+cat <<EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: cilium-gateway
+  namespace: default
+spec:
+  gatewayClassName: cilium
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+  - name: https
+    protocol: HTTPS
+    port: 443
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: tls-secret
+EOF
+
+echo "===== 7. 验证部署 ====="
+# 验证Cilium
+cilium connectivity test
+
+# 查看Hubble流量
+cilium hubble observe --follow &
+
+# 查看Tetragon事件
+kubectl logs -n kube-system -l app.kubernetes.io/name=tetragon -c export-stdout -f &
+
+echo "✅ Cilium 1.14+部署完成！"
+echo "Hubble UI: http://localhost:12000"
+```
+
+---
+
 ## 相关文档
 
 - [CNI网络概述](01_CNI网络概述.md)
 - [Calico网络配置](02_Calico网络配置.md)
 - [NetworkPolicy策略](04_NetworkPolicy策略.md)
+- [Kubernetes集群部署 - Cilium部署](../02_Kubernetes部署/01_集群部署.md#93-部署cilium网络方案)
 - [Kubernetes网络故障排查](../02_Kubernetes部署/05_故障排查.md#3-网络故障排查)
 
 ---
 
 **更新时间**: 2025-10-19  
-**文档版本**: v1.0  
-**状态**: ✅ 生产就绪
+**文档版本**: v2.0  
+**状态**: ✅ 生产就绪 - 2025技术标准对齐

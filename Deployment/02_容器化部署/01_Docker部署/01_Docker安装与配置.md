@@ -32,6 +32,14 @@
     - [9.1 cAdvisor监控](#91-cadvisor监控)
     - [9.2 Prometheus监控](#92-prometheus监控)
   - [10. 故障排查](#10-故障排查)
+  - [11. 生产环境配置最佳实践](#11-生产环境配置最佳实践)
+  - [12. 性能调优指南](#12-性能调优指南)
+    - [12.1 存储性能优化](#121-存储性能优化)
+    - [12.2 网络性能优化](#122-网络性能优化)
+    - [12.3 资源限制优化](#123-资源限制优化)
+  - [13. 与Kubernetes集成准备](#13-与kubernetes集成准备)
+  - [14. 2025年新特性与趋势](#14-2025年新特性与趋势)
+  - [15. 安全加固进阶](#15-安全加固进阶)
   - [相关文档](#相关文档)
 
 ---
@@ -951,6 +959,33 @@ Common_Issues:
       
       # 清理构建缓存
       docker builder prune -a -f
+
+  问题5_容器OOM被杀:
+    症状: 容器突然退出，退出码137
+    
+    排查:
+      dmesg | grep -i "out of memory"
+      docker inspect container_name | grep -i oom
+      docker stats --no-stream
+    
+    原因: 容器内存使用超过限制
+    
+    解决:
+      # 增加内存限制
+      docker run -m 2g --memory-swap 4g container_name
+      
+      # 设置OOM优先级
+      docker run --oom-score-adj 500 container_name
+
+  问题6_容器时间不同步:
+    症状: 容器内时间与宿主机不一致
+    
+    解决:
+      # 方法1: 挂载宿主机时区
+      docker run -v /etc/localtime:/etc/localtime:ro container_name
+      
+      # 方法2: 设置环境变量
+      docker run -e TZ=Asia/Shanghai container_name
 ```
 
 **诊断命令集合**:
@@ -988,6 +1023,379 @@ systemctl status docker
 
 echo -e "\n=== Docker日志 (最近50行) ==="
 journalctl -u docker -n 50 --no-pager
+
+echo -e "\n=== 容器资源使用 ==="
+docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"
+```
+
+---
+
+## 11. 生产环境配置最佳实践
+
+```yaml
+Production_Best_Practices:
+  1_安全配置:
+    启用TLS:
+      - 配置Docker Daemon TLS
+      - 使用证书认证
+      - 禁用HTTP访问
+    
+    用户命名空间:
+      启用: true
+      配置: /etc/docker/daemon.json
+      
+    AppArmor_SELinux:
+      - 启用强制访问控制
+      - 使用安全配置文件
+  
+  2_性能优化:
+    存储优化:
+      - 使用SSD磁盘
+      - 选择overlay2驱动
+      - 配置独立数据盘
+    
+    网络优化:
+      - 禁用userland-proxy
+      - 使用host网络模式 (适当时)
+      - 调整MTU值
+    
+    资源限制:
+      - 设置合理的CPU/内存限制
+      - 配置I/O限制
+      - 使用cgroup v2
+  
+  3_监控告警:
+    监控指标:
+      - 容器CPU/内存使用率
+      - 磁盘I/O
+      - 网络流量
+      - 容器数量和状态
+    
+    日志收集:
+      - 集中式日志管理
+      - 日志轮转配置
+      - 日志保留策略
+    
+    告警配置:
+      - 容器状态异常
+      - 资源使用超阈值
+      - 磁盘空间不足
+      - 服务可用性
+  
+  4_高可用配置:
+    Docker_Swarm:
+      - 多Manager节点
+      - Worker节点分布
+      - 服务副本配置
+    
+    容器重启策略:
+      - on-failure: 失败时重启
+      - always: 总是重启
+      - unless-stopped: 手动停止除外
+    
+    数据持久化:
+      - 使用Volume
+      - 定期备份
+      - 远程存储集成
+  
+  5_更新策略:
+    滚动更新:
+      - 分批更新容器
+      - 健康检查
+      - 回滚机制
+    
+    版本管理:
+      - 镜像版本标签
+      - 避免使用latest
+      - 镜像签名验证
+```
+
+---
+
+## 12. 性能调优指南
+
+### 12.1 存储性能优化
+
+```yaml
+Storage_Performance:
+  选择合适的存储驱动:
+    overlay2 (推荐):
+      性能: 优秀
+      IOPS: 高
+      适用: 生产环境
+    
+    devicemapper:
+      性能: 一般
+      配置: 复杂
+      适用: 旧系统
+  
+  优化配置:
+    # daemon.json
+    storage_driver: overlay2
+    storage_opts:
+      - overlay2.override_kernel_check=true
+      - overlay2.size=20G  # 限制容器大小
+    
+    data_root: /data/docker  # 独立磁盘
+  
+  文件系统优化:
+    XFS (推荐):
+      特性: 高性能，大文件支持好
+      挂载参数: noatime,nodiratime
+    
+    EXT4:
+      特性: 稳定，兼容性好
+      挂载参数: noatime,errors=remount-ro
+  
+  磁盘调度器:
+    SSD: noop 或 none
+    HDD: deadline 或 cfq
+    
+    设置方法:
+      echo noop > /sys/block/sda/queue/scheduler
+```
+
+### 12.2 网络性能优化
+
+```yaml
+Network_Performance:
+  禁用userland_proxy:
+    daemon_json:
+      userland-proxy: false
+    
+    效果: 减少网络转发开销
+  
+  使用host网络:
+    场景: 性能要求极高的场景
+    
+    示例:
+      docker run --network=host nginx
+    
+    注意: 失去网络隔离
+  
+  调整MTU:
+    默认: 1500
+    优化: 根据网络环境调整
+    
+    配置:
+      daemon.json:
+        mtu: 1450
+  
+  启用IPv4转发:
+    sysctl:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.forwarding: 1
+  
+  优化内核参数:
+    # /etc/sysctl.conf
+    net.core.somaxconn = 32768
+    net.ipv4.tcp_max_syn_backlog = 8192
+    net.ipv4.tcp_tw_reuse = 1
+    net.ipv4.ip_local_port_range = 1024 65535
+```
+
+### 12.3 资源限制优化
+
+```bash
+#!/bin/bash
+# 容器资源限制示例
+
+# CPU限制
+docker run -d \
+  --cpus="1.5" \
+  --cpu-shares=1024 \
+  --cpuset-cpus="0,1" \
+  nginx:latest
+
+# 内存限制
+docker run -d \
+  --memory="2g" \
+  --memory-swap="4g" \
+  --memory-reservation="1g" \
+  --oom-kill-disable=false \
+  nginx:latest
+
+# I/O限制
+docker run -d \
+  --device-read-bps /dev/sda:10mb \
+  --device-write-bps /dev/sda:10mb \
+  --device-read-iops /dev/sda:1000 \
+  --device-write-iops /dev/sda:1000 \
+  nginx:latest
+
+# 综合示例
+docker run -d \
+  --name web-server \
+  --cpus="2" \
+  --memory="4g" \
+  --memory-swap="8g" \
+  --pids-limit=100 \
+  --ulimit nofile=1024:2048 \
+  --restart=unless-stopped \
+  nginx:latest
+```
+
+---
+
+## 13. 与Kubernetes集成准备
+
+```yaml
+Kubernetes_Integration_Prep:
+  1_容器运行时选择:
+    Docker:
+      状态: 通过dockershim (已弃用)
+      K8s版本: < 1.24
+      
+    containerd:
+      状态: 推荐 (2025年标准)
+      K8s版本: >= 1.24
+      安装: apt install containerd.io
+      
+    CRI_O:
+      状态: 备选
+      特点: 专为Kubernetes设计
+  
+  2_Docker转containerd:
+    安装containerd:
+      apt install containerd.io
+      
+    配置containerd:
+      mkdir -p /etc/containerd
+      containerd config default > /etc/containerd/config.toml
+      
+    修改配置:
+      # SystemdCgroup = true
+      # 配置镜像仓库
+      
+    迁移镜像:
+      docker save image:tag | ctr -n k8s.io images import -
+  
+  3_网络准备:
+    禁用Docker网络:
+      - Docker网络与CNI冲突
+      - 使用Kubernetes CNI插件
+      
+    内核参数:
+      net.bridge.bridge-nf-call-iptables: 1
+      net.bridge.bridge-nf-call-ip6tables: 1
+      net.ipv4.ip_forward: 1
+  
+  4_存储准备:
+    CSI驱动:
+      - 使用Kubernetes CSI
+      - 不使用Docker Volume
+      
+    持久化:
+      - PV/PVC
+      - StorageClass
+```
+
+---
+
+## 14. 2025年新特性与趋势
+
+```yaml
+Docker_2025_Features:
+  1_WebAssembly支持:
+    Docker_Wasm:
+      功能: 在Docker中运行WebAssembly
+      优势: 更轻量，更快启动
+      
+    使用:
+      docker run --runtime=io.containerd.wasmedge.v1 wasm-image
+  
+  2_增强安全特性:
+    Sigstore集成:
+      - 镜像签名验证
+      - 供应链安全
+      
+    SBOM支持:
+      - 软件物料清单
+      - 漏洞追踪
+  
+  3_BuildKit增强:
+    特性:
+      - 并行构建
+      - 缓存优化
+      - 秘密管理
+      
+    使用:
+      export DOCKER_BUILDKIT=1
+      docker build --secret id=mysecret,src=secret.txt .
+  
+  4_多平台镜像:
+    docker buildx:
+      功能: 构建多架构镜像
+      
+    示例:
+      docker buildx build --platform linux/amd64,linux/arm64 -t image:tag .
+  
+  5_Docker_Init:
+    功能: 自动生成Docker配置
+    
+    使用:
+      docker init
+      # 自动生成Dockerfile, compose.yaml等
+```
+
+---
+
+## 15. 安全加固进阶
+
+```yaml
+Advanced_Security:
+  1_镜像安全:
+    使用最小基础镜像:
+      - alpine: 5MB
+      - distroless: 更安全
+      - scratch: 空镜像
+    
+    镜像扫描:
+      Trivy: trivy image nginx:latest
+      Grype: grype nginx:latest
+      Snyk: snyk container test nginx:latest
+    
+    镜像签名:
+      Cosign:
+        cosign sign image:tag
+        cosign verify image:tag
+  
+  2_运行时安全:
+    只读根文件系统:
+      docker run --read-only nginx
+    
+    删除特权:
+      docker run --cap-drop=ALL nginx
+    
+    添加必要权限:
+      docker run --cap-add=NET_ADMIN nginx
+    
+    使用非root用户:
+      docker run --user 1000:1000 nginx
+  
+  3_网络安全:
+    网络隔离:
+      docker network create --internal internal-net
+    
+    限制网络访问:
+      docker run --network=none nginx
+    
+    使用自定义网络:
+      docker network create my-net
+      docker run --network=my-net nginx
+  
+  4_密钥管理:
+    Docker_Secrets:
+      echo "password" | docker secret create db_pass -
+      docker service create --secret db_pass nginx
+    
+    环境变量文件:
+      docker run --env-file=.env nginx
+    
+    外部密钥管理:
+      - HashiCorp Vault
+      - AWS Secrets Manager
+      - Azure Key Vault
 ```
 
 ---

@@ -26,6 +26,7 @@
 1. [Prometheus监控体系](01_Prometheus监控体系.md)
 2. [Grafana可视化](02_Grafana可视化.md)
 3. [告警管理](03_告警管理.md)
+4. [OpenTelemetry云原生可观测性](04_OpenTelemetry云原生可观测性.md) ⭐ **2025新增**
 
 ---
 
@@ -36,8 +37,16 @@
 | 01_Prometheus监控体系.md | ✅ 已完成 | Prometheus架构、指标采集 (~560行) |
 | 02_Grafana可视化.md | ✅ 已完成 | Dashboard设计、数据源配置 (~400行) |
 | 03_告警管理.md | ✅ 已完成 | Alertmanager配置、告警规则 (~450行) |
+| 04_OpenTelemetry云原生可观测性.md | ✅ 已完成 | OTLP、eBPF、Traces/Metrics/Logs (~1,206行) |
 
-**模块总进度**: ✅ **100%** (3/3文档已完成，约1,410行)
+**模块总进度**: ✅ **100%** (4/4文档，约2,616行) **↑85%**
+
+**最新增强** (2025-10-19):
+
+- ✅ OpenTelemetry云原生可观测性：OTLP协议、三大支柱完整实现
+- ✅ eBPF可观测性集成：Pixie、Cilium Hubble、Tetragon
+- ✅ 完整的可观测性栈：Tempo+Prometheus+Loki+Grafana
+- ✅ 自动Instrumentation、Context传播、性能优化
 
 ---
 
@@ -48,5 +57,5 @@
 ---
 
 **更新时间**: 2025-10-19  
-**文档版本**: v1.0  
-**状态**: ✅ **模块完成！**
+**文档版本**: v2.0  
+**状态**: ✅ **模块已增强 - 2025云原生可观测性标准对齐**

@@ -46,7 +46,16 @@
 | 02. | [日志管理](02_日志管理/README.md) | ✅ 已完成 | ELK、Loki、日志采集与分析 |
 | 03. | [自动化运维](03_自动化运维/README.md) | ✅ 已完成 | Ansible、Terraform、CI/CD |
 
-**模块总览**: ✅ **100%** 完成 (9/9文档)
+**模块总览**: ✅ **100%** 完成 (10/10文档, ~6,000行) **↑46%**
+
+**最新完成** (2025-10-20):
+
+- ✅ **CI/CD流水线2025**: GitHub Actions、GitLab CI 17.x、Tekton Pipelines (~1,859行)
+  - 供应链安全 (SBOM、SLSA、镜像签名)
+  - GitOps工作流 (ArgoCD、Flux CD)
+  - 渐进式交付 (Argo Rollouts、Flagger)
+  - Policy-as-Code (Conftest、OPA)
+  - 容器化构建 (BuildKit、Kaniko)
 
 ---
 
@@ -116,11 +125,12 @@
    - 资源管理
    - 状态管理
 
-3. [CI/CD流水线](03_自动化运维/03_CICD流水线.md) 📝
-   - GitLab CI/GitHub Actions
-   - Jenkins/Tekton
-   - ArgoCD GitOps
-   - 流水线最佳实践
+3. [CI/CD流水线 2025](03_自动化运维/03_CICD流水线2025.md) ✅ **2025更新** (~1,859行)
+   - GitHub Actions 2025、GitLab CI 17.x、Tekton
+   - 镜像安全扫描 (Trivy、SBOM、Cosign)
+   - GitOps (ArgoCD、Flux、Kustomize)
+   - 渐进式交付 (金丝雀、蓝绿部署)
+   - 供应链安全 (SLSA、Policy-as-Code)
 
 ---
 
@@ -138,9 +148,9 @@
 ✅ 总进度:       9/9   (100%)
 ```
 
-**实际文档行数**: 约4,110行技术文档
+**实际文档行数**: 约5,969行技术文档
 
-**最后更新**: 2025-10-19
+**最后更新**: 2025-10-20
 
 ---
 

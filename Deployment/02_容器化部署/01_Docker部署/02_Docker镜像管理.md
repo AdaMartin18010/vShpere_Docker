@@ -28,6 +28,23 @@
     - [6.2 使用Clair扫描](#62-使用clair扫描)
   - [7. 镜像签名与验证](#7-镜像签名与验证)
   - [8. 镜像管理最佳实践](#8-镜像管理最佳实践)
+  - [9. 镜像多架构构建](#9-镜像多架构构建)
+    - [9.1 Docker Buildx简介](#91-docker-buildx简介)
+    - [9.2 Buildx安装与配置](#92-buildx安装与配置)
+    - [9.3 多架构镜像构建](#93-多架构镜像构建)
+    - [9.4 多架构Dockerfile示例](#94-多架构dockerfile示例)
+    - [9.5 查看镜像Manifest](#95-查看镜像manifest)
+  - [10. 镜像供应链安全](#10-镜像供应链安全)
+    - [10.1 SBOM (软件物料清单)](#101-sbom-软件物料清单)
+    - [10.2 生成和管理SBOM](#102-生成和管理sbom)
+    - [10.3 镜像证明 (Attestation)](#103-镜像证明-attestation)
+  - [11. 高级镜像优化技术](#11-高级镜像优化技术)
+    - [11.1 使用Distroless镜像](#111-使用distroless镜像)
+    - [11.2 使用.dockerignore优化](#112-使用dockerignore优化)
+    - [11.3 缓存优化策略](#113-缓存优化策略)
+    - [11.4 镜像压缩与优化工具](#114-镜像压缩与优化工具)
+  - [12. 镜像仓库高可用方案](#12-镜像仓库高可用方案)
+  - [13. 镜像生命周期管理](#13-镜像生命周期管理)
   - [相关文档](#相关文档)
 
 ---
@@ -1166,6 +1183,640 @@ Image_Management_Best_Practices:
       - 定期扫描
       - 订阅安全公告
       - 及时更新基础镜像
+```
+
+---
+
+## 9. 镜像多架构构建
+
+### 9.1 Docker Buildx简介
+
+```yaml
+Docker_Buildx:
+  定义:
+    - Docker官方构建工具
+    - 基于BuildKit
+    - 支持多平台构建
+    - 支持并行构建
+  
+  主要特性:
+    - 多架构镜像构建
+    - 构建缓存优化
+    - 秘密注入
+    - SSH转发
+    - 导出多种格式
+  
+  支持平台:
+    - linux/amd64 (x86_64)
+    - linux/arm64 (ARM 64位)
+    - linux/arm/v7 (ARM 32位)
+    - linux/arm/v6
+    - linux/386 (x86 32位)
+    - linux/ppc64le (PowerPC)
+    - linux/s390x (IBM Z)
+```
+
+### 9.2 Buildx安装与配置
+
+```bash
+#!/bin/bash
+# Docker Buildx 安装与配置
+
+# 1. 检查Buildx版本 (Docker 19.03+默认包含)
+docker buildx version
+
+# 2. 创建新的builder实例
+docker buildx create --name mybuilder --use
+
+# 3. 启动builder
+docker buildx inspect --bootstrap
+
+# 4. 列出所有builder
+docker buildx ls
+
+# 5. 查看支持的平台
+docker buildx inspect --bootstrap | grep Platforms
+
+# 6. 配置QEMU (用于模拟其他架构)
+docker run --privileged --rm tonistiigi/binfmt --install all
+
+# 7. 验证QEMU
+docker buildx inspect --bootstrap
+```
+
+### 9.3 多架构镜像构建
+
+```bash
+#!/bin/bash
+# 多架构镜像构建示例
+
+# 方法1: 构建并推送多架构镜像
+docker buildx build \
+  --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  -t myregistry.com/myapp:latest \
+  --push \
+  .
+
+# 方法2: 构建到本地
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t myapp:latest \
+  --load \  # 注意: --load只支持单一平台
+  .
+
+# 方法3: 导出到tar
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -o type=tar,dest=output.tar \
+  .
+
+# 方法4: 使用docker-container驱动
+docker buildx create --driver docker-container --name container-builder
+docker buildx use container-builder
+docker buildx build --platform linux/amd64,linux/arm64 -t myapp:latest --push .
+```
+
+### 9.4 多架构Dockerfile示例
+
+```dockerfile
+# 多架构镜像Dockerfile
+FROM --platform=$BUILDPLATFORM golang:1.21-alpine AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 构建参数
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+# 复制源代码
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# 交叉编译
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -o /app/main .
+
+# 运行阶段 - 自动匹配目标平台
+FROM alpine:3.19
+
+# 安装运行时依赖
+RUN apk add --no-cache ca-certificates tzdata
+
+# 从builder复制二进制文件
+COPY --from=builder /app/main /usr/local/bin/main
+
+# 创建非root用户
+RUN addgroup -g 1000 appgroup && \
+    adduser -D -u 1000 -G appgroup appuser
+
+USER appuser
+
+ENTRYPOINT ["/usr/local/bin/main"]
+```
+
+### 9.5 查看镜像Manifest
+
+```bash
+#!/bin/bash
+# 查看多架构镜像manifest
+
+# 方法1: 使用docker manifest
+docker manifest inspect nginx:latest
+
+# 方法2: 使用docker buildx imagetools
+docker buildx imagetools inspect nginx:latest
+
+# 方法3: 查看特定平台
+docker buildx imagetools inspect nginx:latest --raw | jq '.manifests[] | select(.platform.architecture == "arm64")'
+
+# 输出示例:
+# {
+#   "schemaVersion": 2,
+#   "mediaType": "application/vnd.docker.distribution.manifest.list.v2+json",
+#   "manifests": [
+#     {
+#       "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+#       "size": 1234,
+#       "digest": "sha256:...",
+#       "platform": {
+#         "architecture": "amd64",
+#         "os": "linux"
+#       }
+#     },
+#     {
+#       "platform": {
+#         "architecture": "arm64",
+#         "os": "linux"
+#       }
+#     }
+#   ]
+# }
+```
+
+---
+
+## 10. 镜像供应链安全
+
+### 10.1 SBOM (软件物料清单)
+
+```yaml
+SBOM_Software_Bill_of_Materials:
+  定义:
+    - 记录软件组件清单
+    - 跟踪依赖关系
+    - 漏洞管理基础
+    - 合规性要求
+  
+  SBOM格式:
+    SPDX:
+      标准: ISO/IEC 5962:2021
+      格式: JSON, XML, YAML
+      用途: 开源合规
+    
+    CycloneDX:
+      标准: OWASP项目
+      格式: JSON, XML
+      用途: 安全分析
+  
+  SBOM工具:
+    Syft:
+      命令: syft nginx:latest -o spdx-json
+      输出: SPDX或CycloneDX格式
+    
+    Docker_Scout:
+      命令: docker scout sbom nginx:latest
+      功能: Docker官方SBOM工具
+```
+
+### 10.2 生成和管理SBOM
+
+```bash
+#!/bin/bash
+# SBOM生成与管理
+
+# 1. 安装Syft
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+# 2. 生成SBOM (SPDX格式)
+syft nginx:latest -o spdx-json > nginx-sbom.spdx.json
+
+# 3. 生成SBOM (CycloneDX格式)
+syft nginx:latest -o cyclonedx-json > nginx-sbom.cyclonedx.json
+
+# 4. 扫描本地目录
+syft dir:. -o spdx-json > app-sbom.spdx.json
+
+# 5. 从Dockerfile生成SBOM
+docker build -t myapp:latest .
+syft myapp:latest -o spdx-json > myapp-sbom.spdx.json
+
+# 6. 使用Docker Scout
+docker scout sbom myapp:latest
+
+# 7. 对比两个镜像的SBOM
+docker scout compare --to nginx:1.24 nginx:1.25
+
+# 8. 将SBOM附加到镜像
+docker buildx build \
+  --sbom=true \
+  -t myapp:latest \
+  --push \
+  .
+```
+
+### 10.3 镜像证明 (Attestation)
+
+```bash
+#!/bin/bash
+# 镜像证明生成与验证
+
+# 1. 安装BuildKit 0.11+
+# BuildKit支持原生证明
+
+# 2. 构建时生成SBOM证明
+docker buildx build \
+  --attest type=sbom \
+  --attest type=provenance,mode=max \
+  -t myapp:latest \
+  --push \
+  .
+
+# 3. 查看证明
+docker buildx imagetools inspect myapp:latest --format "{{json .Provenance}}"
+
+# 4. 验证证明
+docker buildx imagetools inspect myapp:latest \
+  --format '{{range .Provenance}}{{println .SBOM}}{{end}}'
+```
+
+---
+
+## 11. 高级镜像优化技术
+
+### 11.1 使用Distroless镜像
+
+```dockerfile
+# 使用Distroless镜像 (Google维护)
+# Distroless镜像不包含shell、包管理器等，只包含运行时必需组件
+
+# Go应用示例
+FROM golang:1.21 AS builder
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/main .
+
+# Distroless基础镜像
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=builder /app/main /app/main
+ENTRYPOINT ["/app/main"]
+
+# Java应用示例
+FROM maven:3.9-eclipse-temurin-21 AS builder
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn package -DskipTests
+
+FROM gcr.io/distroless/java21-debian12:nonroot
+COPY --from=builder /app/target/app.jar /app/app.jar
+CMD ["app.jar"]
+
+# Python应用示例
+FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+COPY . .
+
+FROM gcr.io/distroless/python3-debian12:nonroot
+COPY --from=builder /root/.local /root/.local
+COPY --from=builder /app /app
+ENV PATH=/root/.local/bin:$PATH
+WORKDIR /app
+CMD ["app.py"]
+```
+
+### 11.2 使用.dockerignore优化
+
+```bash
+# .dockerignore示例 - 减少构建上下文大小
+
+# 版本控制
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# IDE配置
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 文档
+*.md
+docs/
+LICENSE
+CHANGELOG.md
+
+# 测试文件
+**/*_test.go
+**/*_test.py
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/node_modules
+**/coverage
+**/.coverage
+
+# 构建产物
+**/dist
+**/build
+**/target
+**/*.o
+**/*.so
+**/*.exe
+
+# 日志和临时文件
+**/*.log
+**/tmp
+**/temp
+**/.DS_Store
+
+# 依赖缓存
+**/vendor
+**/.bundle
+
+# 环境文件
+.env
+.env.local
+*.secret
+
+# 大文件
+**/*.mp4
+**/*.mov
+**/*.zip
+**/*.tar.gz
+```
+
+### 11.3 缓存优化策略
+
+```dockerfile
+# 缓存优化Dockerfile示例
+
+# ===== Node.js应用 =====
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 1. 先只复制依赖文件 (利用缓存)
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# 2. 再复制源代码 (源代码改变不影响依赖缓存)
+COPY . .
+RUN npm run build
+
+# ===== Python应用 =====
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# 1. 先安装系统依赖 (很少变化)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. 再安装Python依赖 (requirements.txt变化时才重建)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 3. 最后复制应用代码 (经常变化)
+COPY . .
+
+# ===== 使用BuildKit缓存挂载 =====
+FROM python:3.12-slim
+
+# 使用缓存挂载加速pip安装
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip setuptools wheel
+
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+# ===== Go应用带缓存 =====
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+# 使用Go mod缓存
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -o /app/main .
+```
+
+### 11.4 镜像压缩与优化工具
+
+```bash
+#!/bin/bash
+# 镜像压缩与优化工具
+
+# 1. Docker Slim - 自动优化镜像
+# 安装
+curl -sL https://raw.githubusercontent.com/slimtoolkit/slim/master/scripts/install-slim.sh | sudo -E bash -
+
+# 使用
+slim build --target nginx:latest --tag nginx:slim
+
+# 高级用法
+slim build \
+  --target myapp:latest \
+  --tag myapp:slim \
+  --http-probe=false \
+  --continue-after=10 \
+  --include-path=/app/config
+
+# 2. Dive - 分析镜像层
+# 安装
+wget https://github.com/wagoodman/dive/releases/download/v0.11.0/dive_0.11.0_linux_amd64.deb
+sudo dpkg -i dive_0.11.0_linux_amd64.deb
+
+# 使用
+dive nginx:latest
+
+# CI模式 (检查浪费空间)
+CI=true dive --ci-config .dive-ci nginx:latest
+
+# .dive-ci 配置示例
+# rules:
+#   lowestEfficiency: 0.95
+#   highestWastedBytes: 20MB
+
+# 3. 使用UPX压缩二进制文件
+FROM golang:1.21-alpine AS builder
+RUN apk add --no-cache upx
+WORKDIR /app
+COPY . .
+RUN go build -ldflags="-s -w" -o main .
+RUN upx --best --lzma main  # 压缩二进制文件
+
+FROM alpine:3.19
+COPY --from=builder /app/main /usr/local/bin/main
+ENTRYPOINT ["main"]
+```
+
+---
+
+## 12. 镜像仓库高可用方案
+
+```yaml
+Registry_High_Availability:
+  1_Harbor_HA架构:
+    组件部署:
+      Harbor_Core:
+        - 多实例部署
+        - 负载均衡
+        - 会话共享
+      
+      Harbor_Registry:
+        - 多副本
+        - 共享存储 (S3/OSS/NFS)
+      
+      数据库:
+        - PostgreSQL主从
+        - 或使用云数据库
+      
+      Redis:
+        - Redis Sentinel
+        - 或Redis Cluster
+    
+    存储后端:
+      S3:
+        - AWS S3
+        - MinIO
+        - Ceph RGW
+      
+      云存储:
+        - Azure Blob Storage
+        - Google Cloud Storage
+        - 阿里云OSS
+  
+  2_缓存加速:
+    Registry_Proxy:
+      - Docker Registry代理
+      - 缓存常用镜像
+      - 减少外网带宽
+    
+    CDN加速:
+      - 全球分发
+      - 边缘缓存
+      - 加速镜像拉取
+  
+  3_多地域部署:
+    主从同步:
+      - Harbor复制策略
+      - 定期同步
+      - 增量复制
+    
+    区域就近访问:
+      - GeoDNS
+      - 智能路由
+      - 最近节点
+  
+  4_灾备方案:
+    备份策略:
+      - 镜像定期备份
+      - 元数据备份
+      - 增量备份
+    
+    恢复测试:
+      - 定期演练
+      - RTO/RPO指标
+      - 自动化恢复
+```
+
+---
+
+## 13. 镜像生命周期管理
+
+```yaml
+Image_Lifecycle_Management:
+  1_版本管理:
+    语义化版本 (SemVer):
+      格式: MAJOR.MINOR.PATCH
+      示例:
+        - myapp:1.0.0 (首次发布)
+        - myapp:1.0.1 (补丁更新)
+        - myapp:1.1.0 (功能更新)
+        - myapp:2.0.0 (重大变更)
+    
+    标签策略:
+      latest: 最新稳定版
+      stable: 稳定版本
+      dev: 开发版本
+      SHA: 基于Git SHA的版本
+      日期: 2025-10-19
+  
+  2_镜像推广流程:
+    开发阶段:
+      - 推送到dev环境
+      - 标签: dev, dev-SHA
+    
+    测试阶段:
+      - 推送到test环境
+      - 标签: test, test-SHA
+      - 自动化测试
+    
+    预生产阶段:
+      - 推送到staging
+      - 标签: staging, rc-版本号
+      - 灰度发布
+    
+    生产阶段:
+      - 推送到prod
+      - 标签: 版本号, stable, latest
+      - 完整发布
+  
+  3_镜像清理策略:
+    按时间清理:
+      - 删除90天前的镜像
+      - 保留最近N个版本
+    
+    按使用情况:
+      - 删除未使用的镜像
+      - 保留活跃镜像
+    
+    按空间:
+      - 磁盘使用率>80%触发清理
+      - 优先删除旧版本
+  
+  4_合规性管理:
+    许可证管理:
+      - 扫描开源许可证
+      - 避免许可证冲突
+      - 生成许可证报告
+    
+    审计追踪:
+      - 记录镜像构建历史
+      - 跟踪镜像使用
+      - 合规性报告
 ```
 
 ---
