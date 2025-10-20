@@ -33,12 +33,45 @@ vSphere / VMware / Docker / Podman 全面技术体系库
 
 ```text
 ./
-├─ ai.md                     # 项目目标与推进指南
-├─ README.md                 # 根导航（本文件）
-├─ Container/                # 容器化（Docker / Podman 等）
-├─ vShpere_VMware/           # VMware vSphere 技术体系
-└─ formal_container/         # 形式化分析与对标（标准/课程/最佳实践）
+├─ 📁 _archive/              # 历史归档（按年月组织）
+│   └─ 2025-10/              # 2025年10月归档
+│       ├─ daily_summaries/   # 每日工作总结（17个）
+│       ├─ milestone_reports/ # 项目里程碑报告（29个）
+│       └─ project_summaries/ # 专题技术总结（12个）
+│
+├─ 📁 _docs/                 # 项目文档
+│   ├─ guides/               # 使用指南
+│   ├─ reports/              # 技术分析报告
+│   └─ standards/            # 项目管理标准
+│
+├─ 📁 2025年技术处理与分析/   # 技术处理分析项目
+├─ 📁 Analysis/              # 综合技术分析
+├─ 📁 Container/             # 容器化技术（Docker/Podman等）164个文档
+├─ 📁 Deployment/            # 部署与运维（129个文档）
+├─ 📁 formal_container/      # 形式化分析与对标（标准/课程/最佳实践）
+├─ 📁 scripts/               # 自动化脚本工具
+├─ 📁 Security/              # 安全架构文档
+├─ 📁 Semantic/              # 语义模型分析
+├─ 📁 vShpere_VMware/        # VMware vSphere 技术体系（106个文档）
+│
+├─ 📄 ai.md                  # 项目目标与推进指南
+├─ 📄 README.md              # 根导航（本文件）
+├─ 📄 README_EN.md           # 英文导航
+├─ 📄 CHANGELOG.md           # 变更日志
+├─ 📄 CONTRIBUTING.md        # 贡献指南
+├─ 📄 PROJECT_STATUS.md      # 项目状态
+├─ 📄 QUICKSTART.md          # 快速开始
+├─ 📄 GLOSSARY_技术术语双语对照表.md  # 术语表
+├─ 📄 TERMINOLOGY.md         # 术语规范
+└─ 📄 VERSION_UPDATE_SLA.md  # 版本更新SLA
 ```
+
+**📚 快速导航**:
+
+- **历史文档**: 查看 [`_archive/2025-10/README.md`](_archive/2025-10/README.md) 了解历史总结报告
+- **项目指南**: 查看 [`_docs/guides/`](_docs/guides/) 获取使用和导航指南
+- **分析报告**: 查看 [`_docs/reports/`](_docs/reports/) 了解技术分析和对标报告
+- **项目标准**: 查看 [`_docs/standards/`](_docs/standards/) 了解质量保证和改进计划
 
 ## 快速开始
 
