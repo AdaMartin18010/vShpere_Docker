@@ -1,0 +1,77 @@
+---
+# yamllint配置文件
+# 用于验证YAML文件格式规范
+# 项目: vSphere_Docker
+# 日期: 2025-10-21
+
+extends: default
+
+rules:
+  # 行长度：警告而非错误，允许120字符
+  line-length:
+    max: 120
+    level: warning
+  
+  # 缩进：2空格，序列也缩进
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+  
+  # 注释：至少1个空格
+  comments:
+    min-spaces-from-content: 1
+  
+  # 注释缩进：允许任意缩进
+  comments-indentation: {}
+  
+  # 文档开始：不强制---
+  document-start: disable
+  
+  # 文档结束：不强制...
+  document-end: disable
+  
+  # 空行：允许
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 0
+  
+  # 空值：允许各种形式
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+  
+  # 键重复：禁止
+  key-duplicates: enable
+  
+  # 键顺序：不强制
+  key-ordering: disable
+  
+  # 新行：Unix风格(LF)
+  new-line-at-end-of-file: enable
+  
+  # 新行字符：Unix风格
+  new-lines:
+    type: unix
+  
+  # 尾随空格：禁止
+  trailing-spaces: enable
+  
+  # 布尔值：允许true/false, yes/no
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+    check-keys: false
+  
+  # 引号：不强制，允许单引号和双引号
+  quoted-strings:
+    quote-type: any
+    required: false
+
+# 忽略文件/目录
+ignore: |
+  _archive/
+  node_modules/
+  .git/
+  vendor/
+

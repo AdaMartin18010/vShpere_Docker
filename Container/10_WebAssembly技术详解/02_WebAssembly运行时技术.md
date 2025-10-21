@@ -1371,4 +1371,4 @@ impl HPCWasmRuntime {
 
 ---
 
-*本文档基于WebAssembly 2.0最新标准，提供完整的运行时技术解析和实践指导。*
+_本文档基于WebAssembly 2.0最新标准，提供完整的运行时技术解析和实践指导。_

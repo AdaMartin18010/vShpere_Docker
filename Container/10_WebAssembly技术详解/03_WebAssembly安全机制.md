@@ -856,4 +856,4 @@ impl SecurityMonitor {
 
 ---
 
-*本文档基于WebAssembly 2.0最新安全标准，提供完整的安全机制解析和最佳实践指导。*
+_本文档基于WebAssembly 2.0最新安全标准，提供完整的安全机制解析和最佳实践指导。_

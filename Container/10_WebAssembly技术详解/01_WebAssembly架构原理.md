@@ -852,4 +852,4 @@ wasmtime --aot module.wasm
 - [WasmEdge](https://wasmedge.org/docs/)
 - [Bytecode Alliance](https://bytecodealliance.org/)
 
-*本文档基于WebAssembly 2.0和WASI 2.0最新标准（2025年10月），提供完整的技术解析和实践指导。*
+_本文档基于WebAssembly 2.0和WASI 2.0最新标准（2025年10月），提供完整的技术解析和实践指导。_
