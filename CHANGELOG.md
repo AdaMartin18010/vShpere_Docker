@@ -1,5 +1,15 @@
 # 更新日志 (Changelog)
 
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (2025改进版) |
+| **更新日期** | 2025-10-21 |
+| **格式标准** | Keep a Changelog 1.0.0 |
+| **版本规范** | Semantic Versioning 2.0.0 |
+| **状态** | 持续更新 |
+
 本文档记录项目的所有重要变更。
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，

@@ -1,5 +1,15 @@
 # 贡献指南 (Contributing Guide)
 
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (2025改进版) |
+| **更新日期** | 2025-10-21 |
+| **适用对象** | 所有贡献者 |
+| **标准对齐** | Open Source Best Practices, Contributor Covenant |
+| **状态** | 生产就绪 |
+
 感谢您对虚拟化容器化技术知识库项目的关注！我们欢迎任何形式的贡献。
 
 [English Version](#english-version) | [中文版本](#中文版本)
@@ -895,7 +905,7 @@ git commit -m "fix bug"
 
 ### Documentation Standards
 
-*(Detailed standards similar to Chinese version...)*
+_(Detailed standards similar to Chinese version...)_
 
 ---
 
@@ -974,7 +984,7 @@ All contributors will be recorded in:
 
 ### FAQ
 
-*(FAQ section similar to Chinese version...)*
+_(FAQ section similar to Chinese version...)_
 
 ---
 
