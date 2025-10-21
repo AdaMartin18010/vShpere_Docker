@@ -1,4 +1,19 @@
-# Docker镜像管理
+# Docker镜像管理（2025版）
+
+> **文档定位**: 本文档提供Docker镜像的完整管理指南，涵盖Dockerfile编写、多阶段构建、BuildKit优化、私有仓库部署（Harbor）、镜像扫描与签名、多架构构建、供应链安全（SBOM）与生命周期管理，对齐Docker 25.0最新特性[^docker-images]。
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (2025改进版) |
+| **更新日期** | 2025-10-21 |
+| **Docker版本** | Docker 25.0, BuildKit 0.13+ |
+| **兼容版本** | Docker 24.0+, 23.0+ |
+| **标准对齐** | OCI Image Spec, Docker Best Practices, SLSA Framework |
+| **状态** | 生产就绪 |
+
+> **版本锚点**: 本文档基于Docker 25.0和BuildKit 0.13+最新特性，向下兼容24.0/23.0系列。完整版本信息参考《2025年技术标准最终对齐报告.md》。
 
 > **返回**: [Docker部署目录](README.md) | [容器化部署首页](../README.md) | [部署指南首页](../../00_索引导航/README.md)
 
@@ -6,40 +21,41 @@
 
 ## 📋 目录
 
-- [Docker镜像管理](#docker镜像管理)
+- [Docker镜像管理（2025版）](#docker镜像管理2025版)
+  - [文档元信息](#文档元信息)
   - [📋 目录](#-目录)
   - [1. Docker镜像基础](#1-docker镜像基础)
   - [2. Dockerfile详解](#2-dockerfile详解)
-    - [2.1 Dockerfile指令](#21-dockerfile指令)
+    - [2.1 Dockerfile指令\[^dockerfile-reference\]](#21-dockerfile指令dockerfile-reference)
     - [2.2 Dockerfile最佳实践](#22-dockerfile最佳实践)
   - [3. 镜像构建](#3-镜像构建)
-    - [3.1 基础构建](#31-基础构建)
+    - [3.1 基础构建\[^build-basics\]](#31-基础构建build-basics)
     - [3.2 多阶段构建](#32-多阶段构建)
     - [3.3 BuildKit增强构建](#33-buildkit增强构建)
   - [4. 镜像优化](#4-镜像优化)
-    - [4.1 镜像体积优化](#41-镜像体积优化)
+    - [4.1 镜像体积优化\[^image-size\]](#41-镜像体积优化image-size)
     - [4.2 构建速度优化](#42-构建速度优化)
     - [4.3 镜像层优化](#43-镜像层优化)
   - [5. 私有镜像仓库](#5-私有镜像仓库)
-    - [5.1 Harbor部署](#51-harbor部署)
+    - [5.1 Harbor部署\[^harbor-install\]](#51-harbor部署harbor-install)
     - [5.2 Harbor配置与使用](#52-harbor配置与使用)
   - [6. 镜像扫描与安全](#6-镜像扫描与安全)
-    - [6.1 使用Trivy扫描](#61-使用trivy扫描)
+    - [6.1 使用Trivy扫描\[^trivy\]](#61-使用trivy扫描trivy)
     - [6.2 使用Clair扫描](#62-使用clair扫描)
   - [7. 镜像签名与验证](#7-镜像签名与验证)
   - [8. 镜像管理最佳实践](#8-镜像管理最佳实践)
   - [9. 镜像多架构构建](#9-镜像多架构构建)
-    - [9.1 Docker Buildx简介](#91-docker-buildx简介)
+    - [9.1 Docker Buildx简介\[^buildx\]](#91-docker-buildx简介buildx)
     - [9.2 Buildx安装与配置](#92-buildx安装与配置)
     - [9.3 多架构镜像构建](#93-多架构镜像构建)
     - [9.4 多架构Dockerfile示例](#94-多架构dockerfile示例)
     - [9.5 查看镜像Manifest](#95-查看镜像manifest)
   - [10. 镜像供应链安全](#10-镜像供应链安全)
-    - [10.1 SBOM (软件物料清单)](#101-sbom-软件物料清单)
+    - [10.1 SBOM (软件物料清单)\[^sbom\]](#101-sbom-软件物料清单sbom)
     - [10.2 生成和管理SBOM](#102-生成和管理sbom)
     - [10.3 镜像证明 (Attestation)](#103-镜像证明-attestation)
   - [11. 高级镜像优化技术](#11-高级镜像优化技术)
-    - [11.1 使用Distroless镜像](#111-使用distroless镜像)
+    - [11.1 使用Distroless镜像\[^distroless\]](#111-使用distroless镜像distroless)
     - [11.2 使用.dockerignore优化](#112-使用dockerignore优化)
     - [11.3 缓存优化策略](#113-缓存优化策略)
     - [11.4 镜像压缩与优化工具](#114-镜像压缩与优化工具)
@@ -51,8 +67,10 @@
 
 ## 1. Docker镜像基础
 
+**Docker镜像架构与原理**[^docker-image-spec]:
+
 ```yaml
-Docker_Image_Basics:
+Docker_Image_Basics[^image-layers]:
   定义:
     - 只读模板
     - 用于创建容器
@@ -180,7 +198,9 @@ docker import container.tar myimage:v1
 
 ## 2. Dockerfile详解
 
-### 2.1 Dockerfile指令
+**Dockerfile最佳实践指南**[^dockerfile-best-practices]:
+
+### 2.1 Dockerfile指令[^dockerfile-reference]
 
 ```dockerfile
 # ========================================
@@ -401,7 +421,9 @@ ENV APP_VERSION=${VERSION}
 
 ## 3. 镜像构建
 
-### 3.1 基础构建
+**Docker镜像构建技术**[^docker-build]:
+
+### 3.1 基础构建[^build-basics]
 
 ```bash
 # 基本构建
@@ -548,8 +570,10 @@ CMD ["node", "dist/main.js"]
 
 ### 3.3 BuildKit增强构建
 
+**BuildKit高级特性**[^buildkit]:
+
 ```bash
-# 启用BuildKit
+# 启用BuildKit[^buildkit-usage]
 export DOCKER_BUILDKIT=1
 
 # 或每次构建时启用
@@ -595,7 +619,9 @@ RUN npm run build
 
 ## 4. 镜像优化
 
-### 4.1 镜像体积优化
+**镜像优化最佳实践**[^image-optimization]:
+
+### 4.1 镜像体积优化[^image-size]
 
 ```yaml
 Image_Size_Optimization:
@@ -782,7 +808,9 @@ RUN wget https://example.com/large.tar.gz && \
 
 ## 5. 私有镜像仓库
 
-### 5.1 Harbor部署
+**Harbor企业级镜像仓库**[^harbor]:
+
+### 5.1 Harbor部署[^harbor-install]
 
 ```yaml
 # docker-compose.yml
@@ -978,7 +1006,9 @@ curl -X GET "http://harbor.example.com/api/v2.0/projects/library/repositories" \
 
 ## 6. 镜像扫描与安全
 
-### 6.1 使用Trivy扫描
+**容器镜像安全扫描**[^image-security]:
+
+### 6.1 使用Trivy扫描[^trivy]
 
 ```bash
 # 安装Trivy
@@ -1189,7 +1219,9 @@ Image_Management_Best_Practices:
 
 ## 9. 镜像多架构构建
 
-### 9.1 Docker Buildx简介
+**多架构镜像构建技术**[^multi-arch]:
+
+### 9.1 Docker Buildx简介[^buildx]
 
 ```yaml
 Docker_Buildx:
@@ -1361,7 +1393,9 @@ docker buildx imagetools inspect nginx:latest --raw | jq '.manifests[] | select(
 
 ## 10. 镜像供应链安全
 
-### 10.1 SBOM (软件物料清单)
+**软件供应链安全框架（SLSA）**[^supply-chain]:
+
+### 10.1 SBOM (软件物料清单)[^sbom]
 
 ```yaml
 SBOM_Software_Bill_of_Materials:
@@ -1457,7 +1491,9 @@ docker buildx imagetools inspect myapp:latest \
 
 ## 11. 高级镜像优化技术
 
-### 11.1 使用Distroless镜像
+**高级镜像优化策略**[^advanced-optimization]:
+
+### 11.1 使用Distroless镜像[^distroless]
 
 ```dockerfile
 # 使用Distroless镜像 (Google维护)
@@ -1756,8 +1792,10 @@ Registry_High_Availability:
 
 ## 13. 镜像生命周期管理
 
+**镜像生命周期管理策略**[^lifecycle-management]:
+
 ```yaml
-Image_Lifecycle_Management:
+Image_Lifecycle_Management[^image-lifecycle]:
   1_版本管理:
     语义化版本 (SemVer):
       格式: MAJOR.MINOR.PATCH
