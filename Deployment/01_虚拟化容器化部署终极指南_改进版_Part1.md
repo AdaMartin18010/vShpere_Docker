@@ -98,6 +98,7 @@
 | **大型企业** | Xeon Platinum 8380 | EPYC 7763 | 64核+ |
 
 **关键特性要求**[^cpu-features]:
+
 - ✅ **VT-x/AMD-V** - 硬件虚拟化支持（必需）
 - ✅ **EPT/RVI** - 扩展页表（性能关键）
 - ✅ **AES-NI** - 硬件加密加速
@@ -114,6 +115,7 @@
 | **大数据/AI** | 16GB:1 | 1TB+ |
 
 **内存技术选型**:
+
 - **DDR5 ECC** - 2025年主流，推荐4800MHz+
 - **持久内存（Optane）** - 大数据场景
 
@@ -475,6 +477,7 @@ Set-VBRJobSchedule -Job $job `
 ## 说明
 
 **Part 1完成内容**:
+
 - ✅ 部署架构概述
 - ✅ 硬件选型与规划（CPU/内存/存储/网络）
 - ✅ VMware vSphere部署（ESXi/vCenter/网络/存储/HA/DRS）
@@ -482,6 +485,7 @@ Set-VBRJobSchedule -Job $job `
 - ✅ 虚拟化高可用与容灾
 
 **Part 2内容预览**:
+
 - 容器化部署（Docker/Kubernetes）
 - 混合部署架构
 - 监控与运维
@@ -491,4 +495,3 @@ Set-VBRJobSchedule -Job $job `
 **引用数量**: 20+个权威引用  
 **总行数**: 约600行（精简版）  
 **下一步**: 创建Part 2继续完成
-
