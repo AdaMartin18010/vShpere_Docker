@@ -2463,11 +2463,11 @@ allowed_path {
 
 ### 8. 相关项目文档
 
-- [Container/01_Docker技术详解/01_Docker架构原理_改进版.md](./01_Docker架构原理_改进版.md) - Docker架构深度解析
-- [Container/01_Docker技术详解/03_Docker镜像技术_改进版.md](./03_Docker镜像技术_改进版.md) - 镜像技术与BuildKit
-- [Container/01_Docker技术详解/04_Docker网络技术_改进版.md](./04_Docker网络技术_改进版.md) - 网络安全与隔离
-- [Container/01_Docker技术详解/05_Docker存储技术_改进版.md](./05_Docker存储技术_改进版.md) - 存储驱动与安全
-- [Container/07_容器技术标准/01_OCI标准详解_改进版.md](../07_容器技术标准/01_OCI标准详解_改进版.md) - OCI标准与安全规范
+- [Container/01_Docker技术详解/01_Docker架构原理.md](./01_Docker架构原理.md) - Docker架构深度解析
+- [Container/01_Docker技术详解/03_Docker镜像技术.md](./03_Docker镜像技术.md) - 镜像技术与BuildKit
+- [Container/01_Docker技术详解/04_Docker网络技术.md](./04_Docker网络技术.md) - 网络安全与隔离
+- [Container/01_Docker技术详解/05_Docker存储技术.md](./05_Docker存储技术.md) - 存储驱动与安全
+- [Container/07_容器技术标准/01_OCI标准详解.md](../07_容器技术标准/01_OCI标准详解.md) - OCI标准与安全规范
 
 ---
 
