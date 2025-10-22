@@ -1,0 +1,133 @@
+# ===================================================================
+# Kuasar运行时无关Pod配置
+# ===================================================================
+# 功能: 一份YAML跑多种沙盒 (gVisor/Kata/Wasm)
+# 成本: ¥0
+# 窗口期: 2025 Q4 - 2026 Q2
+# ===================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuasar-agnostic-app
+  labels:
+    app: kuasar-demo
+spec:
+  # 使用Kuasar运行时类
+  runtimeClassName: kuasar-auto
+  
+  containers:
+  - name: app
+    image: nginx:alpine
+    
+    # 仅使用POSIX子集API (兼容所有运行时)
+    securityContext:
+      # Rootless
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      
+      # 零Capabilities
+      capabilities:
+        drop:
+        - ALL
+      
+      # 只读根文件系统
+      readOnlyRootFilesystem: true
+      
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "100m"
+      limits:
+        memory: "128Mi"
+        cpu: "200m"
+        
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp
+    - name: cache
+      mountPath: /var/cache/nginx
+      
+  volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+    
+  # 调度约束
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+          - key: kuasar.io/runtime
+            operator: In
+            values:
+            - gvisor
+            - kata
+            - wasm
+
+---
+# ===================================================================
+# RuntimeClass定义
+# ===================================================================
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kuasar-auto
+handler: kuasar
+scheduling:
+  nodeSelector:
+    # 自动选择最优运行时
+    kuasar.io/runtime: "auto"
+  tolerations:
+  - key: "kuasar.io/sandbox"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+---
+# ===================================================================
+# 不同运行时的RuntimeClass
+# ===================================================================
+
+# gVisor
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kuasar-gvisor
+handler: kuasar
+scheduling:
+  nodeSelector:
+    kuasar.io/runtime: "gvisor"
+
+---
+# Kata Containers
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kuasar-kata
+handler: kuasar
+scheduling:
+  nodeSelector:
+    kuasar.io/runtime: "kata"
+
+---
+# WASM
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: kuasar-wasm
+handler: kuasar
+scheduling:
+  nodeSelector:
+    kuasar.io/runtime: "wasm"
+
+# ===================================================================
+# 使用说明:
+#   kubectl apply -f agnostic_pod.yaml
+#   kubectl get pod kuasar-agnostic-app -o wide
+#   kubectl describe pod kuasar-agnostic-app
+# ===================================================================
+

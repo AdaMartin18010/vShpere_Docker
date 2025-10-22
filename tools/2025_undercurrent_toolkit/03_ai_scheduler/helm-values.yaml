@@ -1,0 +1,112 @@
+# ===================================================================
+# K8s 1.32 AI Scheduler Helm Values
+# ===================================================================
+# 功能: LSTM内存泄漏预测 + 自动驱逐
+# 收益: 集群故障率 -40%
+# 窗口期: 2025 Q4 - 2025-12-31
+# ===================================================================
+
+aiScheduler:
+  enabled: true
+  
+  # LSTM模型配置
+  model:
+    type: lstm
+    size: small  # small (<100MB), medium, large
+    lookbackWindow: 1h
+    predictionHorizon: 10m
+    
+  # 预测配置
+  predictor:
+    enabled: true
+    # 内存泄漏检测阈值
+    memoryLeakThreshold:
+      growthRate: 0.05  # 5% per minute
+      absoluteValue: 0.8  # 80% of limit
+    # 预测准确率目标
+    targetAccuracy:
+      precision: 0.90
+      recall: 0.85
+      
+  # 驱逐策略
+  eviction:
+    enabled: true
+    # 提前驱逐时间
+    leadTime: 5m
+    # 驱逐概率阈值
+    probabilityThreshold: 0.8
+    # 优雅关闭时间
+    gracePeriod: 30s
+    
+  # 调度策略
+  scheduling:
+    # 调度器名称
+    schedulerName: ai-scheduler
+    # 权重
+    scoringWeight: 100
+    # 启用插件
+    plugins:
+      preFilter:
+        - AIPredictor
+      score:
+        - AIScorer
+        - AIResourcePredictor
+        
+  # 资源限制
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+      
+  # 模型持久化
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+    
+  # Prometheus监控
+  prometheus:
+    enabled: true
+    port: 9090
+    path: /metrics
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      
+  # 日志配置
+  logging:
+    level: info  # debug, info, warn, error
+    format: json
+    
+  # 高可用
+  replicaCount: 2
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: ai-scheduler
+          topologyKey: kubernetes.io/hostname
+          
+  # 安全上下文
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+      - ALL
+      
+# ===================================================================
+# 部署命令:
+#   helm install ai-scheduler \
+#     oci://registry.k8s.io/scheduler-plugins/ai-scheduler \
+#     -f helm-values.yaml \
+#     --namespace kube-system
+# ===================================================================
+
