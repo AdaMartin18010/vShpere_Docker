@@ -1,0 +1,625 @@
+openapi: 3.0.3
+info:
+  title: etcd API v3
+  description: |
+    etcd是一个分布式键值存储系统,为分布式系统提供可靠的数据存储。
+    
+    **主要功能:**
+    - 键值存储 (KV Store)
+    - 监听机制 (Watch)
+    - 租约管理 (Lease)
+    - 分布式锁
+    - 集群管理
+    
+    **认证方式:**
+    - TLS证书认证
+    - 用户名/密码认证
+  version: 3.5.0
+  contact:
+    name: etcd项目
+    url: https://etcd.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://localhost:2379
+    description: 本地etcd服务器 (HTTP)
+  - url: https://localhost:2379
+    description: 本地etcd服务器 (HTTPS/TLS)
+
+tags:
+  - name: KV
+    description: 键值存储操作
+  - name: Watch
+    description: 键监听操作
+  - name: Lease
+    description: 租约管理
+  - name: Cluster
+    description: 集群管理
+  - name: Auth
+    description: 认证与授权
+  - name: Maintenance
+    description: 维护操作
+
+paths:
+  /v3/kv/put:
+    post:
+      tags:
+        - KV
+      summary: 存储键值对
+      description: 在etcd中存储或更新一个键值对
+      operationId: kvPut
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - value
+              properties:
+                key:
+                  type: string
+                  format: byte
+                  description: Base64编码的键
+                  example: "bXlfa2V5"
+                value:
+                  type: string
+                  format: byte
+                  description: Base64编码的值
+                  example: "bXlfdmFsdWU="
+                lease:
+                  type: integer
+                  format: int64
+                  description: 关联的租约ID
+                prev_kv:
+                  type: boolean
+                  description: 是否返回之前的键值
+                ignore_value:
+                  type: boolean
+                  description: 更新时是否忽略值
+                ignore_lease:
+                  type: boolean
+                  description: 更新时是否忽略租约
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutResponse'
+
+  /v3/kv/range:
+    post:
+      tags:
+        - KV
+      summary: 获取键值对
+      description: 根据键或键范围获取值
+      operationId: kvRange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+              properties:
+                key:
+                  type: string
+                  format: byte
+                  description: Base64编码的键
+                range_end:
+                  type: string
+                  format: byte
+                  description: 范围结束键(不包含)
+                limit:
+                  type: integer
+                  format: int64
+                  description: 返回的最大键值对数
+                revision:
+                  type: integer
+                  format: int64
+                  description: 指定读取的修订版本
+                sort_order:
+                  type: string
+                  enum: [NONE, ASCEND, DESCEND]
+                  description: 排序顺序
+                sort_target:
+                  type: string
+                  enum: [KEY, VERSION, CREATE, MOD, VALUE]
+                  description: 排序目标
+                serializable:
+                  type: boolean
+                  description: 是否允许可序列化读取
+                keys_only:
+                  type: boolean
+                  description: 是否只返回键
+                count_only:
+                  type: boolean
+                  description: 是否只返回计数
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RangeResponse'
+
+  /v3/kv/deleterange:
+    post:
+      tags:
+        - KV
+      summary: 删除键值对
+      description: 删除指定的键或键范围
+      operationId: kvDelete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+              properties:
+                key:
+                  type: string
+                  format: byte
+                  description: Base64编码的键
+                range_end:
+                  type: string
+                  format: byte
+                  description: 范围结束键
+                prev_kv:
+                  type: boolean
+                  description: 是否返回被删除的键值
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /v3/watch:
+    post:
+      tags:
+        - Watch
+      summary: 监听键变化
+      description: 监听指定键或键前缀的变化
+      operationId: watch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - create_request
+              properties:
+                create_request:
+                  type: object
+                  required:
+                    - key
+                  properties:
+                    key:
+                      type: string
+                      format: byte
+                      description: 要监听的键
+                    range_end:
+                      type: string
+                      format: byte
+                      description: 监听范围结束键
+                    start_revision:
+                      type: integer
+                      format: int64
+                      description: 开始监听的修订版本
+                    progress_notify:
+                      type: boolean
+                      description: 是否周期性通知进度
+                    filters:
+                      type: array
+                      items:
+                        type: string
+                        enum: [NOPUT, NODELETE]
+                      description: 事件过滤器
+                    prev_kv:
+                      type: boolean
+                      description: 是否返回事件前的键值
+      responses:
+        '200':
+          description: 成功 (流式响应)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchResponse'
+
+  /v3/lease/grant:
+    post:
+      tags:
+        - Lease
+      summary: 创建租约
+      description: 创建一个具有指定TTL的租约
+      operationId: leaseGrant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - TTL
+              properties:
+                TTL:
+                  type: integer
+                  format: int64
+                  description: 租约的生存时间(秒)
+                  example: 60
+                ID:
+                  type: integer
+                  format: int64
+                  description: 请求的租约ID(可选,0表示自动分配)
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaseGrantResponse'
+
+  /v3/lease/revoke:
+    post:
+      tags:
+        - Lease
+      summary: 撤销租约
+      description: 撤销指定的租约,删除所有关联的键
+      operationId: leaseRevoke
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ID
+              properties:
+                ID:
+                  type: integer
+                  format: int64
+                  description: 要撤销的租约ID
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaseRevokeResponse'
+
+  /v3/lease/keepalive:
+    post:
+      tags:
+        - Lease
+      summary: 续约
+      description: 保持租约活跃,延长TTL
+      operationId: leaseKeepAlive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ID
+              properties:
+                ID:
+                  type: integer
+                  format: int64
+                  description: 要续约的租约ID
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaseKeepAliveResponse'
+
+  /v3/cluster/member/list:
+    post:
+      tags:
+        - Cluster
+      summary: 列出集群成员
+      description: 获取当前集群的所有成员信息
+      operationId: memberList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                linearizable:
+                  type: boolean
+                  description: 是否需要线性一致性读取
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberListResponse'
+
+  /v3/cluster/member/add:
+    post:
+      tags:
+        - Cluster
+      summary: 添加集群成员
+      description: 向集群添加新的成员节点
+      operationId: memberAdd
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - peerURLs
+              properties:
+                peerURLs:
+                  type: array
+                  items:
+                    type: string
+                  description: 新成员的Peer URLs
+                  example: ["http://10.0.0.10:2380"]
+                isLearner:
+                  type: boolean
+                  description: 是否作为学习者加入
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberAddResponse'
+
+  /v3/maintenance/status:
+    post:
+      tags:
+        - Maintenance
+      summary: 获取服务器状态
+      description: 获取etcd服务器的状态信息
+      operationId: status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+
+components:
+  schemas:
+    PutResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        prev_kv:
+          $ref: '#/components/schemas/KeyValue'
+
+    RangeResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        kvs:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+        more:
+          type: boolean
+          description: 是否还有更多数据
+        count:
+          type: integer
+          format: int64
+          description: 匹配的键值对总数
+
+    DeleteResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        deleted:
+          type: integer
+          format: int64
+          description: 删除的键值对数量
+        prev_kvs:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+
+    WatchResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        watch_id:
+          type: integer
+          format: int64
+        created:
+          type: boolean
+        canceled:
+          type: boolean
+        compact_revision:
+          type: integer
+          format: int64
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+
+    LeaseGrantResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        ID:
+          type: integer
+          format: int64
+          description: 租约ID
+        TTL:
+          type: integer
+          format: int64
+          description: 租约TTL(秒)
+
+    LeaseRevokeResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+
+    LeaseKeepAliveResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        ID:
+          type: integer
+          format: int64
+        TTL:
+          type: integer
+          format: int64
+
+    MemberListResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+
+    MemberAddResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        member:
+          $ref: '#/components/schemas/Member'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+
+    StatusResponse:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/ResponseHeader'
+        version:
+          type: string
+        dbSize:
+          type: integer
+          format: int64
+        leader:
+          type: integer
+          format: int64
+        raftIndex:
+          type: integer
+          format: int64
+        raftTerm:
+          type: integer
+          format: int64
+
+    ResponseHeader:
+      type: object
+      properties:
+        cluster_id:
+          type: integer
+          format: int64
+        member_id:
+          type: integer
+          format: int64
+        revision:
+          type: integer
+          format: int64
+          description: 当前键值存储的修订版本
+        raft_term:
+          type: integer
+          format: int64
+
+    KeyValue:
+      type: object
+      properties:
+        key:
+          type: string
+          format: byte
+        create_revision:
+          type: integer
+          format: int64
+        mod_revision:
+          type: integer
+          format: int64
+        version:
+          type: integer
+          format: int64
+        value:
+          type: string
+          format: byte
+        lease:
+          type: integer
+          format: int64
+
+    Event:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [PUT, DELETE]
+        kv:
+          $ref: '#/components/schemas/KeyValue'
+        prev_kv:
+          $ref: '#/components/schemas/KeyValue'
+
+    Member:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+        name:
+          type: string
+        peerURLs:
+          type: array
+          items:
+            type: string
+        clientURLs:
+          type: array
+          items:
+            type: string
+        isLearner:
+          type: boolean
+
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: 用户名/密码认证
+    
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Token认证
+
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+

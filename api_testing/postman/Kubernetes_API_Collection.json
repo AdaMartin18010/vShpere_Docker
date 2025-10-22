@@ -1,0 +1,533 @@
+{
+	"info": {
+		"_postman_id": "kubernetes-api-2025",
+		"name": "Kubernetes API v1.28",
+		"description": "Kubernetes API完整测试集合 - 覆盖核心资源、工作负载、服务发现等",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345679"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{k8s_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "01_Cluster_Info",
+			"item": [
+				{
+					"name": "获取API版本",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取所有API组",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/apis",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "集群健康检查",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/healthz",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["healthz"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取节点列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/nodes",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "nodes"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02_Namespace_Operations",
+			"item": [
+				{
+					"name": "列出所有命名空间",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建命名空间",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Namespace\",\n    \"metadata\": {\n        \"name\": \"test-api\",\n        \"labels\": {\n            \"purpose\": \"api-testing\"\n        }\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取命名空间详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除命名空间",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03_Pod_Operations",
+			"item": [
+				{
+					"name": "列出Pods",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/pods",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "pods"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建Pod",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"pod_name\", jsonData.metadata.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Pod\",\n    \"metadata\": {\n        \"name\": \"test-nginx\",\n        \"labels\": {\n            \"app\": \"nginx\",\n            \"test\": \"api\"\n        }\n    },\n    \"spec\": {\n        \"containers\": [\n            {\n                \"name\": \"nginx\",\n                \"image\": \"nginx:alpine\",\n                \"ports\": [\n                    {\n                        \"containerPort\": 80\n                    }\n                ],\n                \"resources\": {\n                    \"requests\": {\n                        \"cpu\": \"100m\",\n                        \"memory\": \"128Mi\"\n                    },\n                    \"limits\": {\n                        \"cpu\": \"200m\",\n                        \"memory\": \"256Mi\"\n                    }\n                }\n            }\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/pods",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "pods"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取Pod详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/pods/{{pod_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "pods", "{{pod_name}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取Pod日志",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/pods/{{pod_name}}/log?tailLines=100",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "pods", "{{pod_name}}", "log"],
+							"query": [
+								{
+									"key": "tailLines",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除Pod",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/pods/{{pod_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "pods", "{{pod_name}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04_Deployment_Operations",
+			"item": [
+				{
+					"name": "列出Deployments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/apis/apps/v1/namespaces/{{namespace}}/deployments",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis", "apps", "v1", "namespaces", "{{namespace}}", "deployments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建Deployment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"deployment_name\", jsonData.metadata.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"apps/v1\",\n    \"kind\": \"Deployment\",\n    \"metadata\": {\n        \"name\": \"nginx-deployment\"\n    },\n    \"spec\": {\n        \"replicas\": 3,\n        \"selector\": {\n            \"matchLabels\": {\n                \"app\": \"nginx\"\n            }\n        },\n        \"template\": {\n            \"metadata\": {\n                \"labels\": {\n                    \"app\": \"nginx\"\n                }\n            },\n            \"spec\": {\n                \"containers\": [\n                    {\n                        \"name\": \"nginx\",\n                        \"image\": \"nginx:alpine\",\n                        \"ports\": [\n                            {\n                                \"containerPort\": 80\n                            }\n                        ]\n                    }\n                ]\n            }\n        }\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/apis/apps/v1/namespaces/{{namespace}}/deployments",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis", "apps", "v1", "namespaces", "{{namespace}}", "deployments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取Deployment详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/apis/apps/v1/namespaces/{{namespace}}/deployments/{{deployment_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis", "apps", "v1", "namespaces", "{{namespace}}", "deployments", "{{deployment_name}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新Deployment副本数",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/strategic-merge-patch+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"spec\": {\n        \"replicas\": 5\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/apis/apps/v1/namespaces/{{namespace}}/deployments/{{deployment_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis", "apps", "v1", "namespaces", "{{namespace}}", "deployments", "{{deployment_name}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除Deployment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/apis/apps/v1/namespaces/{{namespace}}/deployments/{{deployment_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["apis", "apps", "v1", "namespaces", "{{namespace}}", "deployments", "{{deployment_name}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05_Service_Operations",
+			"item": [
+				{
+					"name": "列出Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/services",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "services"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"service_name\", jsonData.metadata.name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Service\",\n    \"metadata\": {\n        \"name\": \"nginx-service\"\n    },\n    \"spec\": {\n        \"selector\": {\n            \"app\": \"nginx\"\n        },\n        \"type\": \"ClusterIP\",\n        \"ports\": [\n            {\n                \"protocol\": \"TCP\",\n                \"port\": 80,\n                \"targetPort\": 80\n            }\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/services",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "services"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取Service详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/services/{{service_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "services", "{{service_name}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除Service",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/services/{{service_name}}",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "services", "{{service_name}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "06_ConfigMap_Secret",
+			"item": [
+				{
+					"name": "创建ConfigMap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"ConfigMap\",\n    \"metadata\": {\n        \"name\": \"test-config\"\n    },\n    \"data\": {\n        \"config.json\": \"{\\\"env\\\":\\\"test\\\",\\\"debug\\\":true}\",\n        \"app.conf\": \"server {\\n  listen 80;\\n}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/configmaps",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "configmaps"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "列出ConfigMaps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/configmaps",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "configmaps"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建Secret",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Secret\",\n    \"metadata\": {\n        \"name\": \"test-secret\"\n    },\n    \"type\": \"Opaque\",\n    \"data\": {\n        \"username\": \"YWRtaW4=\",\n        \"password\": \"cGFzc3dvcmQxMjM=\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/secrets",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "secrets"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "列出Secrets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{k8s_api_server}}/api/v1/namespaces/{{namespace}}/secrets",
+							"host": ["{{k8s_api_server}}"],
+							"path": ["api", "v1", "namespaces", "{{namespace}}", "secrets"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "k8s_api_server",
+			"value": "https://kubernetes.default.svc",
+			"type": "string"
+		},
+		{
+			"key": "k8s_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "namespace",
+			"value": "default",
+			"type": "string"
+		},
+		{
+			"key": "pod_name",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "deployment_name",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "service_name",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

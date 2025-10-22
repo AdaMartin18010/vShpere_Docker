@@ -1,0 +1,305 @@
+# GitLab CI/CD配置 - API测试
+# 复制到项目根目录的 .gitlab-ci.yml 或包含在主配置文件中
+
+stages:
+  - setup
+  - test
+  - performance
+  - report
+  - deploy
+
+variables:
+  PYTHON_VERSION: "3.11"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  DOCKER_VERSION: "24.0"
+  KUBERNETES_VERSION: "1.28"
+
+# 缓存配置
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .cache/pip
+    - venv/
+
+# ========================================
+# 阶段1: 环境准备
+# ========================================
+setup:
+  stage: setup
+  image: python:${PYTHON_VERSION}-slim
+  script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install --upgrade pip
+    - cd tools/api_testing
+    - pip install -r requirements.txt
+  artifacts:
+    paths:
+      - venv/
+    expire_in: 1 hour
+
+# ========================================
+# 阶段2: API测试
+# ========================================
+
+# Docker API测试
+docker-api-test:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  services:
+    - name: docker:${DOCKER_VERSION}-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - source venv/bin/activate
+    - apt-get update && apt-get install -y docker.io
+  script:
+    - cd tools/api_testing
+    - python scripts/docker_api_test.py
+  artifacts:
+    paths:
+      - tools/api_testing/reports/docker_*.html
+    reports:
+      junit: tools/api_testing/reports/docker_*.xml
+    expire_in: 30 days
+  retry: 2
+
+# Kubernetes API测试
+kubernetes-api-test:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  services:
+    - name: kindest/node:v${KUBERNETES_VERSION}
+      alias: kubernetes
+  before_script:
+    - source venv/bin/activate
+    - apt-get update && apt-get install -y curl
+    # 安装kubectl
+    - curl -LO "https://dl.k8s.io/release/v${KUBERNETES_VERSION}.0/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+  script:
+    - cd tools/api_testing
+    - python scripts/kubernetes_api_test.py
+  artifacts:
+    paths:
+      - tools/api_testing/reports/k8s_*.html
+    reports:
+      junit: tools/api_testing/reports/k8s_*.xml
+    expire_in: 30 days
+  retry: 2
+
+# libvirt API测试
+libvirt-api-test:
+  stage: test
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update
+    - apt-get install -y python3 python3-pip python3-venv
+    - apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients python3-libvirt
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install --upgrade pip
+    - cd tools/api_testing && pip install -r requirements.txt
+    # 启动libvirt
+    - service libvirtd start
+  script:
+    - cd tools/api_testing
+    - python scripts/libvirt_api_test.py --uri qemu:///system
+  artifacts:
+    paths:
+      - tools/api_testing/reports/libvirt_*.html
+    reports:
+      junit: tools/api_testing/reports/libvirt_*.xml
+    expire_in: 30 days
+  retry: 2
+  tags:
+    - kvm  # 需要支持KVM的Runner
+
+# vSphere API测试 (可选)
+vsphere-api-test:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  before_script:
+    - source venv/bin/activate
+  script:
+    - cd tools/api_testing
+    - |
+      python scripts/vsphere_api_test.py \
+        --server ${VSPHERE_HOST} \
+        --username ${VSPHERE_USER} \
+        --password ${VSPHERE_PASSWORD} \
+        --no-verify-ssl
+  artifacts:
+    paths:
+      - tools/api_testing/reports/vsphere_*.html
+    expire_in: 30 days
+  only:
+    variables:
+      - $VSPHERE_HOST
+  retry: 2
+
+# Postman/Newman测试
+postman-test:
+  stage: test
+  image: postman/newman:alpine
+  services:
+    - name: docker:${DOCKER_VERSION}-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    # 安装newman-reporter-htmlextra
+    - npm install -g newman-reporter-htmlextra
+    # 运行Docker API测试
+    - |
+      newman run tools/api_testing/postman/Docker_API_Collection.json \
+        --environment tools/api_testing/postman/environments/docker_local.json \
+        --reporters cli,htmlextra \
+        --reporter-htmlextra-export tools/api_testing/reports/docker_postman_report.html
+  artifacts:
+    paths:
+      - tools/api_testing/reports/*_postman_report.html
+    expire_in: 30 days
+  allow_failure: true
+
+# ========================================
+# 阶段3: 性能测试
+# ========================================
+performance-test:
+  stage: performance
+  image: grafana/k6:latest
+  services:
+    - name: docker:${DOCKER_VERSION}-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    # K6性能测试脚本
+    - echo "性能测试待实现"
+    # - k6 run tools/api_testing/performance/docker_api_load_test.js
+  artifacts:
+    paths:
+      - tools/api_testing/reports/performance_*.html
+    expire_in: 30 days
+  only:
+    - main
+    - develop
+  allow_failure: true
+
+# ========================================
+# 阶段4: 生成报告
+# ========================================
+generate-report:
+  stage: report
+  image: python:${PYTHON_VERSION}-slim
+  dependencies:
+    - docker-api-test
+    - kubernetes-api-test
+    - libvirt-api-test
+  before_script:
+    - source venv/bin/activate
+  script:
+    - cd tools/api_testing
+    - python scripts/run_all_tests.py --report-only
+  artifacts:
+    paths:
+      - tools/api_testing/reports/comprehensive_*.html
+      - tools/api_testing/reports/comprehensive_*.json
+      - tools/api_testing/reports/comprehensive_*.md
+    expire_in: 90 days
+  when: always
+
+# ========================================
+# 阶段5: 部署报告
+# ========================================
+deploy-report:
+  stage: deploy
+  image: alpine:latest
+  dependencies:
+    - generate-report
+  before_script:
+    - apk add --no-cache rsync openssh-client
+  script:
+    # 部署到GitLab Pages
+    - mkdir -p public/api-test-reports
+    - cp -r tools/api_testing/reports/* public/api-test-reports/
+    # 创建索引页
+    - echo "<html><head><title>API Test Reports</title></head>" > public/index.html
+    - echo "<body><h1>API Test Reports</h1>" >> public/index.html
+    - echo "<ul>" >> public/index.html
+    - find public/api-test-reports -name "*.html" -exec basename {} \; | while read file; do
+        echo "<li><a href='api-test-reports/$file'>$file</a></li>" >> public/index.html
+      done
+    - echo "</ul></body></html>" >> public/index.html
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+
+# ========================================
+# 通知任务
+# ========================================
+notify-success:
+  stage: .post
+  image: curlimages/curl:latest
+  script:
+    - |
+      if [ -n "$SLACK_WEBHOOK" ]; then
+        curl -X POST $SLACK_WEBHOOK \
+          -H 'Content-Type: application/json' \
+          -d "{\"text\":\"✅ API测试成功 - Pipeline #${CI_PIPELINE_ID}\"}"
+      fi
+  when: on_success
+  only:
+    variables:
+      - $SLACK_WEBHOOK
+
+notify-failure:
+  stage: .post
+  image: curlimages/curl:latest
+  script:
+    - |
+      if [ -n "$SLACK_WEBHOOK" ]; then
+        curl -X POST $SLACK_WEBHOOK \
+          -H 'Content-Type: application/json' \
+          -d "{\"text\":\"❌ API测试失败 - Pipeline #${CI_PIPELINE_ID}\n查看: ${CI_PIPELINE_URL}\"}"
+      fi
+  when: on_failure
+  only:
+    variables:
+      - $SLACK_WEBHOOK
+
+# ========================================
+# 定时任务
+# ========================================
+scheduled-test:
+  extends:
+    - docker-api-test
+  only:
+    - schedules
+  variables:
+    TEST_ENV: "production"
+
+# ========================================
+# 手动任务
+# ========================================
+manual-full-test:
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  before_script:
+    - source venv/bin/activate
+  script:
+    - cd tools/api_testing
+    - python scripts/run_all_tests.py --full
+  artifacts:
+    paths:
+      - tools/api_testing/reports/
+    expire_in: 90 days
+  when: manual
+  allow_failure: false
+

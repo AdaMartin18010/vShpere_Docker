@@ -1,0 +1,307 @@
+# API测试环境配置
+# 支持多环境配置: development, testing, staging, production
+
+environments:
+  # 开发环境
+  development:
+    name: "开发环境"
+    description: "本地开发和调试使用"
+    
+    docker:
+      host: "unix:///var/run/docker.sock"
+      api_version: "v1.43"
+      timeout: 10
+      verify_ssl: false
+    
+    kubernetes:
+      api_server: "http://localhost:8001"
+      token: null  # 使用kubectl proxy时不需要token
+      namespace: "default"
+      verify_ssl: false
+      timeout: 30
+    
+    vsphere:
+      server: "vcenter-dev.local"
+      username: "administrator@vsphere.local"
+      password: "Dev@Password123"
+      port: 443
+      verify_ssl: false
+      timeout: 60
+    
+    libvirt:
+      uri: "qemu:///system"
+      timeout: 30
+    
+    etcd:
+      endpoints:
+        - "http://localhost:2379"
+      timeout: 10
+    
+    consul:
+      host: "localhost"
+      port: 8500
+      scheme: "http"
+      verify_ssl: false
+  
+  # 测试环境
+  testing:
+    name: "测试环境"
+    description: "CI/CD自动化测试使用"
+    
+    docker:
+      host: "tcp://docker-test.example.com:2375"
+      api_version: "v1.43"
+      timeout: 15
+      verify_ssl: false
+    
+    kubernetes:
+      api_server: "https://k8s-test.example.com:6443"
+      token: "${K8S_TEST_TOKEN}"  # 从环境变量读取
+      namespace: "test"
+      verify_ssl: true
+      timeout: 30
+    
+    vsphere:
+      server: "vcenter-test.example.com"
+      username: "${VSPHERE_TEST_USER}"
+      password: "${VSPHERE_TEST_PASSWORD}"
+      port: 443
+      verify_ssl: true
+      timeout: 60
+    
+    libvirt:
+      uri: "qemu+ssh://testuser@libvirt-test.example.com/system"
+      timeout: 30
+    
+    etcd:
+      endpoints:
+        - "https://etcd-test-1.example.com:2379"
+        - "https://etcd-test-2.example.com:2379"
+        - "https://etcd-test-3.example.com:2379"
+      timeout: 15
+      ca_cert: "/etc/etcd/ca.crt"
+      cert: "/etc/etcd/client.crt"
+      key: "/etc/etcd/client.key"
+    
+    consul:
+      host: "consul-test.example.com"
+      port: 8500
+      scheme: "https"
+      verify_ssl: true
+      token: "${CONSUL_TEST_TOKEN}"
+  
+  # 预生产环境
+  staging:
+    name: "预生产环境"
+    description: "生产前最终测试"
+    
+    docker:
+      host: "tcp://docker-staging.example.com:2376"
+      api_version: "v1.43"
+      timeout: 20
+      verify_ssl: true
+      cert_path: "/etc/docker/certs"
+    
+    kubernetes:
+      api_server: "https://k8s-staging.example.com:6443"
+      token: "${K8S_STAGING_TOKEN}"
+      namespace: "staging"
+      verify_ssl: true
+      timeout: 30
+      kubeconfig: "/etc/kubernetes/staging-kubeconfig.yaml"
+    
+    vsphere:
+      server: "vcenter-staging.example.com"
+      username: "${VSPHERE_STAGING_USER}"
+      password: "${VSPHERE_STAGING_PASSWORD}"
+      port: 443
+      verify_ssl: true
+      timeout: 60
+    
+    libvirt:
+      uri: "qemu+tls://libvirt-staging.example.com/system"
+      timeout: 30
+    
+    etcd:
+      endpoints:
+        - "https://etcd-staging-1.example.com:2379"
+        - "https://etcd-staging-2.example.com:2379"
+        - "https://etcd-staging-3.example.com:2379"
+      timeout: 15
+      ca_cert: "/etc/etcd/ca.crt"
+      cert: "/etc/etcd/client.crt"
+      key: "/etc/etcd/client.key"
+    
+    consul:
+      host: "consul-staging.example.com"
+      port: 8500
+      scheme: "https"
+      verify_ssl: true
+      token: "${CONSUL_STAGING_TOKEN}"
+  
+  # 生产环境
+  production:
+    name: "生产环境"
+    description: "生产环境 - 谨慎操作,只执行只读测试"
+    
+    docker:
+      host: "tcp://docker-prod.example.com:2376"
+      api_version: "v1.43"
+      timeout: 30
+      verify_ssl: true
+      cert_path: "/etc/docker/certs"
+    
+    kubernetes:
+      api_server: "https://k8s-prod.example.com:6443"
+      token: "${K8S_PROD_TOKEN}"
+      namespace: "production"
+      verify_ssl: true
+      timeout: 30
+      kubeconfig: "/etc/kubernetes/prod-kubeconfig.yaml"
+    
+    vsphere:
+      server: "vcenter-prod.example.com"
+      username: "${VSPHERE_PROD_USER}"
+      password: "${VSPHERE_PROD_PASSWORD}"
+      port: 443
+      verify_ssl: true
+      timeout: 90
+    
+    libvirt:
+      uri: "qemu+tls://libvirt-prod.example.com/system"
+      timeout: 45
+    
+    etcd:
+      endpoints:
+        - "https://etcd-prod-1.example.com:2379"
+        - "https://etcd-prod-2.example.com:2379"
+        - "https://etcd-prod-3.example.com:2379"
+        - "https://etcd-prod-4.example.com:2379"
+        - "https://etcd-prod-5.example.com:2379"
+      timeout: 20
+      ca_cert: "/etc/etcd/prod-ca.crt"
+      cert: "/etc/etcd/prod-client.crt"
+      key: "/etc/etcd/prod-client.key"
+    
+    consul:
+      host: "consul-prod.example.com"
+      port: 8500
+      scheme: "https"
+      verify_ssl: true
+      token: "${CONSUL_PROD_TOKEN}"
+
+# 全局配置
+global:
+  # 测试执行配置
+  test_execution:
+    max_retries: 3
+    retry_delay: 2  # 秒
+    parallel_execution: false
+    continue_on_failure: true
+  
+  # 日志配置
+  logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "reports/api_test.log"
+    console: true
+    rotate: true
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+  
+  # 报告配置
+  reporting:
+    output_dir: "reports"
+    formats:
+      - "html"
+      - "json"
+      - "xml"
+    include_screenshots: false
+    include_logs: true
+  
+  # 安全配置
+  security:
+    mask_sensitive_data: true
+    sensitive_keys:
+      - "password"
+      - "token"
+      - "secret"
+      - "key"
+      - "api_key"
+    store_credentials: false
+  
+  # 性能配置
+  performance:
+    enable_metrics: true
+    track_response_time: true
+    alert_slow_requests: true
+    slow_request_threshold: 5000  # 毫秒
+
+# 测试套件配置
+test_suites:
+  smoke_test:
+    description: "快速冒烟测试"
+    tests:
+      - "test_ping"
+      - "test_version"
+      - "test_health_check"
+    timeout: 60
+  
+  full_test:
+    description: "完整功能测试"
+    tests:
+      - "test_authentication"
+      - "test_list_resources"
+      - "test_get_resource_details"
+      - "test_search_resources"
+      - "test_health_check"
+    timeout: 300
+  
+  lifecycle_test:
+    description: "资源生命周期测试"
+    tests:
+      - "test_create_resource"
+      - "test_update_resource"
+      - "test_delete_resource"
+    timeout: 600
+    enabled: false  # 默认不启用写操作测试
+  
+  performance_test:
+    description: "性能和负载测试"
+    tests:
+      - "test_concurrent_requests"
+      - "test_response_time"
+      - "test_throughput"
+    timeout: 900
+    enabled: false
+
+# 通知配置
+notifications:
+  enabled: true
+  
+  email:
+    enabled: false
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    username: "test-notifications@example.com"
+    password: "${EMAIL_PASSWORD}"
+    from_address: "test-notifications@example.com"
+    to_addresses:
+      - "team@example.com"
+    send_on_failure: true
+    send_on_success: false
+  
+  slack:
+    enabled: false
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#api-tests"
+    send_on_failure: true
+    send_on_success: false
+  
+  webhook:
+    enabled: false
+    url: "${WEBHOOK_URL}"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+

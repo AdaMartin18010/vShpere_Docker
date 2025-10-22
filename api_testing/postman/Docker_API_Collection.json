@@ -1,0 +1,548 @@
+{
+	"info": {
+		"_postman_id": "docker-api-2025",
+		"name": "Docker Engine API v1.43",
+		"description": "Docker Engine API完整测试集合 - 覆盖容器、镜像、网络、卷等核心功能",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "01_System_Info",
+			"item": [
+				{
+					"name": "获取Docker版本信息",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/version",
+							"host": ["{{docker_host}}"],
+							"path": ["version"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取系统信息",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/info",
+							"host": ["{{docker_host}}"],
+							"path": ["info"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ping Docker守护进程",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/_ping",
+							"host": ["{{docker_host}}"],
+							"path": ["_ping"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02_Container_Operations",
+			"item": [
+				{
+					"name": "列出所有容器",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/json?all=true",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "json"],
+							"query": [
+								{
+									"key": "all",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建容器",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"container_id\", jsonData.Id);",
+									"    pm.test(\"容器创建成功\", function () {",
+									"        pm.expect(jsonData.Id).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Image\": \"nginx:alpine\",\n    \"Cmd\": [],\n    \"ExposedPorts\": {\n        \"80/tcp\": {}\n    },\n    \"HostConfig\": {\n        \"PortBindings\": {\n            \"80/tcp\": [\n                {\n                    \"HostPort\": \"8080\"\n                }\n            ]\n        }\n    },\n    \"Labels\": {\n        \"test\": \"postman\",\n        \"created_by\": \"api_test\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{docker_host}}/containers/create?name=test_nginx",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "create"],
+							"query": [
+								{
+									"key": "name",
+									"value": "test_nginx"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "启动容器",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}/start",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}", "start"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看容器详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}/json",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}", "json"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看容器日志",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}/logs?stdout=true&stderr=true&tail=100",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}", "logs"],
+							"query": [
+								{
+									"key": "stdout",
+									"value": "true"
+								},
+								{
+									"key": "stderr",
+									"value": "true"
+								},
+								{
+									"key": "tail",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取容器统计信息",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}/stats?stream=false",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}", "stats"],
+							"query": [
+								{
+									"key": "stream",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "停止容器",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}/stop?t=10",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}", "stop"],
+							"query": [
+								{
+									"key": "t",
+									"value": "10",
+									"description": "等待时间(秒)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除容器",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/containers/{{container_id}}?force=true&v=true",
+							"host": ["{{docker_host}}"],
+							"path": ["containers", "{{container_id}}"],
+							"query": [
+								{
+									"key": "force",
+									"value": "true"
+								},
+								{
+									"key": "v",
+									"value": "true",
+									"description": "删除关联的匿名卷"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03_Image_Operations",
+			"item": [
+				{
+					"name": "列出镜像",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/json",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "json"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "拉取镜像",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/create?fromImage=nginx&tag=alpine",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "create"],
+							"query": [
+								{
+									"key": "fromImage",
+									"value": "nginx"
+								},
+								{
+									"key": "tag",
+									"value": "alpine"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看镜像详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/nginx:alpine/json",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "nginx:alpine", "json"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看镜像历史",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/nginx:alpine/history",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "nginx:alpine", "history"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "标记镜像",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/nginx:alpine/tag?repo=my-nginx&tag=v1.0",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "nginx:alpine", "tag"],
+							"query": [
+								{
+									"key": "repo",
+									"value": "my-nginx"
+								},
+								{
+									"key": "tag",
+									"value": "v1.0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除镜像",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/images/my-nginx:v1.0",
+							"host": ["{{docker_host}}"],
+							"path": ["images", "my-nginx:v1.0"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04_Network_Operations",
+			"item": [
+				{
+					"name": "列出网络",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/networks",
+							"host": ["{{docker_host}}"],
+							"path": ["networks"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建网络",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"network_id\", jsonData.Id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"test_network\",\n    \"Driver\": \"bridge\",\n    \"IPAM\": {\n        \"Config\": [\n            {\n                \"Subnet\": \"172.20.0.0/16\",\n                \"Gateway\": \"172.20.0.1\"\n            }\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{docker_host}}/networks/create",
+							"host": ["{{docker_host}}"],
+							"path": ["networks", "create"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看网络详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/networks/{{network_id}}",
+							"host": ["{{docker_host}}"],
+							"path": ["networks", "{{network_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除网络",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/networks/{{network_id}}",
+							"host": ["{{docker_host}}"],
+							"path": ["networks", "{{network_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "05_Volume_Operations",
+			"item": [
+				{
+					"name": "列出卷",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/volumes",
+							"host": ["{{docker_host}}"],
+							"path": ["volumes"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "创建卷",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"volume_name\", jsonData.Name);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"test_volume\",\n    \"Driver\": \"local\",\n    \"Labels\": {\n        \"test\": \"postman\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{docker_host}}/volumes/create",
+							"host": ["{{docker_host}}"],
+							"path": ["volumes", "create"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查看卷详情",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/volumes/{{volume_name}}",
+							"host": ["{{docker_host}}"],
+							"path": ["volumes", "{{volume_name}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除卷",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{docker_host}}/volumes/{{volume_name}}",
+							"host": ["{{docker_host}}"],
+							"path": ["volumes", "{{volume_name}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is successful\", function () {",
+					"    pm.response.to.have.status.oneOf([200, 201, 204]);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "docker_host",
+			"value": "http://localhost:2375/v1.43",
+			"type": "string"
+		},
+		{
+			"key": "container_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "network_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "volume_name",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

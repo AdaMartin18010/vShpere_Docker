@@ -1,0 +1,108 @@
+# API测试工具依赖包
+# Python 3.8+ required
+
+# 核心依赖
+requests>=2.31.0
+urllib3>=2.0.0
+requests-unixsocket>=0.3.0
+
+# 虚拟化相关
+libvirt-python>=9.0.0
+pyvmomi>=8.0.0
+
+# Kubernetes相关
+kubernetes>=28.1.0
+openshift>=0.13.0
+
+# 配置解析
+PyYAML>=6.0.1
+python-dotenv>=1.0.0
+
+# 命令行工具
+click>=8.1.7
+rich>=13.7.0
+colorama>=0.4.6
+
+# 测试框架
+pytest>=7.4.3
+pytest-html>=4.1.1
+pytest-cov>=4.1.0
+pytest-timeout>=2.2.0
+
+# HTTP/API测试
+httpx>=0.25.2
+aiohttp>=3.9.1
+
+# JSON/YAML处理
+jsonschema>=4.20.0
+jmespath>=1.0.1
+
+# 报告生成
+jinja2>=3.1.2
+markdown>=3.5.1
+
+# 日志
+loguru>=0.7.2
+
+# 性能测试
+locust>=2.18.3
+
+# API文档
+pyyaml>=6.0.1
+prance>=23.6.21.0
+
+# 数据库 (用于测试结果存储)
+sqlalchemy>=2.0.23
+
+# 时间处理
+python-dateutil>=2.8.2
+
+# 加密和认证
+cryptography>=41.0.7
+PyJWT>=2.8.0
+
+# 环境变量管理
+python-decouple>=3.8
+
+# 并发测试
+asyncio>=3.4.3
+
+# Mock和Stub
+responses>=0.24.1
+requests-mock>=1.11.0
+
+# 代码质量
+pylint>=3.0.3
+black>=23.12.1
+isort>=5.13.2
+mypy>=1.7.1
+
+# 文档生成
+mkdocs>=1.5.3
+mkdocs-material>=9.5.3
+
+# 可选依赖 (用于特定功能)
+# etcd客户端
+python-etcd>=0.4.5
+etcd3>=0.12.0
+
+# Consul客户端
+python-consul>=1.1.0
+
+# Zookeeper客户端
+kazoo>=2.9.0
+
+# gRPC (用于CRI/CSI/CNI测试)
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+
+# Protobuf
+protobuf>=4.25.1
+
+# OpenAPI工具
+openapi-spec-validator>=0.7.1
+
+# Newman (Postman CLI)
+# 注意: Newman是Node.js工具,需要单独安装
+# npm install -g newman
+

@@ -1,0 +1,378 @@
+name: API Testing CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨2点运行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ========================================
+  # Job 1: Docker API 测试
+  # ========================================
+  docker-api-test:
+    name: Docker API 测试
+    runs-on: ubuntu-latest
+    
+    services:
+      docker:
+        image: docker:24-dind
+        options: --privileged
+        ports:
+          - 2375:2375
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 安装依赖
+        run: |
+          cd tools/api_testing
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 等待Docker就绪
+        run: |
+          timeout 30 bash -c 'until docker info; do sleep 1; done'
+      
+      - name: 运行Docker API测试
+        env:
+          DOCKER_HOST: tcp://localhost:2375
+        run: |
+          cd tools/api_testing
+          python scripts/docker_api_test.py
+      
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-api-test-report
+          path: tools/api_testing/reports/docker_*.html
+          retention-days: 30
+
+  # ========================================
+  # Job 2: Kubernetes API 测试
+  # ========================================
+  kubernetes-api-test:
+    name: Kubernetes API 测试
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 创建Kind集群
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: api-test
+          version: v0.20.0
+          kubectl_version: v1.28.0
+      
+      - name: 验证集群
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+      
+      - name: 安装依赖
+        run: |
+          cd tools/api_testing
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 运行Kubernetes API测试
+        run: |
+          cd tools/api_testing
+          python scripts/kubernetes_api_test.py
+      
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k8s-api-test-report
+          path: tools/api_testing/reports/k8s_*.html
+          retention-days: 30
+
+  # ========================================
+  # Job 3: libvirt API 测试
+  # ========================================
+  libvirt-api-test:
+    name: libvirt API 测试
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 安装libvirt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-kvm \
+            libvirt-daemon-system \
+            libvirt-clients \
+            python3-libvirt
+      
+      - name: 启动libvirt服务
+        run: |
+          sudo systemctl start libvirtd
+          sudo systemctl status libvirtd
+      
+      - name: 安装Python依赖
+        run: |
+          cd tools/api_testing
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 运行libvirt API测试
+        run: |
+          cd tools/api_testing
+          python scripts/libvirt_api_test.py --uri qemu:///system
+      
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: libvirt-api-test-report
+          path: tools/api_testing/reports/libvirt_*.html
+          retention-days: 30
+
+  # ========================================
+  # Job 4: vSphere API 测试 (可选)
+  # ========================================
+  vsphere-api-test:
+    name: vSphere API 测试
+    runs-on: ubuntu-latest
+    # 只在有vSphere环境变量时运行
+    if: ${{ secrets.VSPHERE_HOST != '' }}
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: 安装依赖
+        run: |
+          cd tools/api_testing
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 运行vSphere API测试
+        env:
+          VSPHERE_HOST: ${{ secrets.VSPHERE_HOST }}
+          VSPHERE_USER: ${{ secrets.VSPHERE_USER }}
+          VSPHERE_PASSWORD: ${{ secrets.VSPHERE_PASSWORD }}
+        run: |
+          cd tools/api_testing
+          python scripts/vsphere_api_test.py \
+            --server $VSPHERE_HOST \
+            --username $VSPHERE_USER \
+            --password $VSPHERE_PASSWORD \
+            --no-verify-ssl
+      
+      - name: 上传测试报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vsphere-api-test-report
+          path: tools/api_testing/reports/vsphere_*.html
+          retention-days: 30
+
+  # ========================================
+  # Job 5: Postman/Newman 测试
+  # ========================================
+  postman-test:
+    name: Postman Collection 测试
+    runs-on: ubuntu-latest
+    
+    services:
+      docker:
+        image: docker:24-dind
+        options: --privileged
+        ports:
+          - 2375:2375
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: 安装Newman
+        run: |
+          npm install -g newman newman-reporter-htmlextra
+      
+      - name: 等待Docker就绪
+        run: |
+          timeout 30 bash -c 'until docker info; do sleep 1; done'
+      
+      - name: 运行Docker API Postman测试
+        continue-on-error: true
+        run: |
+          newman run tools/api_testing/postman/Docker_API_Collection.json \
+            --environment tools/api_testing/postman/environments/docker_local.json \
+            --reporters cli,htmlextra \
+            --reporter-htmlextra-export tools/api_testing/reports/docker_postman_report.html
+      
+      - name: 上传Postman报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postman-test-reports
+          path: tools/api_testing/reports/*_postman_report.html
+          retention-days: 30
+
+  # ========================================
+  # Job 6: 性能测试 (K6)
+  # ========================================
+  performance-test:
+    name: API 性能测试
+    runs-on: ubuntu-latest
+    
+    services:
+      docker:
+        image: docker:24-dind
+        options: --privileged
+        ports:
+          - 2375:2375
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 安装K6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | \
+            sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+      
+      - name: 运行性能测试
+        continue-on-error: true
+        run: |
+          # 这里添加K6性能测试脚本
+          echo "性能测试脚本待实现"
+      
+      - name: 上传性能报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-test-report
+          path: tools/api_testing/reports/performance_*.html
+          retention-days: 30
+
+  # ========================================
+  # Job 7: 生成综合报告
+  # ========================================
+  generate-report:
+    name: 生成综合测试报告
+    runs-on: ubuntu-latest
+    needs: [docker-api-test, kubernetes-api-test, libvirt-api-test]
+    if: always()
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: 下载所有测试报告
+        uses: actions/download-artifact@v4
+        with:
+          path: test-reports
+      
+      - name: 安装依赖
+        run: |
+          cd tools/api_testing
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: 生成综合报告
+        run: |
+          cd tools/api_testing
+          python scripts/run_all_tests.py --report-only
+      
+      - name: 上传综合报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-report
+          path: tools/api_testing/reports/comprehensive_*.html
+          retention-days: 90
+      
+      - name: 发布报告到GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./tools/api_testing/reports
+          destination_dir: api-test-reports
+
+  # ========================================
+  # Job 8: 通知
+  # ========================================
+  notify:
+    name: 发送测试通知
+    runs-on: ubuntu-latest
+    needs: [generate-report]
+    if: always()
+    
+    steps:
+      - name: 发送Slack通知
+        if: ${{ secrets.SLACK_WEBHOOK != '' }}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'API测试完成'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      
+      - name: 创建Issue (失败时)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `API测试失败 - ${new Date().toISOString()}`,
+              body: `API测试流程失败,请查看详情: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['api-test', 'failure', 'automated']
+            })
+
