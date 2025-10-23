@@ -1,0 +1,208 @@
+# 虚拟化测试配置文件示例
+# 复制此文件为 config.yaml 并填写实际配置
+
+# ========================================
+# vSphere配置
+# ========================================
+vsphere:
+  # vCenter Server连接信息
+  host: "vcenter.example.com"
+  port: 443
+  
+  # 管理员账户（用于完整权限测试）
+  admin:
+    username: "administrator@vsphere.local"
+    password: "YourAdminPassword123!"
+  
+  # 测试用户账户（用于权限验证测试）
+  test_user:
+    username: "testuser@vsphere.local"
+    password: "YourTestPassword123!"
+  
+  # 只读用户账户（用于只读权限测试）
+  readonly_user:
+    username: "readonly@vsphere.local"
+    password: "YourReadonlyPassword123!"
+  
+  # SSL/TLS配置
+  ssl:
+    verify_cert: false  # 生产环境应设为true
+    cert_path: ""       # 自定义证书路径（可选）
+  
+  # 测试环境配置
+  test_environment:
+    datacenter: "Datacenter1"
+    cluster: "Cluster1"
+    datastore: "datastore1"
+    network: "VM Network"
+    resource_pool: "TestPool"
+  
+  # 测试VM配置
+  test_vm:
+    name_prefix: "test-vm"
+    cpu_count: 2
+    memory_mb: 1024
+    disk_size_gb: 10
+    guest_os: "ubuntu64Guest"
+  
+  # 超时配置（秒）
+  timeouts:
+    connection: 30
+    power_on: 300
+    power_off: 120
+    snapshot: 180
+    clone: 600
+
+# ========================================
+# libvirt配置
+# ========================================
+libvirt:
+  # libvirt URI
+  # 本地: qemu:///system
+  # 远程TCP: qemu+tcp://remote-host/system
+  # 远程SSH: qemu+ssh://user@remote-host/system
+  # 远程TLS: qemu+tls://remote-host/system
+  uri: "qemu:///system"
+  
+  # 认证配置（仅用于远程连接）
+  auth:
+    username: ""
+    password: ""
+    ssh_key_path: ""
+  
+  # 测试域配置
+  test_domain:
+    name_prefix: "test-domain"
+    vcpu_count: 2
+    memory_mb: 1024
+    memory_current_mb: 512
+    disk_size_gb: 10
+    disk_format: "qcow2"  # qcow2, raw, vmdk
+    network_type: "network"  # network, bridge, user
+    network_source: "default"
+  
+  # 存储池配置
+  storage:
+    pool_name: "default"
+    pool_path: "/var/lib/libvirt/images"
+    pool_type: "dir"  # dir, lvm, nfs, iscsi
+  
+  # 网络配置
+  network:
+    network_name: "default"
+    bridge_name: "virbr0"
+  
+  # 超时配置（秒）
+  timeouts:
+    connection: 30
+    domain_start: 120
+    domain_shutdown: 60
+    domain_destroy: 30
+    snapshot: 120
+
+# ========================================
+# 测试执行配置
+# ========================================
+test_execution:
+  # 测试模式
+  mode: "integration"  # unit, integration, e2e
+  
+  # 并发配置
+  parallel:
+    enabled: false
+    max_workers: 4
+  
+  # 重试配置
+  retry:
+    enabled: true
+    max_attempts: 3
+    delay_seconds: 5
+  
+  # 清理策略
+  cleanup:
+    auto_cleanup: true
+    cleanup_on_failure: true
+    keep_failed_resources: false
+  
+  # 跳过配置
+  skip:
+    slow_tests: false
+    destructive_tests: false
+    requires_admin: false
+
+# ========================================
+# 日志配置
+# ========================================
+logging:
+  # 日志级别: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # 日志输出
+  console:
+    enabled: true
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  file:
+    enabled: true
+    path: "logs/test.log"
+    max_bytes: 10485760  # 10MB
+    backup_count: 5
+  
+  # 详细输出
+  verbose: false
+
+# ========================================
+# 报告配置
+# ========================================
+reporting:
+  # 报告格式
+  formats:
+    - "html"
+    - "json"
+    - "junit"
+  
+  # 报告输出目录
+  output_dir: "reports"
+  
+  # 报告选项
+  options:
+    include_screenshots: false
+    include_logs: true
+    include_timing: true
+    include_system_info: true
+
+# ========================================
+# 高级配置
+# ========================================
+advanced:
+  # 性能监控
+  performance_monitoring:
+    enabled: false
+    interval_seconds: 5
+    metrics:
+      - "cpu"
+      - "memory"
+      - "disk_io"
+      - "network_io"
+  
+  # 审计日志
+  audit_logging:
+    enabled: false
+    log_all_api_calls: false
+    log_authentication: true
+    log_authorization: true
+  
+  # 资源限制
+  resource_limits:
+    max_vms_per_test: 5
+    max_snapshots_per_vm: 3
+    max_test_duration_minutes: 30
+
+# ========================================
+# 环境变量（可选，会覆盖以上配置）
+# ========================================
+# export VSPHERE_HOST=vcenter.example.com
+# export VSPHERE_USER=administrator@vsphere.local
+# export VSPHERE_PASSWORD=YourPassword123!
+# export LIBVIRT_URI=qemu:///system
+
