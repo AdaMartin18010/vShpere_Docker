@@ -18,9 +18,9 @@
 
 本文档深入解释虚拟化和容器化API的交互模式、功能说明和实际应用场景，帮助您：
 
-✅ 理解不同API的交互方式和通信流程  
-✅ 掌握每个API的具体功能和使用方法  
-✅ 学习实际场景中如何组合使用这些API  
+✅ 理解不同API的交互方式和通信流程
+✅ 掌握每个API的具体功能和使用方法
+✅ 学习实际场景中如何组合使用这些API
 ✅ 获得可直接使用的代码示例和最佳实践
 
 ---
@@ -60,16 +60,16 @@ sequenceDiagram
     Docker->>Registry: 拉取nginx镜像
     Registry-->>Docker: 返回镜像数据
     Docker-->>Client: 200 OK (镜像拉取完成)
-    
+
     Client->>Docker: POST /containers/create
     Docker->>Docker: 创建容器实例
     Docker-->>Client: 201 Created {Id: "abc123"}
-    
+
     Client->>Docker: POST /containers/abc123/start
     Docker->>Container: 启动容器进程
     Container-->>Docker: 容器启动成功
     Docker-->>Client: 204 No Content
-    
+
     Client->>Docker: GET /containers/abc123/json
     Docker-->>Client: 200 OK {State: "running"}
 ```
@@ -163,7 +163,7 @@ import (
     "fmt"
     "io"
     "os"
-    
+
     "github.com/docker/docker/api/types"
     "github.com/docker/docker/api/types/container"
     "github.com/docker/docker/client"
@@ -181,7 +181,7 @@ func main() {
         panic(err)
     }
     defer cli.Close()
-    
+
     // 2. 拉取镜像 (流式响应)
     fmt.Println("📥 拉取镜像...")
     reader, err := cli.ImagePull(ctx, "nginx:alpine", types.ImagePullOptions{})
@@ -190,7 +190,7 @@ func main() {
     }
     defer reader.Close()
     io.Copy(os.Stdout, reader) // 实时显示拉取进度
-    
+
     // 3. 创建容器
     fmt.Println("\n🔧 创建容器...")
     resp, err := cli.ContainerCreate(ctx,
@@ -211,23 +211,23 @@ func main() {
     if err != nil {
         panic(err)
     }
-    
+
     containerID := resp.ID
     fmt.Printf("✅ 容器创建成功: %s\n", containerID[:12])
-    
+
     // 4. 启动容器
     fmt.Println("🚀 启动容器...")
     if err := cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{}); err != nil {
         panic(err)
     }
-    
+
     // 5. 检查容器状态
     fmt.Println("🔍 检查容器状态...")
     inspect, err := cli.ContainerInspect(ctx, containerID)
     if err != nil {
         panic(err)
     }
-    
+
     fmt.Printf("✅ 容器状态: %s\n", inspect.State.Status)
     fmt.Printf("✅ 容器IP: %s\n", inspect.NetworkSettings.IPAddress)
     fmt.Printf("✅ 端口映射: 80 -> 8080\n")
@@ -299,13 +299,13 @@ sequenceDiagram
     etcd->>Storage: 写入键值对
     Storage-->>etcd: 写入成功 (revision: 100)
     etcd-->>Client: PutResponse {revision: 100}
-    
+
     Client->>etcd: Watch("/config/app")
     etcd->>Watch: 创建监听流
     Watch-->>Client: WatchResponse (ready)
-    
+
     Note over Client,etcd: 另一个客户端更新配置
-    
+
     Client->>etcd: Put("/config/app", "v2")
     etcd->>Storage: 更新键值对
     Storage->>Watch: 触发变更事件
@@ -325,13 +325,13 @@ package etcdserverpb;
 service KV {
   // 存储键值对
   rpc Put(PutRequest) returns (PutResponse) {}
-  
+
   // 获取键值对
   rpc Range(RangeRequest) returns (RangeResponse) {}
-  
+
   // 删除键值对
   rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {}
-  
+
   // 事务操作
   rpc Txn(TxnRequest) returns (TxnResponse) {}
 }
@@ -390,9 +390,9 @@ func main() {
         log.Fatal(err)
     }
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // 2. Put操作 (一元RPC)
     fmt.Println("📝 存储配置...")
     putResp, err := client.Put(ctx, "/config/database/host", "localhost:3306")
@@ -400,7 +400,7 @@ func main() {
         log.Fatal(err)
     }
     fmt.Printf("✅ 存储成功, 版本: %d\n", putResp.Header.Revision)
-    
+
     // 3. Get操作 (一元RPC)
     fmt.Println("\n📖 读取配置...")
     getResp, err := client.Get(ctx, "/config/database/host")
@@ -412,11 +412,11 @@ func main() {
         fmt.Printf("✅ 值: %s\n", kv.Value)
         fmt.Printf("✅ 版本: %d\n", kv.ModRevision)
     }
-    
+
     // 4. Watch操作 (双向流RPC)
     fmt.Println("\n👀 监听配置变化...")
     watchChan := client.Watch(ctx, "/config/database/", clientv3.WithPrefix())
-    
+
     // 在另一个goroutine中更新配置
     go func() {
         time.Sleep(2 * time.Second)
@@ -424,7 +424,7 @@ func main() {
         client.Put(ctx, "/config/database/host", "192.168.1.100:3306")
         client.Put(ctx, "/config/database/port", "3306")
     }()
-    
+
     // 监听变更事件
     timeout := time.After(5 * time.Second)
     for {
@@ -598,7 +598,7 @@ class UnixSocketHTTPConnection(http.client.HTTPConnection):
     def __init__(self, socket_path):
         super().__init__('localhost')
         self.socket_path = socket_path
-    
+
     def connect(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.connect(self.socket_path)
@@ -617,7 +617,7 @@ container_config = {
     "Image": "nginx:alpine",
     "ExposedPorts": {"80/tcp": {}}
 }
-conn.request('POST', '/containers/create?name=test-nginx', 
+conn.request('POST', '/containers/create?name=test-nginx',
              body=json.dumps(container_config),
              headers={'Content-Type': 'application/json'})
 response = conn.getresponse()
@@ -662,13 +662,13 @@ API: GET /version
 // 功能: 智能版本检查和兼容性验证
 func checkDockerVersion(cli *client.Client) error {
     ctx := context.Background()
-    
+
     // 获取版本信息
     version, err := cli.ServerVersion(ctx)
     if err != nil {
         return fmt.Errorf("Docker守护进程不可用: %w", err)
     }
-    
+
     fmt.Println("📊 Docker系统信息:")
     fmt.Printf("  Docker版本: %s\n", version.Version)
     fmt.Printf("  API版本: %s\n", version.APIVersion)
@@ -677,13 +677,13 @@ func checkDockerVersion(cli *client.Client) error {
     fmt.Printf("  架构: %s\n", version.Arch)
     fmt.Printf("  内核版本: %s\n", version.KernelVersion)
     fmt.Printf("  构建时间: %s\n", version.BuildTime)
-    
+
     // API版本兼容性检查
     minAPIVersion := "1.24"
     if version.APIVersion < minAPIVersion {
         return fmt.Errorf("API版本过低: %s < %s", version.APIVersion, minAPIVersion)
     }
-    
+
     fmt.Println("✅ API版本兼容")
     return nil
 }
@@ -730,23 +730,23 @@ API: GET /info
 // 功能: 全面的系统信息分析
 func analyzeSystemInfo(cli *client.Client) error {
     ctx := context.Background()
-    
+
     info, err := cli.Info(ctx)
     if err != nil {
         return err
     }
-    
+
     // 容器统计
     fmt.Println("\n📦 容器统计:")
     fmt.Printf("  总计: %d\n", info.Containers)
     fmt.Printf("  运行中: %d\n", info.ContainersRunning)
     fmt.Printf("  暂停: %d\n", info.ContainersPaused)
     fmt.Printf("  停止: %d\n", info.ContainersStopped)
-    
+
     // 镜像统计
     fmt.Println("\n🖼️  镜像统计:")
     fmt.Printf("  总计: %d\n", info.Images)
-    
+
     // 存储信息
     fmt.Println("\n💾 存储信息:")
     fmt.Printf("  驱动: %s\n", info.Driver)
@@ -754,22 +754,22 @@ func analyzeSystemInfo(cli *client.Client) error {
     for _, status := range info.DriverStatus {
         fmt.Printf("  %s: %s\n", status[0], status[1])
     }
-    
+
     // 系统资源
     fmt.Println("\n🔧 系统资源:")
     fmt.Printf("  CPU数: %d\n", info.NCPU)
     fmt.Printf("  内存: %.2f GB\n", float64(info.MemTotal)/(1024*1024*1024))
-    
+
     // 网络信息
     fmt.Println("\n🌐 网络:")
     fmt.Printf("  默认网络: %s\n", info.DefaultRuntime)
-    
+
     // 安全特性
     fmt.Println("\n🔒 安全特性:")
     for _, feature := range info.SecurityOptions {
         fmt.Printf("  %s\n", feature)
     }
-    
+
     // 警告信息
     if len(info.Warnings) > 0 {
         fmt.Println("\n⚠️  警告:")
@@ -777,7 +777,7 @@ func analyzeSystemInfo(cli *client.Client) error {
             fmt.Printf("  - %s\n", warning)
         }
     }
-    
+
     return nil
 }
 ```
@@ -804,28 +804,28 @@ API: POST /images/create
 // 功能: 带进度显示的镜像拉取
 func pullImageWithProgress(cli *client.Client, imageName string) error {
     ctx := context.Background()
-    
+
     fmt.Printf("📥 拉取镜像: %s\n", imageName)
-    
+
     // 拉取镜像
     reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
     if err != nil {
         return fmt.Errorf("拉取镜像失败: %w", err)
     }
     defer reader.Close()
-    
+
     // 解析并显示进度
     type ProgressDetail struct {
         Current int64 `json:"current"`
         Total   int64 `json:"total"`
     }
-    
+
     type ProgressMessage struct {
         Status         string         `json:"status"`
         ProgressDetail ProgressDetail `json:"progressDetail"`
         ID             string         `json:"id"`
     }
-    
+
     decoder := json.NewDecoder(reader)
     for {
         var msg ProgressMessage
@@ -835,7 +835,7 @@ func pullImageWithProgress(cli *client.Client, imageName string) error {
             }
             return err
         }
-        
+
         // 显示进度
         if msg.ProgressDetail.Total > 0 {
             percent := float64(msg.ProgressDetail.Current) / float64(msg.ProgressDetail.Total) * 100
@@ -844,7 +844,7 @@ func pullImageWithProgress(cli *client.Client, imageName string) error {
             fmt.Printf("\n  %s", msg.Status)
         }
     }
-    
+
     fmt.Println("\n✅ 镜像拉取完成")
     return nil
 }
@@ -893,14 +893,14 @@ API: POST /build
 // 功能: 从Dockerfile构建镜像
 func buildImage(cli *client.Client, contextDir, dockerfile, tag string) error {
     ctx := context.Background()
-    
+
     // 创建tar包
     tar, err := archive.TarWithOptions(contextDir, &archive.TarOptions{})
     if err != nil {
         return err
     }
     defer tar.Close()
-    
+
     // 构建选项
     opts := types.ImageBuildOptions{
         Tags:       []string{tag},
@@ -910,22 +910,22 @@ func buildImage(cli *client.Client, contextDir, dockerfile, tag string) error {
             "VERSION": stringPtr("1.0.0"),
         },
     }
-    
+
     fmt.Printf("🔨 构建镜像: %s\n", tag)
-    
+
     // 开始构建
     resp, err := cli.ImageBuild(ctx, tar, opts)
     if err != nil {
         return err
     }
     defer resp.Body.Close()
-    
+
     // 显示构建日志
     type BuildMessage struct {
         Stream string `json:"stream"`
         Error  string `json:"error"`
     }
-    
+
     decoder := json.NewDecoder(resp.Body)
     for {
         var msg BuildMessage
@@ -935,16 +935,16 @@ func buildImage(cli *client.Client, contextDir, dockerfile, tag string) error {
             }
             return err
         }
-        
+
         if msg.Error != "" {
             return fmt.Errorf("构建错误: %s", msg.Error)
         }
-        
+
         if msg.Stream != "" {
             fmt.Print(msg.Stream)
         }
     }
-    
+
     fmt.Println("✅ 镜像构建完成")
     return nil
 }
@@ -967,11 +967,11 @@ func buildImage(cli *client.Client, contextDir, dockerfile, tag string) error {
     WORKDIR /app
     COPY . .
     RUN go build -o app
-    
+
     FROM alpine:latest
     COPY --from=builder /app/app /app
     CMD ["/app"]
-  
+
   好处: 减小镜像大小
 
 场景3 - 动态构建参数:
@@ -1011,31 +1011,31 @@ API: POST /containers/create
 // 功能: 创建生产级容器配置
 func createProductionContainer(cli *client.Client) (string, error) {
     ctx := context.Background()
-    
+
     // 容器配置
     config := &container.Config{
         Image: "myapp:latest",
         Cmd:   []string{"/app/server"},
-        
+
         // 环境变量
         Env: []string{
             "ENV=production",
             "LOG_LEVEL=info",
             "DB_HOST=database:5432",
         },
-        
+
         // 暴露端口
         ExposedPorts: nat.PortSet{
             "8080/tcp": struct{}{},
             "9090/tcp": struct{}{}, // metrics
         },
-        
+
         // 工作目录
         WorkingDir: "/app",
-        
+
         // 用户
         User: "appuser:appgroup",
-        
+
         // 标签
         Labels: map[string]string{
             "app":         "myapp",
@@ -1043,7 +1043,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
             "environment": "production",
             "maintainer":  "devops@example.com",
         },
-        
+
         // 健康检查
         Healthcheck: &container.HealthConfig{
             Test: []string{"CMD", "curl", "-f", "http://localhost:8080/health"},
@@ -1052,7 +1052,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
             Retries:  3,
         },
     }
-    
+
     // 主机配置
     hostConfig := &container.HostConfig{
         // 端口映射
@@ -1060,13 +1060,13 @@ func createProductionContainer(cli *client.Client) (string, error) {
             "8080/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: "8080"}},
             "9090/tcp": []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: "9090"}},
         },
-        
+
         // 目录挂载
         Binds: []string{
             "/data/app:/app/data:rw",
             "/logs/app:/app/logs:rw",
         },
-        
+
         // 资源限制
         Resources: container.Resources{
             Memory:     512 * 1024 * 1024,  // 512MB
@@ -1075,13 +1075,13 @@ func createProductionContainer(cli *client.Client) (string, error) {
             CPUQuota:   50000,               // 50% CPU
             CPUPeriod:  100000,
         },
-        
+
         // 重启策略
         RestartPolicy: container.RestartPolicy{
             Name:              "unless-stopped",
             MaximumRetryCount: 3,
         },
-        
+
         // 日志配置
         LogConfig: container.LogConfig{
             Type: "json-file",
@@ -1090,14 +1090,14 @@ func createProductionContainer(cli *client.Client) (string, error) {
                 "max-file": "3",
             },
         },
-        
+
         // 网络模式
         NetworkMode: "bridge",
-        
+
         // DNS配置
         DNS: []string{"8.8.8.8", "8.8.4.4"},
     }
-    
+
     // 网络配置
     networkingConfig := &network.NetworkingConfig{
         EndpointsConfig: map[string]*network.EndpointSettings{
@@ -1106,7 +1106,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
             },
         },
     }
-    
+
     // 创建容器
     resp, err := cli.ContainerCreate(
         ctx,
@@ -1116,13 +1116,13 @@ func createProductionContainer(cli *client.Client) (string, error) {
         nil,
         "myapp-prod",
     )
-    
+
     if err != nil {
         return "", fmt.Errorf("创建容器失败: %w", err)
     }
-    
+
     fmt.Printf("✅ 容器创建成功: %s\n", resp.ID[:12])
-    
+
     // 显示警告
     if len(resp.Warnings) > 0 {
         fmt.Println("⚠️  警告:")
@@ -1130,7 +1130,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
             fmt.Printf("  - %s\n", warning)
         }
     }
-    
+
     return resp.ID, nil
 }
 ```
@@ -1152,7 +1152,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
     - 0.0.0.0: 所有网卡可访问
     - 127.0.0.1: 仅本地访问
     - 具体IP: 指定网卡
-  
+
 3. 资源限制 (Resources):
   内存:
     - Memory: 内存限制
@@ -1162,7 +1162,7 @@ func createProductionContainer(cli *client.Client) (string, error) {
     - CPUShares: 相对权重(默认1024)
     - CPUQuota: 绝对限制(微秒)
     - CPUs: CPU数量(小数)
-  
+
 4. 重启策略 (RestartPolicy):
   - no: 不自动重启
   - always: 总是重启
@@ -1206,7 +1206,7 @@ API: POST /api/v1/namespaces/{namespace}/pods
 // 功能: 创建生产级Pod
 func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
     ctx := context.Background()
-    
+
     pod := &corev1.Pod{
         ObjectMeta: metav1.ObjectMeta{
             Name:      "myapp-pod",
@@ -1227,11 +1227,11 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                 {
                     Name:  "init-database",
                     Image: "busybox:latest",
-                    Command: []string{"sh", "-c", 
+                    Command: []string{"sh", "-c",
                         "until nc -z database 5432; do echo waiting for database; sleep 2; done"},
                 },
             },
-            
+
             // 主容器
             Containers: []corev1.Container{
                 {
@@ -1249,7 +1249,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                             Protocol:      corev1.ProtocolTCP,
                         },
                     },
-                    
+
                     // 环境变量
                     Env: []corev1.EnvVar{
                         {Name: "ENV", Value: "production"},
@@ -1266,7 +1266,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                             },
                         },
                     },
-                    
+
                     // 资源请求和限制
                     Resources: corev1.ResourceRequirements{
                         Requests: corev1.ResourceList{
@@ -1278,7 +1278,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                             corev1.ResourceMemory: resource.MustParse("512Mi"),
                         },
                     },
-                    
+
                     // 存活探针
                     LivenessProbe: &corev1.Probe{
                         ProbeHandler: corev1.ProbeHandler{
@@ -1292,7 +1292,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                         TimeoutSeconds:      5,
                         FailureThreshold:    3,
                     },
-                    
+
                     // 就绪探针
                     ReadinessProbe: &corev1.Probe{
                         ProbeHandler: corev1.ProbeHandler{
@@ -1305,7 +1305,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                         PeriodSeconds:       5,
                         TimeoutSeconds:      3,
                     },
-                    
+
                     // 卷挂载
                     VolumeMounts: []corev1.VolumeMount{
                         {
@@ -1320,7 +1320,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                     },
                 },
             },
-            
+
             // 卷定义
             Volumes: []corev1.Volume{
                 {
@@ -1342,16 +1342,16 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
                     },
                 },
             },
-            
+
             // 重启策略
             RestartPolicy: corev1.RestartPolicyAlways,
-            
+
             // 节点选择
             NodeSelector: map[string]string{
                 "disktype": "ssd",
                 "zone":     "us-east-1a",
             },
-            
+
             // Pod反亲和性 (避免同一节点运行多个副本)
             Affinity: &corev1.Affinity{
                 PodAntiAffinity: &corev1.PodAntiAffinity{
@@ -1376,13 +1376,13 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
             },
         },
     }
-    
+
     // 创建Pod
     createdPod, err := clientset.CoreV1().Pods("production").Create(ctx, pod, metav1.CreateOptions{})
     if err != nil {
         return nil, fmt.Errorf("创建Pod失败: %w", err)
     }
-    
+
     fmt.Printf("✅ Pod创建成功: %s\n", createdPod.Name)
     return createdPod, nil
 }
@@ -1396,7 +1396,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
     目的: 检测容器是否存活
     失败: 重启容器
     场景: 应用死锁、无响应
-  
+
   ReadinessProbe (就绪探针):
     目的: 检测容器是否就绪
     失败: 从Service摘除
@@ -1406,7 +1406,7 @@ func createProductionPod(clientset *kubernetes.Clientset) (*corev1.Pod, error) {
   Requests (请求):
     作用: 调度决策依据
     保证: 至少分配该资源
-  
+
   Limits (限制):
     作用: 资源使用上限
     超出: CPU限流、内存OOM
@@ -1440,7 +1440,7 @@ func NewConfigManager(endpoints []string, prefix string) (*ConfigManager, error)
     if err != nil {
         return nil, err
     }
-    
+
     return &ConfigManager{
         client: client,
         prefix: prefix,
@@ -1513,7 +1513,7 @@ func (dl *DistributedLock) Lock(ctx context.Context) error {
         return err
     }
     dl.leaseID = lease.ID
-    
+
     // 2. 启动自动续约
     keepAliveChan, err := dl.client.KeepAlive(ctx, dl.leaseID)
     if err != nil {
@@ -1524,21 +1524,21 @@ func (dl *DistributedLock) Lock(ctx context.Context) error {
             // 续约成功
         }
     }()
-    
+
     // 3. 尝试获取锁
     txn := dl.client.Txn(ctx).
         If(clientv3.Compare(clientv3.CreateRevision(dl.key), "=", 0)).
         Then(clientv3.OpPut(dl.key, "", clientv3.WithLease(dl.leaseID)))
-    
+
     txnResp, err := txn.Commit()
     if err != nil {
         return err
     }
-    
+
     if !txnResp.Succeeded {
         return fmt.Errorf("锁已被占用")
     }
-    
+
     fmt.Printf("🔒 获取锁成功: %s\n", dl.key)
     return nil
 }
@@ -1568,32 +1568,32 @@ func (dl *DistributedLock) Unlock(ctx context.Context) error {
 func DeployMicroservicesApp(clientset *kubernetes.Clientset) error {
     ctx := context.Background()
     namespace := "microservices"
-    
+
     fmt.Println("🚀 开始部署微服务应用...")
-    
+
     // 1. 部署数据库
     fmt.Println("\n📊 部署PostgreSQL...")
     deployPostgreSQL(ctx, clientset, namespace)
-    
+
     // 2. 部署Redis缓存
     fmt.Println("\n💾 部署Redis...")
     deployRedis(ctx, clientset, namespace)
-    
+
     // 3. 部署后端服务
     fmt.Println("\n⚙️  部署后端服务...")
     services := []string{"user-service", "order-service", "payment-service"}
     for _, svc := range services {
         deployBackendService(ctx, clientset, namespace, svc)
     }
-    
+
     // 4. 部署API网关
     fmt.Println("\n🌐 部署API网关...")
     deployAPIGateway(ctx, clientset, namespace)
-    
+
     // 5. 部署前端
     fmt.Println("\n🖥️  部署前端...")
     deployFrontend(ctx, clientset, namespace)
-    
+
     fmt.Println("\n✅ 微服务应用部署完成!")
     return nil
 }
@@ -1608,23 +1608,23 @@ func DeployMicroservicesApp(clientset *kubernetes.Clientset) error {
 ```go
 func BlueGreenDeployment(clientset *kubernetes.Clientset, namespace, appName, newVersion string) error {
     ctx := context.Background()
-    
+
     fmt.Println("🔵🟢 开始蓝绿部署...")
-    
+
     // 1. 获取当前版本（蓝色环境）
     currentService, _ := clientset.CoreV1().Services(namespace).Get(ctx, appName, metav1.GetOptions{})
     currentVersion := currentService.Spec.Selector["version"]
     fmt.Printf("  当前版本（蓝色）: %s\n", currentVersion)
-    
+
     // 2. 部署新版本（绿色环境）
     fmt.Printf("  部署新版本（绿色）: %s\n", newVersion)
     greenDeployment := createDeployment(appName+"-green", newVersion, 3)
     clientset.AppsV1().Deployments(namespace).Create(ctx, greenDeployment, metav1.CreateOptions{})
-    
+
     // 3. 等待绿色环境就绪
     fmt.Println("  ⏳ 等待绿色环境就绪...")
     waitForDeploymentReady(clientset, namespace, appName+"-green")
-    
+
     // 4. 健康检查
     fmt.Println("  🏥 执行健康检查...")
     if err := performHealthCheck(appName + "-green"); err != nil {
@@ -1632,17 +1632,17 @@ func BlueGreenDeployment(clientset *kubernetes.Clientset, namespace, appName, ne
         clientset.AppsV1().Deployments(namespace).Delete(ctx, appName+"-green", metav1.DeleteOptions{})
         return err
     }
-    
+
     // 5. 切换流量到绿色环境
     fmt.Println("  🔄 切换流量...")
     currentService.Spec.Selector["version"] = newVersion
     clientset.CoreV1().Services(namespace).Update(ctx, currentService, metav1.UpdateOptions{})
     fmt.Println("  ✅ 流量已切换到绿色环境")
-    
+
     // 6. 删除蓝色环境
     fmt.Println("  🗑️  删除蓝色环境...")
     clientset.AppsV1().Deployments(namespace).Delete(ctx, appName+"-blue", metav1.DeleteOptions{})
-    
+
     fmt.Println("✅ 蓝绿部署完成!")
     return nil
 }
@@ -1657,28 +1657,28 @@ func BlueGreenDeployment(clientset *kubernetes.Clientset, namespace, appName, ne
 ```go
 func CanaryDeployment(clientset *kubernetes.Clientset, namespace, appName, newVersion string) error {
     ctx := context.Background()
-    
+
     fmt.Println("🐤 开始金丝雀发布...")
-    
+
     // 金丝雀流量比例: 10% -> 25% -> 50% -> 100%
     canaryStages := []int32{1, 2, 5, 10}
-    
+
     for i, canaryReplicas := range canaryStages {
         fmt.Printf("\n📊 阶段 %d: %d%% 流量到金丝雀\n", i+1, canaryReplicas*10)
-        
+
         // 更新金丝雀副本数
         canaryDeployment, _ := clientset.AppsV1().Deployments(namespace).Get(
             ctx, appName+"-canary", metav1.GetOptions{})
         canaryDeployment.Spec.Replicas = &canaryReplicas
         clientset.AppsV1().Deployments(namespace).Update(ctx, canaryDeployment, metav1.UpdateOptions{})
-        
+
         // 等待就绪
         waitForDeploymentReady(clientset, namespace, appName+"-canary")
-        
+
         // 监控指标
         fmt.Println("  📈 监控指标...")
         time.Sleep(5 * time.Minute)
-        
+
         // 检查错误率
         errorRate := checkErrorRate()
         if errorRate > 0.01 {
@@ -1687,20 +1687,20 @@ func CanaryDeployment(clientset *kubernetes.Clientset, namespace, appName, newVe
             clientset.AppsV1().Deployments(namespace).Update(ctx, canaryDeployment, metav1.UpdateOptions{})
             return fmt.Errorf("金丝雀发布失败")
         }
-        
+
         fmt.Println("  ✅ 阶段通过")
     }
-    
+
     // 全量切换
     fmt.Println("\n🎯 全量切换到新版本...")
     stableDeployment, _ := clientset.AppsV1().Deployments(namespace).Get(
         ctx, appName+"-stable", metav1.GetOptions{})
     stableDeployment.Spec.Template.Spec.Containers[0].Image = appName + ":" + newVersion
     clientset.AppsV1().Deployments(namespace).Update(ctx, stableDeployment, metav1.UpdateOptions{})
-    
+
     // 删除金丝雀
     clientset.AppsV1().Deployments(namespace).Delete(ctx, appName+"-canary", metav1.DeleteOptions{})
-    
+
     fmt.Println("✅ 金丝雀发布完成!")
     return nil
 }

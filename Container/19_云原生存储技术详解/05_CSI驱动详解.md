@@ -1,8 +1,8 @@
 # 05 - CSI驱动详解
 
-**作者**: 云原生存储专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生存储专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -36,6 +36,9 @@
     - [5.2 安全加固](#52-安全加固)
     - [5.3 故障排查](#53-故障排查)
   - [6. 总结](#6-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -81,13 +84,13 @@ CSI发展历程:
 
 ```yaml
 CSI规范结构:
-  
+
 1. Identity Service (身份服务):
    功能:
      - 获取插件信息
      - 获取插件能力
      - 健康检查
-   
+
    RPC:
      - GetPluginInfo
      - GetPluginCapabilities
@@ -99,7 +102,7 @@ CSI规范结构:
      - 发布/取消发布卷
      - 快照/克隆
      - 扩容
-   
+
    RPC:
      - CreateVolume
      - DeleteVolume
@@ -117,7 +120,7 @@ CSI规范结构:
      - 挂载卷到节点
      - 卸载卷
      - 节点信息报告
-   
+
    RPC:
      - NodeStageVolume
      - NodeUnstageVolume
@@ -138,13 +141,13 @@ CSI能力 (Capabilities):
     - CLONE_VOLUME
     - EXPAND_VOLUME
     - VOLUME_CONDITION
-  
+
   Volume:
     - STAGE_UNSTAGE_VOLUME
     - EXPAND_VOLUME
     - VOLUME_CONDITION
     - VOLUME_MOUNT_GROUP
-  
+
   Node:
     - STAGE_UNSTAGE_VOLUME
     - GET_VOLUME_STATS
@@ -244,7 +247,7 @@ CSI架构:
      - 监听PVC创建/删除
      - 调用CSI CreateVolume/DeleteVolume
      - 创建/删除PV对象
-   
+
    部署:
      - Sidecar容器
      - 与CSI Controller Plugin同Pod
@@ -254,7 +257,7 @@ CSI架构:
      - 监听VolumeAttachment CRD
      - 调用CSI ControllerPublishVolume/ControllerUnpublishVolume
      - 更新VolumeAttachment状态
-   
+
    部署:
      - Sidecar容器
      - 与CSI Controller Plugin同Pod
@@ -264,7 +267,7 @@ CSI架构:
      - 监听PVC扩容请求
      - 调用CSI ControllerExpandVolume
      - 更新PVC/PV状态
-   
+
    部署:
      - Sidecar容器 (可选)
      - 支持在线扩容
@@ -274,7 +277,7 @@ CSI架构:
      - 监听VolumeSnapshot CRD
      - 调用CSI CreateSnapshot/DeleteSnapshot
      - 管理VolumeSnapshotContent
-   
+
    部署:
      - Sidecar容器 (可选)
      - 支持快照功能
@@ -284,7 +287,7 @@ CSI架构:
      - Identity Service (插件信息)
      - Controller Service (卷管理)
      - gRPC Server (Unix Socket)
-   
+
    部署:
      - Deployment/StatefulSet
      - 1-3个副本 (高可用)
@@ -295,7 +298,7 @@ CSI架构:
      - Identity Service (插件信息)
      - Node Service (节点卷操作)
      - 挂载/卸载卷
-   
+
    部署:
      - DaemonSet (每个节点)
      - Privileged模式
@@ -306,7 +309,7 @@ CSI架构:
      - Volume Manager
      - 调用CSI Node Service
      - 管理Pod卷生命周期
-   
+
    通信:
      - Unix Socket (/var/lib/kubelet/plugins/...)
      - gRPC
@@ -327,18 +330,18 @@ metadata:
 spec:
   # 是否需要附加
   attachRequired: true
-  
+
   # Pod信息
   podInfoOnMount: false
-  
+
   # Volume生命周期模式
   volumeLifecycleModes:
   - Persistent
   - Ephemeral
-  
+
   # 存储容量跟踪
   storageCapacity: true
-  
+
   # 支持的FSGroup策略
   fsGroupPolicy: File
 
@@ -854,7 +857,7 @@ func (ns *NodeServer) NodeStageVolume(
 ) (*csi.NodeStageVolumeResponse, error) {
  volumeID := req.GetVolumeId()
  stagingTargetPath := req.GetStagingTargetPath()
- 
+
  // 1. 验证参数
  if volumeID == "" {
   return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
@@ -1367,8 +1370,37 @@ kubectl describe volumeattachment csi-xxx
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生存储专家团队
 
 **Tags**: `#CSI` `#ContainerStorageInterface` `#Kubernetes` `#Storage` `#CloudNative`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [云原生存储概述与架构](./01_云原生存储概述与架构.md) - 云原生存储概述与架构
+- [Kubernetes存储基础](./02_Kubernetes存储基础.md) - Kubernetes存储基础
+- [Rook Ceph深度解析](./03_Rook_Ceph深度解析.md) - Rook Ceph深度解析
+- [Velero备份恢复](./04_Velero备份恢复.md) - Velero备份恢复
+- [存储性能优化](./06_存储性能优化.md) - 存储性能优化
+- [多云存储](./07_多云存储.md) - 多云存储
+- [存储安全](./08_存储安全.md) - 存储安全
+- [实战案例](./09_实战案例.md) - 实战案例
+- [最佳实践](./10_最佳实践.md) - 最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器技术标准](../07_容器技术标准/01_OCI标准详解.md) - OCI标准详解
+- [容器技术标准对比](../07_容器技术标准/03_容器技术标准对比.md) - 容器技术标准对比
+- [Kubernetes存储管理](../03_Kubernetes技术详解/04_存储管理技术.md) - K8s存储管理
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

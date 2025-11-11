@@ -36,6 +36,9 @@
     - [8.1 开发最佳实践](#81-开发最佳实践)
     - [8.2 部署最佳实践](#82-部署最佳实践)
   - [9. 总结](#9-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 文档信息
 
@@ -61,19 +64,19 @@ LightV核心特性:
     - 内存占用: <10MB
     - 镜像大小: <10MB
     - CPU占用: <1%
-  
+
   高性能:
     - 执行性能: 接近原生代码
     - 启动速度: 比Docker快100倍
     - 资源利用率: 提升50%以上
     - 并发能力: 支持大规模并发
-  
+
   安全性:
     - 沙箱隔离: 强隔离执行环境
     - 权限控制: 细粒度权限管理
     - 安全策略: 灵活的安全策略配置
     - 审计日志: 完整的审计日志记录
-  
+
   易用性:
     - 简单配置: 极简的配置文件
     - 快速部署: 一键部署和启动
@@ -92,12 +95,12 @@ LightV核心特性:
     - gVisor
     - Kata Containers
     - Firecracker
-  
+
   应用级虚拟化:
     - WebAssembly
     - Unikernel
     - MicroVM
-  
+
   语言级虚拟化:
     - JVM
     - .NET Runtime
@@ -112,13 +115,13 @@ LightV技术定位:
     - 轻量级虚拟化技术
     - 介于容器和虚拟机之间
     - 专注于快速启动和低资源占用
-  
+
   优势:
     - 比Docker更轻量
     - 比虚拟机更快速
     - 比WebAssembly更灵活
     - 比gVisor更易用
-  
+
   应用场景:
     - 边缘计算
     - 微服务
@@ -136,27 +139,27 @@ LightV vs Docker:
     LightV: <10ms
     Docker: 1-5s
     优势: LightV快100倍
-  
+
   资源占用:
     LightV: <10MB
     Docker: >100MB
     优势: LightV少90%
-  
+
   镜像大小:
     LightV: <10MB
     Docker: >100MB
     优势: LightV小90%
-  
+
   隔离性:
     LightV: 沙箱隔离
     Docker: 命名空间隔离
     优势: 隔离机制不同
-  
+
   性能:
     LightV: 接近原生
     Docker: 好
     优势: LightV性能更优
-  
+
   生态:
     LightV: 新兴
     Docker: 丰富
@@ -171,12 +174,12 @@ LightV vs Kubernetes:
     LightV: 轻量级虚拟化运行时
     Kubernetes: 容器编排平台
     关系: LightV可作为Kubernetes的运行时
-  
+
   集成:
     LightV: 支持Kubernetes集成
     Kubernetes: 支持LightV运行时
     优势: 无缝集成
-  
+
   应用:
     LightV: 单容器管理
     Kubernetes: 多容器编排
@@ -191,17 +194,17 @@ LightV vs WebAssembly:
     LightV: 轻量级虚拟化
     WebAssembly: 字节码格式
     优势: 技术不同
-  
+
   启动时间:
     LightV: <10ms
     WebAssembly: <5ms
     优势: WebAssembly更快
-  
+
   资源占用:
     LightV: <10MB
     WebAssembly: <5MB
     优势: WebAssembly更少
-  
+
   灵活性:
     LightV: 高
     WebAssembly: 中
@@ -218,12 +221,12 @@ LightV vs WebAssembly:
     - IoT设备
     - 边缘节点
     - 移动设备
-  
+
   优势:
     - 快速启动
     - 低资源占用
     - 离线运行
-  
+
   案例:
     - 边缘函数计算
     - 边缘数据处理
@@ -238,12 +241,12 @@ LightV vs WebAssembly:
     - 微服务部署
     - 服务网格
     - API网关
-  
+
   优势:
     - 快速扩展
     - 低资源消耗
     - 高并发支持
-  
+
   案例:
     - 微服务架构
     - Serverless架构
@@ -258,12 +261,12 @@ CI/CD应用:
     - 构建环境
     - 测试环境
     - 部署环境
-  
+
   优势:
     - 快速启动
     - 资源隔离
     - 并行执行
-  
+
   案例:
     - 持续集成
     - 持续部署
@@ -278,12 +281,12 @@ Serverless应用:
     - 函数计算
     - 事件处理
     - 数据处理
-  
+
   优势:
     - 毫秒级启动
     - 按需执行
     - 成本优化
-  
+
   案例:
     - FaaS平台
     - 事件驱动函数
@@ -299,15 +302,15 @@ Serverless应用:
   生态建设:
     挑战: 生态系统不成熟
     解决方案: 积极建设社区和生态
-  
+
   兼容性:
     挑战: 与现有系统兼容性
     解决方案: 提供兼容层和迁移工具
-  
+
   调试困难:
     挑战: 调试工具不足
     解决方案: 开发完善的调试工具
-  
+
   学习曲线:
     挑战: 学习成本较高
     解决方案: 提供丰富的文档和教程
@@ -321,17 +324,17 @@ Serverless应用:
     - 建立开发者社区
     - 提供丰富的工具和库
     - 与主流技术集成
-  
+
   兼容性:
     - 提供Docker兼容层
     - 支持Kubernetes集成
     - 提供迁移工具
-  
+
   调试工具:
     - 开发调试工具
     - 提供日志和监控
     - 支持远程调试
-  
+
   文档和教程:
     - 编写详细文档
     - 提供示例代码
@@ -350,14 +353,14 @@ Firecracker MicroVM (AWS):
     - 内存占用: 5MB基础占用
     - 完整隔离: KVM虚拟化
     - AWS Lambda后端
-  
+
   新特性 (2025年):
     - Snapshot恢复优化: <50ms
     - eBPF网络加速
     - Multi-queue virtio优化
     - ARM64完整支持
     - NVIDIA GPU虚拟化
-  
+
   应用场景:
     - AWS Lambda
     - AWS Fargate
@@ -371,14 +374,14 @@ Kata Containers 3.x (2025年):
     - 内存占用: 20MB基础占用
     - OCI兼容: 完整Docker/Podman支持
     - 硬件虚拟化: KVM/QEMU/ACRN
-  
+
   新特性 (2025年):
     - Rust重写核心组件
     - Confidential Containers (CoCo): TEE支持
     - GPU直通优化
     - Kubernetes DRA集成
     - 快照/检查点恢复
-  
+
   应用场景:
     - 多租户Kubernetes
     - 机密计算
@@ -392,14 +395,14 @@ gVisor (Google):
     - 启动时间: <100ms
     - 系统调用拦截: 安全沙箱
     - Go语言实现
-  
+
   新特性 (2025年):
     - GPU支持: 实验性
     - 性能提升: 50%+ (vs 2023)
     - Checkpoint/Restore
     - Rootless模式成熟
     - eBPF支持
-  
+
   应用场景:
     - Google Cloud Run
     - 不信任代码执行
@@ -411,19 +414,19 @@ Unikernel (2025年):
     - MirageOS 4.5+: OCaml
     - IncludeOS 0.16+: C++
     - Unikraft 0.15+: 模块化
-  
+
   特点:
     - 启动时间: <10ms
     - 镜像大小: <5MB
     - 定制内核: 单一应用
     - 极致性能
-  
+
   新特性 (2025年):
     - OCI镜像支持
     - Kubernetes集成
     - POSIX兼容性提升
     - 开发工具链成熟
-  
+
   应用场景:
     - 边缘函数
     - NFV网络功能
@@ -437,13 +440,13 @@ WebAssembly/WASI (2025年):
     - 跨平台: 真正可移植
     - 沙箱隔离: 内存安全
     - 多语言支持
-  
+
   容器集成:
     - containerd WASM shim
     - Docker WASM
     - Kubernetes RuntimeClass
     - runwasi (Wasmtime/WasmEdge)
-  
+
   应用场景:
     - 边缘函数
     - 插件系统
@@ -496,12 +499,12 @@ WebAssembly/WASI (2025年):
     - Kata Containers主流化
     - Firecracker与K8s深度集成
     - 混合运行时: 根据工作负载选择
-  
+
   WebAssembly崛起:
     - WASI Preview 2成熟
     - 边缘函数主流选择
     - 与容器并行发展
-  
+
   机密计算:
     - TEE (Trusted Execution Environment)
     - Confidential Containers
@@ -513,12 +516,12 @@ WebAssembly/WASI (2025年):
     - Snapshot预热
     - 按需加载
     - 懒加载技术
-  
+
   资源优化:
     - eBPF加速
     - DPDK网络
     - io_uring存储
-  
+
   硬件加速:
     - GPU虚拟化
     - NPU支持
@@ -529,12 +532,12 @@ WebAssembly/WASI (2025年):
     - 5G MEC (Multi-access Edge Computing)
     - IoT设备轻量化
     - CDN边缘函数
-  
+
   AI/ML:
     - 模型推理隔离
     - GPU共享优化
     - 联邦学习
-  
+
   多租户SaaS:
     - 更强隔离
     - 成本优化
@@ -545,12 +548,12 @@ WebAssembly/WASI (2025年):
     - Runtime Spec v1.2+
     - MicroVM支持
     - WASM支持
-  
+
   Kubernetes集成:
     - RuntimeClass成熟
     - DRA (Dynamic Resource Allocation)
     - Pod安全标准
-  
+
   CNCF项目:
     - Kata Containers毕业
     - WasmEdge孵化
@@ -565,7 +568,7 @@ WebAssembly/WASI (2025年):
     - 2025年: 约150亿美元
     - 年增长率: 35%
     - 2027年预测: 280亿美元
-  
+
   细分市场:
     - Serverless: 60亿美元
     - 边缘计算: 50亿美元
@@ -578,7 +581,7 @@ WebAssembly/WASI (2025年):
     - Google Cloud Run: gVisor
     - Azure Container Instances: Kata
     - 阿里云函数计算: Kata
-  
+
   企业采用:
     - 金融: 30% 采用Kata/gVisor
     - 医疗: 25% 采用机密计算
@@ -589,19 +592,19 @@ WebAssembly/WASI (2025年):
   高安全需求:
     推荐: Kata Containers 3.x, Firecracker
     理由: 硬件级隔离
-  
+
   极致性能:
     推荐: Unikernel, WebAssembly
     理由: 启动快、资源少
-  
+
   兼容性优先:
     推荐: Kata Containers 3.x, gVisor
     理由: OCI兼容、K8s集成好
-  
+
   边缘/IoT:
     推荐: WebAssembly, Unikernel
     理由: 体积小、资源占用低
-  
+
   成本敏感:
     推荐: gVisor, WebAssembly
     理由: 无需虚拟化硬件
@@ -682,12 +685,12 @@ security:
     - 使用模块化设计
     - 遵循单一职责原则
     - 保持代码简洁
-  
+
   性能优化:
     - 优化启动时间
     - 减少资源占用
     - 提升执行性能
-  
+
   安全实践:
     - 使用沙箱隔离
     - 控制权限
@@ -702,12 +705,12 @@ security:
     - 合理设置内存限制
     - 优化CPU分配
     - 配置网络策略
-  
+
   监控运维:
     - 监控性能指标
     - 记录日志
     - 设置告警
-  
+
   扩展性:
     - 支持水平扩展
     - 实现负载均衡
@@ -722,6 +725,33 @@ LightV作为一种新兴的轻量级虚拟化技术，通过创新的架构设�
 
 ---
 
-**文档状态**: ✅ 已完成  
-**最后更新**: 2025-11-07  
+**文档状态**: ✅ 已完成
+**最后更新**: 2025-11-07
 **下次更新**: 根据LightV新版本发布情况
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [LightV架构设计](./02_LightV架构设计.md) - LightV架构设计详解
+- [LightV性能分析](./03_LightV性能分析.md) - LightV性能分析详解
+- [LightV安全模型](./04_LightV安全模型.md) - LightV安全模型详解
+- [LightV部署实践](./05_LightV部署实践.md) - LightV部署实践详解
+- [LightV与Docker对比](./06_LightV与Docker对比.md) - LightV与Docker对比
+- [LightV与Kubernetes集成](./07_LightV与Kubernetes集成.md) - LightV与Kubernetes集成
+- [LightV最佳实践](./08_LightV最佳实践.md) - LightV最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [WebAssembly技术详解](../10_WebAssembly技术详解/README.md) - WebAssembly技术体系
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

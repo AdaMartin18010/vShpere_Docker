@@ -1,7 +1,7 @@
 # API测试体系常见问题解答 (FAQ)
 
-> **文档定位**: 快速解决常见问题和疑惑  
-> **创建日期**: 2025年10月23日  
+> **文档定位**: 快速解决常见问题和疑惑
+> **创建日期**: 2025年10月23日
 > **文档版本**: v1.0
 
 ---
@@ -56,12 +56,12 @@
   - 想学习API测试的开发者
   - 需要了解容器化/虚拟化的学生
   - 刚接触DevOps的工程师
-  
+
 实践者:
   - 需要快速验证API的开发者
   - 编写自动化测试的QA工程师
   - 实施CI/CD的运维工程师
-  
+
 架构师:
   - 设计测试架构的技术负责人
   - 评估技术方案的决策者
@@ -104,17 +104,17 @@
   - 阅读README和QUICKSTART
   - 运行第一个测试脚本
   - 理解基本概念
-  
+
 基础掌握 (1-2天):
   - 阅读API标准文档
   - 运行所有测试用例
   - 修改简单的测试
-  
+
 深入理解 (1-2周):
   - 通读所有核心文档
   - 理解架构设计
   - 编写自定义测试
-  
+
 完全精通 (1-2个月):
   - 掌握所有技术栈
   - 能够扩展框架
@@ -322,7 +322,7 @@ make coverage
   Python:
     - 安装: pip install pytest-xdist
     - 运行: pytest -n auto
-  
+
   Go:
     - 运行: go test -parallel 10
 
@@ -489,11 +489,11 @@ docker system prune -af
     - 检测会话状态
     - 超时前自动重连
     - 实现重试机制
-  
+
   方案2: 延长会话时间
     - vCenter配置增加超时时间
     - 但不建议生产环境
-  
+
   方案3: 优化测试设计
     - 缩短单个测试时间
     - 每个测试独立会话
@@ -594,7 +594,7 @@ DRY原则:
     - 集中管理
     - 易于修改
     - 代码复用
-  
+
   示例:
     factory = TestDataFactory()
     container_config = factory.CreateContainerConfig(
@@ -608,7 +608,7 @@ DRY原则:
     - 添加时间戳
     - 使用UUID
     - 加上测试名称
-  
+
   示例:
     name = f"test-{uuid.uuid4().hex[:8]}"
     namespace = f"test-ns-{int(time.time())}"
@@ -635,7 +635,7 @@ DRY原则:
   Python:
     pip install coverage pytest-cov
     pytest --cov=scripts --cov-report=html
-  
+
   Go:
     go test -coverprofile=coverage.out
     go tool cover -html=coverage.out
@@ -656,7 +656,7 @@ DRY原则:
     - 核心业务逻辑
     - 复杂算法
     - 容易出错的代码
-  
+
   低优先级:
     - 简单getter/setter
     - 日志输出
@@ -682,7 +682,7 @@ DRY原则:
 func BenchmarkDockerAPI(b *testing.B) {
     cli, _ := client.NewClientWithOpts(client.FromEnv)
     ctx := context.Background()
-    
+
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
         cli.Ping(ctx)
@@ -706,7 +706,7 @@ def performance_test():
         response = client.containers.list()
         elapsed = time.time() - start
         times.append(elapsed)
-    
+
     print(f"平均响应时间: {statistics.mean(times):.3f}s")
     print(f"P95响应时间: {statistics.quantiles(times, n=20)[18]:.3f}s")
     print(f"最大响应时间: {max(times):.3f}s")
@@ -754,25 +754,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       run: |
         cd api_testing
         pip install -r requirements.txt
-    
+
     - name: Run tests
       run: |
         cd api_testing
         python scripts/run_all_tests.py --report-format html json
-    
+
     - name: Upload report
       uses: actions/upload-artifact@v3
       with:
@@ -822,7 +822,7 @@ api_tests:
   Python:
     - 文件: scripts/new_api_test.py
     - 参考: docker_api_test.py
-  
+
   Go:
     - 文件: scripts/new_api_test.go
     - 参考: docker_api_test.go
@@ -907,7 +907,7 @@ api_tests:
     * Python/Go版本
     * 完整错误信息
     * 复现步骤
-  
+
   - 使用模板
   - 添加相关标签
   - 保持礼貌
@@ -1035,8 +1035,8 @@ api_tests:
 - [QUICKSTART.md](./QUICKSTART.md) - 快速开始指南
 - [ACHIEVEMENT_REPORT.md](./ACHIEVEMENT_REPORT.md) - 成就报告
 
-**最后更新**: 2025年10月23日  
-**文档版本**: v1.0  
+**最后更新**: 2025年10月23日
+**文档版本**: v1.0
 **维护团队**: 技术团队
 
 ---

@@ -45,10 +45,10 @@ Intel平台:
     状态: ✅ Enabled (必须)
     位置: Advanced → CPU Configuration
     说明: 不启用将无法运行虚拟机
-    验证: 
+    验证:
       - Linux: grep -E 'vmx' /proc/cpuinfo
       - Windows: systeminfo | findstr /C:"虚拟化"
-  
+
   Intel VT-d (Intel Virtualization Technology for Directed I/O):
     功能: 设备直通 (PCI Passthrough)
     状态: ✅ Enabled (强烈推荐)
@@ -60,7 +60,7 @@ Intel平台:
       - 提升I/O性能
     验证:
       - Linux: dmesg | grep -e DMAR -e IOMMU
-  
+
   Intel EPT (Extended Page Tables):
     功能: 扩展页表，加速内存虚拟化
     状态: ✅ Enabled (通常自动)
@@ -75,7 +75,7 @@ AMD平台:
     说明: AMD的VT-x等价物
     验证:
       - Linux: grep -E 'svm' /proc/cpuinfo
-  
+
   AMD-Vi (AMD I/O Virtualization):
     功能: 设备直通 (IOMMU)
     状态: ✅ Enabled (强烈推荐)
@@ -83,7 +83,7 @@ AMD平台:
     用途: 同Intel VT-d
     验证:
       - Linux: dmesg | grep AMD-Vi
-  
+
   AMD RVI (Rapid Virtualization Indexing):
     功能: 嵌套页表 (NPT)
     状态: ✅ Enabled (通常自动)
@@ -95,7 +95,7 @@ AMD平台:
     虚拟化技术: 基于AMD平台
     配置: 同AMD-V/AMD-Vi
     支持: 完整虚拟化扩展
-  
+
   鲲鹏 (Kunpeng):
     虚拟化技术: ARM Virtualization Extensions
     配置: 通常默认启用
@@ -106,7 +106,7 @@ AMD平台:
     ```bash
     #!/bin/bash
     echo "=== 虚拟化支持检测 ==="
-    
+
     # 检测CPU虚拟化支持
     if grep -qE 'vmx|svm' /proc/cpuinfo; then
       echo "✅ CPU支持虚拟化"
@@ -119,14 +119,14 @@ AMD平台:
       echo "❌ CPU不支持虚拟化或未启用"
       exit 1
     fi
-    
+
     # 检测IOMMU
     if dmesg | grep -qE 'DMAR|AMD-Vi'; then
       echo "✅ IOMMU已启用"
     else
       echo "⚠️  IOMMU未启用 (VT-d/AMD-Vi)"
     fi
-    
+
     # 检测KVM模块
     if lsmod | grep -q kvm; then
       echo "✅ KVM模块已加载"
@@ -134,12 +134,12 @@ AMD平台:
       echo "❌ KVM模块未加载"
     fi
     ```
-  
+
   ESXi验证:
     ```bash
     # 检查硬件虚拟化
     esxcli hardware cpu global get | grep -i virtualization
-    
+
     # 检查IOMMU
     esxcli system settings kernel list -o iommuEnabled
     ```
@@ -156,40 +156,40 @@ Power Management (电源管理):
   Performance模式配置:
     目标: 最大性能，禁用节能
     适用: 生产虚拟化环境
-    
+
     配置项:
       Power Profile / Power Policy:
         设置: Maximum Performance / High Performance
         位置: Advanced → Power Management
         说明: 禁用CPU降频
-      
+
       C-States (CPU空闲状态):
         设置: ❌ Disabled
         位置: Advanced → CPU Configuration → CPU Power Management
         原因: 避免CPU进入睡眠降低延迟
         影响: 增加功耗约5-10%，降低延迟50%+
-      
+
       C1E (Enhanced Halt State):
         设置: ❌ Disabled
         位置: Advanced → CPU Configuration
         原因: 防止CPU降频
-      
+
       Intel Turbo Boost / AMD Turbo Core:
         设置: ✅ Enabled
         位置: Advanced → CPU Configuration
         原因: 单核性能提升，短暂高负载加速
         提升: 单核性能提升10-40%
-      
+
       Intel SpeedStep / AMD Cool'n'Quiet:
         设置: ❌ Disabled (性能优先)
         设置: ✅ Enabled (节能优先)
         位置: Advanced → CPU Configuration
         说明: 生产环境建议禁用
-  
+
   Balanced模式配置:
     目标: 性能与节能平衡
     适用: 开发测试环境、负载不高场景
-    
+
     配置项:
       Power Profile: Balanced
       C-States: ✅ Enabled (C1/C3)
@@ -201,12 +201,12 @@ Power Management (电源管理):
     延迟: 最低
     功耗: 最高
     适用: 生产环境
-  
+
   Balanced:
     延迟: 适中
     功耗: 适中
     适用: 测试环境
-  
+
   Power Saving:
     延迟: 最高
     功耗: 最低
@@ -271,23 +271,23 @@ Memory Configuration:
     功能: 错误校验与纠正
     设置: ✅ Enabled (自动，使用ECC内存)
     说明: 生产环境必须使用ECC内存
-  
+
   Memory Frequency:
     设置: Auto (自动最高频率)
     或: 手动设定 (3200MHz / 2933MHz)
     说明: 除非稳定性问题，否则使用Auto
-  
+
   Memory Interleaving (内存交错):
     Node Interleaving:
       设置: ❌ Disabled (虚拟化推荐)
       位置: Advanced → Memory Configuration
       原因: 保持NUMA特性，优化性能
-    
+
     Channel Interleaving:
       设置: ✅ Enabled
       位置: Advanced → Memory Configuration
       原因: 提升单NUMA节点内带宽
-  
+
   Memory Patrol Scrubbing:
     功能: 内存巡检
     设置: ✅ Enabled
@@ -301,11 +301,11 @@ NUMA优化:
       - 单路CPU: 1个NUMA节点
       - 双路CPU: 2个NUMA节点
       - 某些EPYC: 每CPU多个NUMA节点
-  
+
   Memory RAS:
     功能: 可靠性、可用性、可维护性
     设置: ✅ Enabled
-    包括: 
+    包括:
       - Demand/Patrol Scrub
       - SDDC (Single Device Data Correction)
 ```
@@ -326,15 +326,15 @@ Boot Configuration:
       ✅ 支持>2TB磁盘
       ✅ 更快启动
       ✅ 更好安全性
-  
+
   Secure Boot:
     设置: ❌ Disabled (虚拟化通常禁用)
     位置: Boot → Secure Boot
-    原因: 
+    原因:
       - ESXi定制镜像可能不支持
       - 第三方驱动签名问题
     注意: 高安全场景可考虑启用
-  
+
   Boot Device Order:
     推荐顺序:
       1. Local HDD/SSD (系统盘)
@@ -345,12 +345,12 @@ PCIe配置:
   SR-IOV (Single Root I/O Virtualization):
     设置: ✅ Enabled
     位置: Advanced → PCIe Configuration
-    用途: 
+    用途:
       - 网卡虚拟化
       - 直接分配虚拟网卡给VM
       - 接近原生性能
     要求: 网卡支持SR-IOV
-  
+
   ACS (Access Control Services):
     设置: ✅ Enabled
     位置: Advanced → PCIe Configuration
@@ -360,7 +360,7 @@ PCIe配置:
   Integrated NIC 1/2:
     设置: ✅ Enabled
     用途: 管理网络
-  
+
   PXE Boot:
     设置: Enabled (需要批量部署)
     设置: Disabled (单机部署)
@@ -373,18 +373,18 @@ Security Settings:
   Intel TXT (Trusted Execution Technology):
     设置: 根据需求
     用途: 可信计算
-  
+
   TPM (Trusted Platform Module):
     设置: ✅ Enabled (推荐)
     版本: TPM 2.0
     用途:
       - 全盘加密
       - vTPM for VM
-  
+
   BIOS/Administrator Password:
     设置: ✅ 必须设置
     强度: 复杂密码
-  
+
   Boot Guard:
     设置: ✅ Enabled (支持的话)
     功能: 启动安全验证
@@ -407,21 +407,21 @@ Security Settings:
        - Intel Virtualization Technology: ✅ Enabled
        - Intel VT for Directed I/O: ✅ Enabled
        - Logical Processor (Hyper-Threading): ✅ Enabled
-  
+
   2. System Setup → System BIOS → System Profile Settings
      操作:
        - System Profile: Performance (性能优先)
        - System Profile: Performance Per Watt (DAPC) (节能)
-  
+
   3. System Setup → System BIOS → Memory Settings
      操作:
        - Node Interleaving: ❌ Disabled
        - System Memory Testing: Enabled
-  
+
   4. System Setup → Device Settings → Network Devices
      操作:
        - 配置网卡，启用PXE (如需)
-  
+
   5. iDRAC Settings → Network
      操作:
        - 配置远程管理IP
@@ -448,22 +448,22 @@ Security Settings:
        - Intel Virtualization Technology: ✅ Enabled
        - Intel VT-d: ✅ Enabled
        - Intel Hyper-Threading: ✅ Enabled
-  
+
   2. System Options → BIOS/Platform Configuration (RBSU)
      操作:
        - Workload Profile: Virtualization - Max Performance
        - 或: General Power Efficient (节能)
-  
+
   3. Power Management → Advanced Power Options
      操作:
        - Power Regulator: HP Static High Performance Mode
        - 或: HP Dynamic Power Savings Mode (节能)
-  
+
   4. System Options → Memory Options
      操作:
        - Node Interleaving: ❌ Disabled
        - Channel Interleaving: ✅ Enabled
-  
+
   5. Network Options → Network Boot Options
      操作:
        - 配置PXE启动顺序
@@ -471,10 +471,10 @@ Security Settings:
 Workload Profile推荐:
   生产虚拟化:
     - Virtualization - Max Performance
-  
+
   混合负载:
     - General Peak Frequency Compute
-  
+
   节能:
     - General Power Efficient
 ```
@@ -492,16 +492,16 @@ Workload Profile推荐:
        - Intel Virtualization Technology: ✅ Enabled
        - Intel VT-d: ✅ Enabled
        - Hyper-Threading: ✅ Enabled
-  
+
   2. System Settings → Power
      操作:
        - Operating Mode: Maximum Performance
        - 或: Custom Mode (自定义)
-  
+
   3. System Settings → Memory
      操作:
        - Memory Interleaving: Auto
-  
+
   4. System Settings → Devices and I/O Ports
      操作:
        - SR-IOV Support: ✅ Enabled
@@ -525,16 +525,16 @@ Operating Mode推荐:
        - Intel Virtualization Technology: ✅ Enabled
        - Intel VT-d: ✅ Enabled
        - Hyper-Threading: ✅ Enabled
-  
+
   2. Advanced → Power Configuration
      操作:
        - Power Policy: Performance
        - 或: Custom (自定义)
-  
+
   3. Advanced → Memory Configuration
      操作:
        - Node Interleaving: ❌ Disabled
-  
+
   4. Advanced → PCIe Configuration
      操作:
        - SR-IOV Support: ✅ Enabled
@@ -558,11 +558,11 @@ Power Policy推荐:
        - Intel Virtualization Technology: ✅ Enabled
        - VT-d: ✅ Enabled
        - Hyper-Threading: ✅ Enabled
-  
+
   2. Advanced → Power & Performance
      操作:
        - CPU Power Mode: Performance Mode
-  
+
   3. Advanced → Chipset Configuration → Memory Configuration
      操作:
        - NUMA: ✅ Enabled
@@ -646,16 +646,16 @@ Lenovo:
 
 ### 📌 常见问题
 
-**Q: Secure Boot要不要启用？**  
+**Q: Secure Boot要不要启用？**
 A: 虚拟化环境通常禁用，避免兼容性问题
 
-**Q: C-States一定要禁用吗？**  
+**Q: C-States一定要禁用吗？**
 A: 生产环境建议禁用，测试环境可启用节能
 
-**Q: NUMA怎么配置？**  
+**Q: NUMA怎么配置？**
 A: 启用NUMA，禁用Node Interleaving
 
-**Q: SR-IOV是什么？**  
+**Q: SR-IOV是什么？**
 A: 网卡虚拟化技术，提升网络性能，必须启用
 
 ---
@@ -669,6 +669,6 @@ A: 网卡虚拟化技术，提升网络性能，必须启用
 
 ---
 
-**更新时间**: 2025-10-19  
-**文档版本**: v3.0  
+**更新时间**: 2025-10-19
+**文档版本**: v3.0
 **状态**: ✅ 生产就绪

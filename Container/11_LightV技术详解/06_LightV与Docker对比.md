@@ -18,12 +18,12 @@
     - 容器化平台
     - 应用打包和分发
     - 容器编排基础
-  
+
   LightV:
     - 轻量级虚拟化运行时
     - 快速启动和低资源占用
     - 高性能容器执行
-  
+
   关系:
     - LightV可作为Docker的替代运行时
     - LightV与Docker兼容
@@ -38,22 +38,22 @@
     Docker: 1-5秒
     LightV: <10毫秒
     差异: LightV快100倍以上
-  
+
   资源占用:
     Docker: >100MB
     LightV: <10MB
     差异: LightV少90%以上
-  
+
   镜像大小:
     Docker: >100MB
     LightV: <10MB
     差异: LightV小90%以上
-  
+
   隔离机制:
     Docker: 命名空间隔离
     LightV: 沙箱隔离
     差异: 隔离机制不同
-  
+
   性能开销:
     Docker: 5-10%
     LightV: <1%
@@ -70,17 +70,17 @@ Docker架构:
     - Docker CLI
     - Docker Compose
     - Docker Desktop
-  
+
   守护进程:
     - dockerd
     - containerd
     - runc
-  
+
   运行时:
     - runc (默认)
     - containerd-shim
     - 容器运行时接口
-  
+
   存储:
     - Overlay2
     - 镜像层
@@ -95,17 +95,17 @@ LightV架构:
     - LightV CLI
     - LightV API
     - LightV Dashboard
-  
+
   守护进程:
     - lightvd
     - LightV Runtime
     - LightV Kernel
-  
+
   运行时:
     - LightV Runtime
     - 沙箱隔离
     - 轻量级虚拟化
-  
+
   存储:
     - 轻量级存储
     - 镜像缓存
@@ -120,17 +120,17 @@ LightV架构:
     Docker: 高（多层架构）
     LightV: 低（简化架构）
     优势: LightV更简单
-  
+
   启动时间:
     Docker: 需要启动多个组件
     LightV: 快速启动
     优势: LightV启动更快
-  
+
   资源占用:
     Docker: 多个守护进程
     LightV: 单一运行时
     优势: LightV资源占用更少
-  
+
   可扩展性:
     Docker: 丰富的插件生态
     LightV: 新兴技术，生态较小
@@ -147,17 +147,17 @@ LightV架构:
     Docker: 1-5秒
     LightV: <10毫秒
     优势: LightV快100倍
-  
+
   冷启动:
     Docker: 需要加载镜像和运行时
     LightV: 快速加载和启动
     优势: LightV冷启动更快
-  
+
   热启动:
     Docker: 需要重新初始化
     LightV: 沙箱池复用
     优势: LightV热启动更快
-  
+
   并发启动:
     Docker: 受限于资源
     LightV: 支持大规模并发
@@ -172,17 +172,17 @@ LightV架构:
     Docker: 90-95%原生性能
     LightV: 95-98%原生性能
     优势: LightV性能更优
-  
+
   内存性能:
     Docker: 较高内存占用
     LightV: 低内存占用
     优势: LightV内存效率更高
-  
+
   网络性能:
     Docker: 良好
     LightV: 优秀
     优势: LightV网络性能更优
-  
+
   I/O性能:
     Docker: 良好
     LightV: 优秀
@@ -197,17 +197,17 @@ LightV架构:
     Docker: >100MB/容器
     LightV: <10MB/容器
     优势: LightV内存占用少90%
-  
+
   CPU占用:
     Docker: 5-10%
     LightV: <1%
     优势: LightV CPU占用更少
-  
+
   磁盘占用:
     Docker: 较大
     LightV: 很小
     优势: LightV磁盘占用更少
-  
+
   并发密度:
     Docker: 100+/节点
     LightV: 1000+/节点
@@ -224,17 +224,17 @@ LightV架构:
     Docker: docker run
     LightV: lightv run
     对比: 命令类似
-  
+
   容器列表:
     Docker: docker ps
     LightV: lightv ps
     对比: 功能相同
-  
+
   容器日志:
     Docker: docker logs
     LightV: lightv logs
     对比: 功能相同
-  
+
   容器监控:
     Docker: docker stats
     LightV: lightv stats
@@ -249,17 +249,17 @@ LightV架构:
     Docker: docker build
     LightV: lightv build
     对比: Docker功能更丰富
-  
+
   镜像推送:
     Docker: docker push
     LightV: lightv push
     对比: Docker生态更成熟
-  
+
   镜像扫描:
     Docker: docker scan
     LightV: lightv scan
     对比: Docker集成更好
-  
+
   镜像优化:
     Docker: 多阶段构建
     LightV: 轻量级构建
@@ -274,17 +274,17 @@ LightV架构:
     Docker: docker network create
     LightV: lightv network create
     对比: 功能类似
-  
+
   网络模式:
     Docker: bridge, host, none, overlay
     LightV: bridge, host, none, overlay
     对比: 支持相同的网络模式
-  
+
   服务发现:
     Docker: Docker Swarm
     LightV: LightV集群
     对比: Docker Swarm更成熟
-  
+
   负载均衡:
     Docker: 内置负载均衡
     LightV: 内置负载均衡
@@ -301,17 +301,17 @@ LightV架构:
     Docker: Docker CLI, Docker Compose
     LightV: LightV CLI
     对比: Docker工具更丰富
-  
+
   开发工具:
     Docker: Docker Desktop, VS Code插件
     LightV: 基础工具
     对比: Docker开发体验更好
-  
+
   监控工具:
     Docker: Prometheus, Grafana集成
     LightV: Prometheus, Grafana集成
     对比: 集成类似
-  
+
   安全工具:
     Docker: Trivy, Clair, Anchore
     LightV: Trivy, Clair, Anchore
@@ -326,17 +326,17 @@ LightV架构:
     Docker: 大型社区
     LightV: 新兴社区
     对比: Docker社区更大
-  
+
   文档资源:
     Docker: 丰富的文档和教程
     LightV: 基础文档
     对比: Docker文档更丰富
-  
+
   第三方支持:
     Docker: 广泛的第三方支持
     LightV: 有限的第三方支持
     对比: Docker支持更广泛
-  
+
   企业采用:
     Docker: 广泛的企业采用
     LightV: 新兴技术
@@ -351,17 +351,17 @@ LightV架构:
     Docker: 默认运行时
     LightV: 支持集成
     对比: Docker集成更成熟
-  
+
   CI/CD:
     Docker: Jenkins, GitLab CI集成
     LightV: 基础集成
     对比: Docker集成更好
-  
+
   云平台:
     Docker: AWS, Azure, GCP支持
     LightV: 基础支持
     对比: Docker云平台支持更广泛
-  
+
   编排工具:
     Docker: Docker Swarm, Kubernetes
     LightV: Kubernetes
@@ -378,12 +378,12 @@ Docker适用场景:
     - 传统应用容器化
     - 微服务架构
     - 持续集成/持续部署
-  
+
   开发环境:
     - 本地开发环境
     - 测试环境
     - 演示环境
-  
+
   生产环境:
     - 大规模生产环境
     - 复杂应用部署
@@ -398,17 +398,17 @@ LightV适用场景:
     - IoT设备
     - 边缘节点
     - 移动设备
-  
+
   Serverless:
     - 函数即服务
     - 事件驱动应用
     - 按需计算
-  
+
   高性能应用:
     - 低延迟应用
     - 高并发应用
     - 实时应用
-  
+
   资源受限环境:
     - 资源受限设备
     - 成本敏感场景
@@ -424,13 +424,13 @@ LightV适用场景:
     - 复杂应用架构
     - 成熟生态需求
     - 多云部署需求
-  
+
   选择LightV:
     - 边缘计算场景
     - Serverless应用
     - 高性能需求
     - 资源受限环境
-  
+
   混合使用:
     - Docker用于传统应用
     - LightV用于高性能应用
@@ -471,17 +471,17 @@ lightv logs <container>
     - 检查应用兼容性
     - 验证功能完整性
     - 测试性能表现
-  
+
   数据迁移:
     - 备份Docker数据
     - 迁移存储卷
     - 验证数据完整性
-  
+
   配置调整:
     - 更新配置文件
     - 调整资源限制
     - 优化启动参数
-  
+
   回滚准备:
     - 保留Docker环境
     - 准备回滚方案
@@ -549,13 +549,13 @@ for i in {1..100}; do lightv run hello-world.lv & done
     - 丰富的工具和文档
     - 广泛的企业采用
     - 强大的社区支持
-  
+
   LightV优势:
     - 极快的启动速度
     - 极低的资源占用
     - 优秀的性能表现
     - 简单的架构设计
-  
+
   适用场景:
     - Docker适合传统企业应用
     - LightV适合边缘计算和Serverless
@@ -571,13 +571,13 @@ for i in {1..100}; do lightv run hello-world.lv & done
     - 复杂的应用架构
     - 多云部署需求
     - 企业级支持需求
-  
+
   选择LightV:
     - 需要极快启动速度
     - 资源受限环境
     - 边缘计算场景
     - Serverless应用
-  
+
   混合使用:
     - Docker用于传统应用
     - LightV用于高性能应用
@@ -593,13 +593,13 @@ for i in {1..100}; do lightv run hello-world.lv & done
     - 增强安全功能
     - 改进用户体验
     - 扩展生态系统
-  
+
   LightV:
     - 快速发展生态
     - 增强功能特性
     - 提升企业支持
     - 扩大应用场景
-  
+
   技术融合:
     - Docker和LightV融合
     - 统一容器标准
@@ -615,6 +615,33 @@ LightV和Docker各有优势，适用于不同的场景。Docker拥有成熟的�
 
 ---
 
-**文档状态**: ✅ 已完成  
-**最后更新**: 2025-11-14  
+**文档状态**: ✅ 已完成
+**最后更新**: 2025-11-14
 **下次更新**: 根据LightV和Docker新版本发布情况
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [LightV概述](./01_LightV概述.md) - LightV技术概述
+- [LightV架构设计](./02_LightV架构设计.md) - LightV架构设计详解
+- [LightV性能分析](./03_LightV性能分析.md) - LightV性能分析详解
+- [LightV安全模型](./04_LightV安全模型.md) - LightV安全模型详解
+- [LightV部署实践](./05_LightV部署实践.md) - LightV部署实践详解
+- [LightV与Kubernetes集成](./07_LightV与Kubernetes集成.md) - LightV与Kubernetes集成
+- [LightV最佳实践](./08_LightV最佳实践.md) - LightV最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Docker架构原理](../01_Docker技术详解/01_Docker架构原理.md) - Docker架构原理
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

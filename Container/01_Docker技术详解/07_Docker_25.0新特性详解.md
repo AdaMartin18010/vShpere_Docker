@@ -325,17 +325,17 @@ docker info --format '{{json .Runtimes}}' | jq
     }
   },
   "default-runtime": "containerd-optimized",
-  
+
   "experimental": true,
   "features": {
     "buildkit": true,
     "containerd-snapshotter": true
   },
-  
+
   "max-concurrent-downloads": 10,
   "max-concurrent-uploads": 10,
   "max-download-attempts": 5,
-  
+
   "log-opts": {
     "max-size": "50m",
     "max-file": "3"
@@ -785,7 +785,7 @@ version: '3.8'
 x-common-variables: &common-vars
   TZ: Asia/Shanghai
   LOG_LEVEL: info
-  
+
 x-common-logging: &common-logging
   driver: json-file
   options:
@@ -808,7 +808,7 @@ services:
     healthcheck:
       <<: *healthcheck-defaults
       test: ["CMD", "curl", "-f", "http://localhost/health"]
-  
+
   api:
     image: myapp:latest
     environment:
@@ -831,15 +831,15 @@ services:
   db:
     image: postgres:15
     profiles: ["production", "staging"]
-  
+
   db-test:
     image: postgres:15-alpine
     profiles: ["test", "development"]
-  
+
   redis:
     image: redis:7
     profiles: ["production", "staging", "development"]
-  
+
   app:
     image: myapp:latest
     # 无profile，总是启动
@@ -868,7 +868,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-  
+
   redis:
     image: redis:7
     healthcheck:
@@ -876,7 +876,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
-  
+
   app:
     image: myapp:latest
     depends_on:
@@ -944,7 +944,7 @@ networks:
       com.docker.network.bridge.enable_icc: "true"
       com.docker.network.bridge.enable_ip_masquerade: "true"
       com.docker.network.driver.mtu: "1500"
-  
+
   backend:
     driver: bridge
     internal: true
@@ -980,13 +980,13 @@ volumes:
       type: none
       o: bind
       device: /data/postgres
-  
+
   redis-data:
     driver: local
     driver_opts:
       type: btrfs
       device: /dev/sdb1
-  
+
   nfs-data:
     driver: local
     driver_opts:
@@ -1391,6 +1391,6 @@ Docker 25.0带来了全面的性能提升和功能增强，关键亮点包括：
 
 ---
 
-**文档完成度**: 100% ✅  
-**生产就绪状态**: ✅ Ready for Production  
+**文档完成度**: 100% ✅
+**生产就绪状态**: ✅ Ready for Production
 **推荐使用场景**: Docker 25.0升级、新特性评估、性能优化、安全加固、迁移规划

@@ -1,9 +1,9 @@
 # eBPF技术详解 - 内容规划
 
-**规划版本**: v1.0  
-**创建日期**: 2025-10-19  
-**目标完成**: 2025-11 (规划中)  
-**预计字数**: 80,000+  
+**规划版本**: v1.0
+**创建日期**: 2025-10-19
+**目标完成**: 2025-11 (规划中)
+**预计字数**: 80,000+
 **预计代码示例**: 150+
 
 ---
@@ -56,21 +56,21 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - Classic BPF → eBPF演进
     - 内核版本支持 (Linux 3.15+)
     - 应用场景爆发 (2020-2025)
-  
+
   1.2 核心架构:
     - eBPF虚拟机 (VM)
     - 验证器 (Verifier)
     - JIT编译器 (X86/ARM/RISC-V)
     - Maps数据结构
     - Helper函数
-  
+
   1.3 程序类型:
     - XDP (网络数据平面)
     - TC (流量控制)
     - Kprobes/Uprobes (追踪)
     - Cgroups (容器资源)
     - LSM (安全模块)
-  
+
   1.4 开发工具链:
     - BCC (BPF Compiler Collection)
     - libbpf-tools
@@ -95,19 +95,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - XDP程序结构
     - 数据包处理 (Drop/Pass/TX/Redirect)
     - XDP性能测试 (数千万PPS)
-  
+
   2.2 TC (Traffic Control):
     - TC钩子点 (Ingress/Egress)
     - 流量分类与策略
     - 流量整形
     - 与XDP协作
-  
+
   2.3 Socket程序:
     - sockops (Socket操作)
     - sk_msg (消息重定向)
     - sk_skb (Socket过滤)
     - sockmap (Socket映射)
-  
+
   2.4 实战案例:
     - DDoS防护 (XDP黑名单)
     - 负载均衡 (L4/L7)
@@ -132,19 +132,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - 网络策略 (L3/L4/L7)
     - 服务负载均衡
     - ClusterMesh多集群
-  
+
   3.2 容器网络加速:
     - Bypass iptables (性能提升10x)
     - 连接追踪优化
     - Service加速
     - Egress Gateway
-  
+
   3.3 容器安全:
     - 系统调用过滤
     - 文件访问控制
     - 网络策略执行
     - 运行时检测
-  
+
   3.4 容器可观测性:
     - 容器网络监控
     - 应用层追踪
@@ -169,19 +169,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - Uprobes (用户空间函数)
     - Tracepoints (静态追踪点)
     - USDT (用户态静态探针)
-  
+
   4.2 性能分析:
     - CPU性能剖析
     - 内存泄漏检测
     - I/O延迟分析
     - 网络性能分析
-  
+
   4.3 工具生态:
     - bpftrace (DTrace-like)
     - BCC工具集 (100+工具)
     - Pixie (K8s可观测)
     - Parca (持续性能剖析)
-  
+
   4.4 实战场景:
     - 应用延迟诊断
     - 容器资源监控
@@ -206,19 +206,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - MAC (强制访问控制)
     - 文件系统访问
     - 网络连接控制
-  
+
   5.2 运行时安全:
     - Seccomp-BPF
     - 系统调用监控
     - 进程行为检测
     - 异常检测
-  
+
   5.3 安全产品:
     - Falco (运行时安全)
     - Tetragon (Cilium安全)
     - Tracee (Aqua Security)
     - KubeArmor
-  
+
   5.4 威胁检测:
     - 容器逃逸检测
     - 加密挖矿检测
@@ -243,19 +243,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - Map设计
     - 避免验证器错误
     - 编译优化
-  
+
   6.2 性能测试:
     - 微基准测试
     - 真实负载测试
     - 性能对比 (vs iptables/userspace)
     - 瓶颈分析
-  
+
   6.3 最佳实践:
     - 程序大小限制 (1M)
     - Map大小选择
     - Per-CPU变量
     - 无锁设计
-  
+
   6.4 调优案例:
     - XDP性能调优
     - 网络策略优化
@@ -280,19 +280,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - 工具链安装 (Clang/LLVM)
     - BCC/libbpf安装
     - 开发容器
-  
+
   7.2 程序开发:
     - 内核态程序 (C)
     - 用户态程序 (C/Go/Rust/Python)
     - Maps操作
     - Helper函数使用
-  
+
   7.3 调试技巧:
     - bpftool工具
     - 日志输出
     - 性能分析
     - 常见错误
-  
+
   7.4 部署管理:
     - systemd集成
     - Kubernetes部署
@@ -317,19 +317,19 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - BCC (工具集)
     - libbpf (标准库)
     - bpftrace (追踪语言)
-  
+
   8.2 商业产品:
     - Isovalent (Cilium商业)
     - Groundcover (可观测)
     - Coroot (APM)
     - Datadog/New Relic (集成)
-  
+
   8.3 云原生集成:
     - Kubernetes (Cilium CNI)
     - Istio (Ambient Mesh)
     - Prometheus (监控)
     - OpenTelemetry (追踪)
-  
+
   8.4 社区生态:
     - eBPF Foundation
     - eBPF Summit
@@ -354,25 +354,25 @@ eBPF (extended Berkeley Packet Filter) 是Linux内核的革命性技术，为容
     - Map设计模式
     - 数据流设计
     - 错误处理
-  
+
   9.2 性能模式:
     - 快速路径优化
     - 批处理技术
     - CPU亲和性
     - 内存优化
-  
+
   9.3 安全模式:
     - 最小权限
     - 验证器友好
     - 沙箱隔离
     - 审计日志
-  
+
   9.4 运维实践:
     - 监控指标
     - 故障排查
     - 升级策略
     - 回滚机制
-  
+
   9.5 案例研究:
     - 大规模K8s集群 (10k+节点)
     - 高性能网关 (100Gbps+)
@@ -530,10 +530,10 @@ Phase 6 (Week 11-12): 优化与实践
 
 ---
 
-**规划状态**: ✅ 完成  
-**开始日期**: 2025-11 (待定)  
+**规划状态**: ✅ 完成
+**开始日期**: 2025-11 (待定)
 **完成日期**: 2025-12 (预计)
 
 ---
 
-*eBPF是容器、网络、安全、监控的革命性技术，本专题将提供从入门到精通的完整学习路径。*
+_eBPF是容器、网络、安全、监控的革命性技术，本专题将提供从入门到精通的完整学习路径。_

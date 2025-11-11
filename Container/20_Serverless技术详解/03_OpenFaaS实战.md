@@ -1,8 +1,8 @@
 # 03 - OpenFaaS实战
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -52,6 +52,9 @@
     - [8.3 数据ETL](#83-数据etl)
     - [8.4 微服务编排](#84-微服务编排)
   - [9. 总结](#9-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -117,7 +120,7 @@ OpenFaaS定位:
      - PHP
      - C#
      - Rust
-   
+
    社区模板:
      - R
      - Crystal
@@ -238,7 +241,7 @@ OpenFaaS定位:
      - 路由请求到函数
      - 认证/鉴权
      - 指标收集
-   
+
    端口:
      - 8080: HTTP API
      - 8082: Prometheus指标
@@ -249,7 +252,7 @@ OpenFaaS定位:
      - 适配不同平台 (K8s/Swarm/faasd)
      - 函数CRUD
      - 扩缩容
-   
+
    实现:
      - faas-netes (Kubernetes)
      - faas-swarm (Docker Swarm)
@@ -261,7 +264,7 @@ OpenFaaS定位:
      - HTTP请求 → 函数调用
      - 处理标准输入/输出
      - 超时控制
-   
+
    类型:
      - Classic Watchdog (HTTP → stdin/stdout)
      - of-watchdog (HTTP → HTTP)
@@ -272,7 +275,7 @@ OpenFaaS定位:
      - NATS Streaming集成
      - 重试机制
      - 回调
-   
+
    可选: 默认不启用
 
 5. Prometheus:
@@ -280,7 +283,7 @@ OpenFaaS定位:
      - 指标收集
      - 监控
      - 告警
-   
+
    内置: 默认部署
 ```
 
@@ -342,7 +345,7 @@ CNCF项目          ❌                  ✅ 孵化
     ✅ 学习Serverless
     ✅ 小团队
     ✅ 预算有限
-  
+
   Knative:
     ✅ 企业级应用
     ✅ 复杂事件驱动
@@ -432,21 +435,21 @@ arkade install openfaas
 
 # 输出:
 # = OpenFaaS has been installed.                                      =
-# 
+#
 #   # Get the faas-cli
 #   curl -SLsf https://cli.openfaas.com | sudo sh
-# 
+#
 #   # Forward the gateway to your machine
 #   kubectl rollout status -n openfaas deploy/gateway
 #   kubectl port-forward -n openfaas svc/gateway 8080:8080 &
-# 
+#
 #   # If basic auth is enabled, you can now log into your gateway:
 #   PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
 #   echo -n $PASSWORD | faas-cli login --username admin --password-stdin
-# 
+#
 #   faas-cli store deploy figlet
 #   faas-cli list
-# 
+#
 # # To remove faas:
 #   arkade uninstall openfaas
 
@@ -562,10 +565,10 @@ cd faasd
 # 输出:
 # [OK] faasd installed
 # [OK] Basic auth configured
-# 
+#
 # Login with:
 #   faas-cli login --gateway http://127.0.0.1:8080 --password $(sudo cat /var/lib/faasd/secrets/basic-auth-password)
-# 
+#
 # Gateway: http://127.0.0.1:8080
 # Username: admin
 # Password: (stored in /var/lib/faasd/secrets/basic-auth-password)
@@ -639,11 +642,11 @@ faas-cli list
 echo "OpenFaaS" | faas-cli invoke figlet
 
 # 输出:
-#   ___                   _____           ____  
-#  / _ \ _ __   ___ _ __ |  ___|_ _  __ _/ ___| 
-# | | | | '_ \ / _ \ '_ \| |_ / _` |/ _` \___ \ 
+#   ___                   _____           ____
+#  / _ \ _ __   ___ _ __ |  ___|_ _  __ _/ ___|
+# | | | | '_ \ / _ \ '_ \| |_ / _` |/ _` \___ \
 # | |_| | |_) |  __/ | | |  _| (_| | (_| |___) |
-#  \___/| .__/ \___|_| |_|_|  \__,_|\__,_|____/ 
+#  \___/| .__/ \___|_| |_|_|  \__,_|\__,_|____/
 #       |_|
 
 # 7. 查看函数详情
@@ -656,10 +659,10 @@ faas-cli describe figlet
 # Available replicas:  1
 # Invocations:         1
 # Image:               functions/figlet:latest
-# Function process:    
+# Function process:
 # URL:                 http://127.0.0.1:8080/function/figlet
 # Async URL:           http://127.0.0.1:8080/async-function/figlet
-# Labels:              
+# Labels:
 # Annotations:
 ```
 
@@ -689,7 +692,7 @@ faas-cli version
 # | |_| | |_) |  __/ | | |  _| (_| | (_| |___) |
 #  \___/| .__/ \___|_| |_|_|  \__,_|\__,_|____/
 #       |_|
-# 
+#
 # CLI:
 #  commit:  abc123
 #  version: 0.16.20
@@ -803,7 +806,7 @@ faas-cli new hello-python --lang python3-http --prefix <your-docker-hub-username
 # | |_| | |_) |  __/ | | |  _| (_| | (_| |___) |
 #  \___/| .__/ \___|_| |_|_|  \__,_|\__,_|____/
 #       |_|
-# 
+#
 # Function created in folder: hello-python
 # Stack file written: hello-python.yml
 
@@ -873,17 +876,17 @@ functions:
     lang: python3-http             # 模板语言
     handler: ./hello-python        # 函数代码目录
     image: <username>/hello-python:latest  # 镜像名
-    
+
     # 环境变量
     environment:
       write_timeout: 10s
       read_timeout: 10s
       exec_timeout: 10s
-      
+
       # 自定义环境变量
       DB_HOST: postgres.default.svc.cluster.local
       API_KEY: ${API_KEY}  # 从环境变量读取
-    
+
     # 资源限制
     limits:
       memory: 128Mi
@@ -891,26 +894,26 @@ functions:
     requests:
       memory: 64Mi
       cpu: 50m
-    
+
     # 标签
     labels:
       com.openfaas.scale.min: "1"
       com.openfaas.scale.max: "5"
       com.openfaas.scale.factor: "20"
-      
+
       # 自定义标签
       app: hello-python
       version: v1
-    
+
     # 注解
     annotations:
       topic: "faas-request"
-    
+
     # Secret挂载
     secrets:
     - db-password
     - api-key
-    
+
     # 约束 (Kubernetes nodeSelector)
     constraints:
     - "kubernetes.io/arch=amd64"
@@ -954,7 +957,7 @@ def handle(req):
     # Secret挂载在 /var/openfaas/secrets/<secret-name>
     with open('/var/openfaas/secrets/db-password', 'r') as f:
         password = f.read()
-    
+
     return f"Password length: {len(password)}"
 
 # 6. 删除Secret
@@ -989,16 +992,16 @@ def handle(req):
         data = json.loads(req) if req else {}
         name = data.get('name', 'World')
         age = data.get('age', 0)
-        
+
         # 业务逻辑
         response = {
             'message': f'Hello, {name}!',
             'age': age,
             'adult': age >= 18
         }
-        
+
         return json.dumps(response)
-    
+
     except Exception as e:
         error = {
             'error': str(e)
@@ -1039,17 +1042,17 @@ def handle(req):
         # 解码Base64图片
         image_data = base64.b64decode(req)
         image = Image.open(io.BytesIO(image_data))
-        
+
         # 转为灰度
         grayscale = image.convert('L')
-        
+
         # 编码为Base64
         buffer = io.BytesIO()
         grayscale.save(buffer, format='PNG')
         result = base64.b64encode(buffer.getvalue()).decode()
-        
+
         return result
-    
+
     except Exception as e:
         return f"Error: {str(e)}"
 ```
@@ -1091,24 +1094,24 @@ type Response struct {
 // Handle a function invocation
 func Handle(w http.ResponseWriter, r *http.Request) {
     var req Request
-    
+
     // 解析JSON
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         w.WriteHeader(http.StatusBadRequest)
         w.Write([]byte(fmt.Sprintf("Error parsing request: %v", err)))
         return
     }
-    
+
     name := req.Name
     if name == "" {
         name = "World"
     }
-    
+
     // 构建响应
     resp := Response{
         Message: fmt.Sprintf("Hello, %s!", name),
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(resp)
 }
@@ -1150,9 +1153,9 @@ func Handle(w http.ResponseWriter, r *http.Request) {
         {ID: 1, Name: "Alice", Email: "alice@example.com", CreatedAt: time.Now()},
         {ID: 2, Name: "Bob", Email: "bob@example.com", CreatedAt: time.Now()},
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
-    
+
     if err := json.NewEncoder(w).Encode(users); err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         w.Write([]byte(fmt.Sprintf("Error: %v", err)))
@@ -1181,19 +1184,19 @@ module.exports = async (event, context) => {
         const body = JSON.parse(event.body || '{}')
         const name = body.name || 'World'
         const timestamp = new Date().toISOString()
-        
+
         // 业务逻辑
         const response = {
             message: `Hello, ${name}!`,
             timestamp: timestamp,
             headers: event.headers
         }
-        
+
         return context
             .status(200)
             .headers({ 'Content-Type': 'application/json' })
             .succeed(response)
-    
+
     } catch (error) {
         return context
             .status(500)
@@ -1229,17 +1232,17 @@ module.exports = async (event, context) => {
     try {
         const body = JSON.parse(event.body || '{}')
         const url = body.url || 'https://api.github.com'
-        
+
         // 发送HTTP请求
         const response = await axios.get(url)
-        
+
         return context
             .status(200)
             .succeed({
                 status: response.status,
                 data: response.data
             })
-    
+
     } catch (error) {
         return context
             .status(500)
@@ -1394,7 +1397,7 @@ queueWorker:
   replicas: 3
   ackWait: 60s
   maxInflight: 10
-  
+
   # NATS配置
   nats:
     channel: "faas-request"
@@ -1413,19 +1416,19 @@ functions:
     labels:
       # 最小副本数
       com.openfaas.scale.min: "1"
-      
+
       # 最大副本数
       com.openfaas.scale.max: "10"
-      
+
       # 扩容因子 (RPS阈值)
       # 例如: 每个Pod处理20个请求/秒
       # 当总RPS达到20时，扩容到2个Pod
       com.openfaas.scale.factor: "20"
-      
+
       # 缩容类型
       com.openfaas.scale.type: "rps"  # 基于RPS
       # 或: "capacity" (基于CPU/内存)
-      
+
       # 缩容延迟 (秒)
       com.openfaas.scale.zero-duration: "5m"
 ```
@@ -1489,22 +1492,22 @@ import os
 
 def handle(req):
     """调用其他函数"""
-    
+
     # OpenFaaS Gateway地址
     gateway_url = os.getenv("gateway_url", "http://gateway.openfaas:8080")
-    
+
     # 调用另一个函数
     function_name = "nodeinfo"
     url = f"{gateway_url}/function/{function_name}"
-    
+
     try:
         response = requests.post(url, data="Hello from caller")
-        
+
         return {
             'status': response.status_code,
             'result': response.text
         }
-    
+
     except Exception as e:
         return {'error': str(e)}
 ```
@@ -1667,14 +1670,14 @@ data:
   alertmanager.yml: |
     global:
       resolve_timeout: 5m
-    
+
     route:
       group_by: ['alertname', 'cluster']
       group_wait: 10s
       group_interval: 10s
       repeat_interval: 12h
       receiver: 'slack'
-    
+
     receivers:
     - name: 'slack'
       slack_configs:
@@ -1696,7 +1699,7 @@ data:
     - name: openfaas
       interval: 10s
       rules:
-      
+
       # 函数调用失败率高
       - alert: HighFunctionErrorRate
         expr: |
@@ -1706,7 +1709,7 @@ data:
           severity: warning
         annotations:
           description: "Function {{ $labels.function_name }} has high error rate"
-      
+
       # 函数延迟高
       - alert: HighFunctionLatency
         expr: |
@@ -1716,7 +1719,7 @@ data:
           severity: warning
         annotations:
           description: "Function {{ $labels.function_name }} has high latency"
-      
+
       # 函数副本数为0
       - alert: FunctionScaledToZero
         expr: |
@@ -1751,36 +1754,36 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Setup faas-cli
       run: |
         curl -sSL https://cli.openfaas.com | sudo sh
-    
+
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    
+
     - name: Pull OpenFaaS templates
       run: faas-cli template store pull python3-http
-    
+
     - name: Build functions
       run: faas-cli build -f stack.yml
-    
+
     - name: Push functions
       run: faas-cli push -f stack.yml
-    
+
     - name: Deploy functions
       run: |
         echo "${{ secrets.OPENFAAS_PASSWORD }}" | faas-cli login \
           --username admin --password-stdin
         faas-cli deploy -f stack.yml
-    
+
     - name: Test functions
       run: |
         sleep 10
@@ -1844,14 +1847,14 @@ deploy:
 // Jenkinsfile
 pipeline {
     agent any
-    
+
     environment {
         OPENFAAS_URL = credentials('openfaas-url')
         OPENFAAS_PASSWORD = credentials('openfaas-password')
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_CREDENTIALS = credentials('docker-credentials')
     }
-    
+
     stages {
         stage('Setup') {
             steps {
@@ -1859,27 +1862,27 @@ pipeline {
                 sh 'echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin'
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh 'faas-cli template store pull python3-http'
                 sh 'faas-cli build -f stack.yml'
             }
         }
-        
+
         stage('Test') {
             steps {
                 sh 'echo "Running tests..."'
                 // 添加测试命令
             }
         }
-        
+
         stage('Push') {
             steps {
                 sh 'faas-cli push -f stack.yml'
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 sh '''
@@ -1889,7 +1892,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Verify') {
             steps {
                 sh 'faas-cli list'
@@ -1897,7 +1900,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo 'Deployment successful!'
@@ -1922,29 +1925,29 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  
+
   source:
     repoURL: https://github.com/your-org/openfaas-functions.git
     targetRevision: HEAD
     path: functions
-    
+
     # Kustomize (可选)
     kustomize:
       images:
       - your-username/my-function:latest
-  
+
   destination:
     server: https://kubernetes.default.svc
     namespace: openfaas-fn
-  
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    
+
     syncOptions:
     - CreateNamespace=true
-    
+
     retry:
       limit: 5
       backoff:
@@ -1965,19 +1968,19 @@ metadata:
 spec:
   name: my-function
   image: your-username/my-function:latest
-  
+
   labels:
     com.openfaas.scale.min: "1"
     com.openfaas.scale.max: "5"
-  
+
   environment:
     write_timeout: "10s"
     read_timeout: "10s"
-  
+
   limits:
     memory: "128Mi"
     cpu: "100m"
-  
+
   requests:
     memory: "64Mi"
     cpu: "50m"
@@ -2009,25 +2012,25 @@ def handle(req):
         image_b64 = data['image']
         width = data.get('width', 800)
         height = data.get('height', 600)
-        
+
         # 解码图片
         image_data = base64.b64decode(image_b64)
         image = Image.open(io.BytesIO(image_data))
-        
+
         # 调整大小
         resized = image.resize((width, height), Image.LANCZOS)
-        
+
         # 编码为Base64
         buffer = io.BytesIO()
         resized.save(buffer, format='PNG')
         result_b64 = base64.b64encode(buffer.getvalue()).decode()
-        
+
         return json.dumps({
             'success': True,
             'image': result_b64,
             'size': f'{width}x{height}'
         })
-    
+
     except Exception as e:
         return json.dumps({
             'success': False,
@@ -2068,36 +2071,36 @@ def handle(req):
     try:
         # 解析Webhook payload
         payload = json.loads(req)
-        
+
         # 提取信息
         event_type = payload.get('action', 'unknown')
         repository = payload.get('repository', {}).get('full_name', 'unknown')
         sender = payload.get('sender', {}).get('login', 'unknown')
-        
+
         # 处理不同事件
         if 'pull_request' in payload:
             pr_number = payload['pull_request']['number']
             pr_title = payload['pull_request']['title']
-            
+
             message = f"PR #{pr_number}: {pr_title} - {event_type} by {sender}"
-        
+
         elif 'issue' in payload:
             issue_number = payload['issue']['number']
             issue_title = payload['issue']['title']
-            
+
             message = f"Issue #{issue_number}: {issue_title} - {event_type} by {sender}"
-        
+
         else:
             message = f"Event: {event_type} in {repository} by {sender}"
-        
+
         # 发送通知 (Slack/Email/etc)
         # send_notification(message)
-        
+
         return json.dumps({
             'success': True,
             'message': message
         })
-    
+
     except Exception as e:
         return json.dumps({
             'success': False,
@@ -2121,7 +2124,7 @@ def handle(req):
         # 解析CSV
         csv_data = io.StringIO(req)
         reader = csv.DictReader(csv_data)
-        
+
         # 转换为JSON
         records = []
         for row in reader:
@@ -2130,27 +2133,27 @@ def handle(req):
                 k.strip(): v.strip()
                 for k, v in row.items()
             }
-            
+
             # 数据转换
             if 'age' in cleaned:
                 cleaned['age'] = int(cleaned['age'])
             if 'price' in cleaned:
                 cleaned['price'] = float(cleaned['price'])
-            
+
             records.append(cleaned)
-        
+
         # 统计
         stats = {
             'total_records': len(records),
             'columns': list(records[0].keys()) if records else []
         }
-        
+
         return json.dumps({
             'success': True,
             'data': records,
             'stats': stats
         })
-    
+
     except Exception as e:
         return json.dumps({
             'success': False,
@@ -2173,38 +2176,38 @@ def handle(req):
     try:
         gateway_url = os.getenv("gateway_url", "http://gateway.openfaas:8080")
         data = json.loads(req)
-        
+
         # 步骤1: 数据验证
         validation_result = call_function(
-            gateway_url, 
-            'validator', 
+            gateway_url,
+            'validator',
             json.dumps(data)
         )
-        
+
         if not validation_result['valid']:
             return json.dumps({'error': 'Validation failed'})
-        
+
         # 步骤2: 数据处理
         processing_result = call_function(
             gateway_url,
             'processor',
             json.dumps(validation_result['data'])
         )
-        
+
         # 步骤3: 数据存储
         storage_result = call_function(
             gateway_url,
             'storage',
             json.dumps(processing_result)
         )
-        
+
         # 步骤4: 发送通知
         notification_result = call_function(
             gateway_url,
             'notifier',
             json.dumps({'message': 'Processing complete'})
         )
-        
+
         return json.dumps({
             'success': True,
             'steps': {
@@ -2214,7 +2217,7 @@ def handle(req):
                 'notification': notification_result
             }
         })
-    
+
     except Exception as e:
         return json.dumps({
             'success': False,
@@ -2284,8 +2287,36 @@ vs Knative:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#OpenFaaS` `#Serverless` `#FaaS` `#Docker` `#Kubernetes`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Serverless概述与架构](./01_Serverless概述与架构.md) - Serverless概述与架构
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [边缘Serverless](./04_边缘Serverless.md) - 边缘Serverless
+- [Serverless安全](./05_Serverless安全.md) - Serverless安全
+- [Serverless性能优化](./06_Serverless性能优化.md) - Serverless性能优化
+- [Serverless CI/CD](./07_Serverless_CICD.md) - Serverless CI/CD
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术详解
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器技术实践案例
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

@@ -1,9 +1,9 @@
 # Docker Swarm技术详解
 
-> **文档定位**: Docker Swarm容器编排技术完整指南，覆盖集群管理、服务编排、高可用部署  
-> **技术版本**: Docker Engine 25.0, Swarm Mode  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [Docker Swarm Docs][swarm-docs], [Docker Orchestration][orchestration], [Swarm Best Practices][swarm-bp]  
+> **文档定位**: Docker Swarm容器编排技术完整指南，覆盖集群管理、服务编排、高可用部署
+> **技术版本**: Docker Engine 25.0, Swarm Mode
+> **最后更新**: 2025-10-21
+> **标准对齐**: [Docker Swarm Docs][swarm-docs], [Docker Orchestration][orchestration], [Swarm Best Practices][swarm-bp]
 > **文档版本**: v2.0 (Phase 1+2 标准化版)
 
 ---
@@ -1048,6 +1048,29 @@ Docker Swarm作为Docker原生的容器编排工具，提供了简单易用的�
 
 ---
 
-**文档完成度**: 100% ✅  
-**生产就绪状态**: ✅ Ready for Production  
+**文档完成度**: 100% ✅
+**生产就绪状态**: ✅ Ready for Production
 **推荐使用场景**: 中小型容器集群编排、快速部署、Docker原生集成环境
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Kubernetes编排技术详解](./02_Kubernetes编排技术详解.md) - Kubernetes编排技术
+- [OpenShift技术详解](./03_OpenShift技术详解.md) - OpenShift企业级平台
+- [容器编排对比分析](./04_容器编排对比分析.md) - 编排技术对比分析
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes完整技术体系
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 编排技术实践案例
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

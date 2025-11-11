@@ -29,6 +29,9 @@
     - [8.1 安全开发指南](#81-安全开发指南)
     - [8.2 安全配置](#82-安全配置)
     - [8.3 安全监控](#83-安全监控)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. WebAssembly安全架构
 
@@ -89,17 +92,17 @@ impl WasmSandbox {
             permissions: WasmPermissions::default(),
         }
     }
-    
+
     pub fn execute_isolated(&mut self, module: &WasmModule) -> Result<(), Error> {
         // 验证模块完整性
         self.validate_module(module)?;
-        
+
         // 检查权限
         self.check_permissions(module)?;
-        
+
         // 在隔离环境中执行
         self.execute_module(module)?;
-        
+
         Ok(())
     }
 }
@@ -127,18 +130,18 @@ impl ResourceIsolation {
             system_call_access: false,
         }
     }
-    
+
     pub fn enforce_limits(&self, execution_context: &mut ExecutionContext) -> Result<(), Error> {
         // 检查内存使用
         if execution_context.memory_usage > self.memory_limit {
             return Err(Error::MemoryLimitExceeded);
         }
-        
+
         // 检查CPU时间
         if execution_context.cpu_time > self.cpu_limit {
             return Err(Error::CPULimitExceeded);
         }
-        
+
         Ok(())
     }
 }
@@ -170,7 +173,7 @@ impl WasmMemory {
     pub fn new(initial_pages: u32, max_pages: u32) -> Self {
         let page_size = 65536; // 64KB per page
         let initial_size = initial_pages as usize * page_size;
-        
+
         Self {
             data: vec![0; initial_size],
             max_pages,
@@ -183,28 +186,28 @@ impl WasmMemory {
             },
         }
     }
-    
+
     pub fn read_with_bounds_check(&self, offset: usize, len: usize) -> Result<&[u8], Error> {
         if offset + len > self.data.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         if !self.access_permissions.read {
             return Err(Error::MemoryAccessDenied);
         }
-        
+
         Ok(&self.data[offset..offset + len])
     }
-    
+
     pub fn write_with_bounds_check(&mut self, offset: usize, data: &[u8]) -> Result<(), Error> {
         if offset + data.len() > self.data.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         if !self.access_permissions.write {
             return Err(Error::MemoryAccessDenied);
         }
-        
+
         self.data[offset..offset + data.len()].copy_from_slice(data);
         Ok(())
     }
@@ -229,23 +232,23 @@ pub struct ProtectedRegion {
 }
 
 impl MemoryProtection {
-    pub fn protect_region(&mut self, start: usize, end: usize, 
+    pub fn protect_region(&mut self, start: usize, end: usize,
                          permissions: RegionPermissions, description: String) -> Result<(), Error> {
         if end <= start || end > self.memory.data.len() {
             return Err(Error::InvalidRegion);
         }
-        
+
         self.protected_regions.push(ProtectedRegion {
             start,
             end,
             permissions,
             description,
         });
-        
+
         Ok(())
     }
-    
-    pub fn check_access(&self, offset: usize, len: usize, 
+
+    pub fn check_access(&self, offset: usize, len: usize,
                        access_type: AccessType) -> Result<(), Error> {
         for region in &self.protected_regions {
             if offset >= region.start && offset + len <= region.end {
@@ -268,7 +271,7 @@ impl MemoryProtection {
                 }
             }
         }
-        
+
         Ok(())
     }
 }
@@ -303,53 +306,53 @@ impl TypeChecker {
     pub fn validate_module(&self, module: &WasmModule) -> Result<(), Error> {
         // 验证类型段
         self.validate_types(&module.types)?;
-        
+
         // 验证函数段
         self.validate_functions(&module.functions)?;
-        
+
         // 验证全局段
         self.validate_globals(&module.globals)?;
-        
+
         // 验证内存段
         self.validate_memories(&module.memories)?;
-        
+
         // 验证表段
         self.validate_tables(&module.tables)?;
-        
+
         Ok(())
     }
-    
+
     fn validate_functions(&self, functions: &[WasmFunction]) -> Result<(), Error> {
         for func in functions {
             let func_type = self.types.get(&func.type_index)
                 .ok_or(Error::InvalidTypeIndex)?;
-            
+
             // 验证函数体类型
             self.validate_function_body(&func.body, func_type)?;
         }
-        
+
         Ok(())
     }
-    
-    fn validate_function_body(&self, body: &[Instruction], 
+
+    fn validate_function_body(&self, body: &[Instruction],
                              func_type: &FuncType) -> Result<(), Error> {
         let mut stack = Vec::new();
-        
+
         for instruction in body {
             self.validate_instruction(instruction, &mut stack, func_type)?;
         }
-        
+
         // 检查返回值类型
         if stack.len() != func_type.returns.len() {
             return Err(Error::TypeMismatch);
         }
-        
+
         for (i, expected_type) in func_type.returns.iter().enumerate() {
             if stack[i] != *expected_type {
                 return Err(Error::TypeMismatch);
             }
         }
-        
+
         Ok(())
     }
 }
@@ -377,21 +380,21 @@ impl RuntimeTypeChecker {
             _ => false,
         }
     }
-    
-    pub fn validate_function_call(&self, func: &WasmFunction, 
+
+    pub fn validate_function_call(&self, func: &WasmFunction,
                                  args: &[WasmValue]) -> Result<(), Error> {
         let func_type = self.get_function_type(func)?;
-        
+
         if args.len() != func_type.params.len() {
             return Err(Error::ArgumentCountMismatch);
         }
-        
+
         for (i, (arg, expected_type)) in args.iter().zip(func_type.params.iter()).enumerate() {
             if !self.check_value_type(arg, *expected_type) {
                 return Err(Error::TypeMismatch);
             }
         }
-        
+
         Ok(())
     }
 }
@@ -451,7 +454,7 @@ impl WasmPermissions {
             system_access: SystemPermissions::default(),
         }
     }
-    
+
     pub fn check_memory_access(&self, operation: MemoryOperation) -> Result<(), Error> {
         match operation {
             MemoryOperation::Allocate(size) => {
@@ -482,7 +485,7 @@ impl WasmPermissions {
                 }
             }
         }
-        
+
         Ok(())
     }
 }
@@ -517,12 +520,12 @@ impl AccessControlList {
             default_policy: AccessPolicy::Deny,
         }
     }
-    
+
     pub fn add_rule(&mut self, rule: AccessRule) {
         self.rules.push(rule);
     }
-    
-    pub fn check_access(&self, subject: &str, resource: &str, 
+
+    pub fn check_access(&self, subject: &str, resource: &str,
                        action: &str, context: &AccessContext) -> AccessDecision {
         for rule in &self.rules {
             if self.matches_rule(rule, subject, resource, action, context) {
@@ -534,7 +537,7 @@ impl AccessControlList {
                 }
             }
         }
-        
+
         AccessDecision {
             effect: match self.default_policy {
                 AccessPolicy::Allow => AccessEffect::Allow,
@@ -574,14 +577,14 @@ impl SecurityPolicyEngine {
             policy_evaluator: PolicyEvaluator::new(),
         }
     }
-    
+
     pub fn add_policy(&mut self, policy: SecurityPolicy) {
         self.policies.insert(policy.name.clone(), policy);
     }
-    
+
     pub fn evaluate_security(&self, context: &SecurityContext) -> SecurityDecision {
         let mut decisions = Vec::new();
-        
+
         for policy_name in &self.active_policies {
             if let Some(policy) = self.policies.get(policy_name) {
                 if policy.enabled {
@@ -590,15 +593,15 @@ impl SecurityPolicyEngine {
                 }
             }
         }
-        
+
         self.resolve_conflicts(decisions)
     }
-    
+
     fn resolve_conflicts(&self, decisions: Vec<SecurityDecision>) -> SecurityDecision {
         // 按优先级排序
         let mut sorted_decisions = decisions;
         sorted_decisions.sort_by(|a, b| b.priority.cmp(&a.priority));
-        
+
         // 返回最高优先级的决策
         sorted_decisions.into_iter().next().unwrap_or_else(|| {
             SecurityDecision {
@@ -669,27 +672,27 @@ impl BytecodeVerifier {
             verification_cache: HashMap::new(),
         }
     }
-    
+
     pub fn verify_module(&mut self, module: &WasmModule) -> VerificationResult {
         let module_hash = self.hash_module(module);
-        
+
         if let Some(cached_result) = self.verification_cache.get(&module_hash) {
             return cached_result.clone();
         }
-        
+
         let mut result = VerificationResult::new();
-        
+
         for rule in &self.validation_rules {
             match rule.validate(module) {
                 Ok(_) => result.add_success(rule.name()),
                 Err(error) => result.add_error(rule.name(), error),
             }
         }
-        
+
         self.verification_cache.insert(module_hash, result.clone());
         result
     }
-    
+
     fn create_default_rules() -> Vec<ValidationRule> {
         vec![
             Box::new(WellFormednessRule::new()),
@@ -719,30 +722,30 @@ impl IntegrityChecker {
             signature_verifier: SignatureVerifier::new(),
         }
     }
-    
-    pub fn verify_integrity(&self, module: &WasmModule, 
+
+    pub fn verify_integrity(&self, module: &WasmModule,
                            expected_checksum: &[u8; 32]) -> Result<(), Error> {
         let actual_checksum = self.calculate_checksum(module);
-        
+
         if actual_checksum != *expected_checksum {
             return Err(Error::IntegrityCheckFailed);
         }
-        
+
         Ok(())
     }
-    
-    pub fn verify_signature(&self, module: &WasmModule, 
+
+    pub fn verify_signature(&self, module: &WasmModule,
                            signature: &[u8], public_key: &[u8]) -> Result<(), Error> {
         self.signature_verifier.verify(module, signature, public_key)
     }
-    
+
     fn calculate_checksum(&self, module: &WasmModule) -> [u8; 32] {
         use sha2::{Sha256, Digest};
-        
+
         let mut hasher = Sha256::new();
         hasher.update(&module.raw_bytes);
         let result = hasher.finalize();
-        
+
         let mut checksum = [0u8; 32];
         checksum.copy_from_slice(&result);
         checksum
@@ -828,24 +831,24 @@ impl SecurityMonitor {
             notification_service: NotificationService::new(),
         }
     }
-    
+
     pub fn log_security_event(&mut self, event: SecurityEvent) {
         self.event_log.push(event.clone());
-        
+
         if self.should_alert(&event) {
             self.notification_service.send_alert(&event);
         }
     }
-    
+
     fn should_alert(&self, event: &SecurityEvent) -> bool {
         match event.severity {
             SecuritySeverity::Critical => true,
             SecuritySeverity::High => {
-                self.count_recent_events(SecuritySeverity::High) > 
+                self.count_recent_events(SecuritySeverity::High) >
                 self.alert_thresholds.high_severity_count
             }
             SecuritySeverity::Medium => {
-                self.count_recent_events(SecuritySeverity::Medium) > 
+                self.count_recent_events(SecuritySeverity::Medium) >
                 self.alert_thresholds.medium_severity_count
             }
             SecuritySeverity::Low => false,
@@ -857,3 +860,25 @@ impl SecurityMonitor {
 ---
 
 _本文档基于WebAssembly 2.0最新安全标准，提供完整的安全机制解析和最佳实践指导。_
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [WebAssembly架构原理](./01_WebAssembly架构原理.md) - WebAssembly架构深度解析
+- [WebAssembly运行时技术](./02_WebAssembly运行时技术.md) - WebAssembly运行时技术详解
+- [WebAssembly 2.0新特性详解](./04_WebAssembly_2.0新特性详解.md) - WebAssembly 2.0新特性
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker安全机制](../01_Docker技术详解/06_Docker安全机制.md) - Docker安全机制
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全技术
+- [容器安全威胁分析](../05_容器安全技术/01_容器安全威胁分析.md) - 安全威胁分析
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

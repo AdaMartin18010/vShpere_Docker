@@ -1,8 +1,8 @@
 # 🔬 高级测试指南
 
-> **文档定位**: API测试的高级技术和最佳实践  
-> **目标读者**: 高级测试工程师、QA架构师  
-> **难度等级**: ⭐⭐⭐⭐⭐  
+> **文档定位**: API测试的高级技术和最佳实践
+> **目标读者**: 高级测试工程师、QA架构师
+> **难度等级**: ⭐⭐⭐⭐⭐
 > **最后更新**: 2025年10月23日
 
 ---
@@ -95,7 +95,7 @@ func TestBoundaryEmptyContainerName(t *testing.T) {
     _, err := cli.ContainerCreate(ctx, &container.Config{
         Image: "",  // 空镜像名
     }, nil, nil, nil, "")
-    
+
     assert.Error(t, err, "空镜像名应该返回错误")
 }
 
@@ -103,13 +103,13 @@ func TestBoundaryEmptyContainerName(t *testing.T) {
 func TestBoundaryMaxContainerName(t *testing.T) {
     maxName := strings.Repeat("a", 255)    // 最大长度
     tooLong := strings.Repeat("a", 256)    // 超长
-    
+
     // 测试最大长度（应该成功）
     _, err := cli.ContainerCreate(ctx, &container.Config{
         Image: "alpine",
     }, nil, nil, nil, maxName)
     assert.NoError(t, err)
-    
+
     // 测试超长（应该失败）
     _, err = cli.ContainerCreate(ctx, &container.Config{
         Image: "alpine",
@@ -137,23 +137,23 @@ def test_error_nonexistent_container(client):
     """测试操作不存在的容器"""
     with pytest.raises(docker.errors.NotFound):
         client.containers.get("nonexistent-id").start()
-    
+
     with pytest.raises(docker.errors.NotFound):
         client.containers.get("nonexistent-id").stop()
-    
+
     with pytest.raises(docker.errors.NotFound):
         client.containers.get("nonexistent-id").remove()
 
 def test_error_network_timeout(client):
     """测试网络超时"""
     import signal
-    
+
     def timeout_handler(signum, frame):
         raise TimeoutError("操作超时")
-    
+
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(1)  # 1秒超时
-    
+
     try:
         # 执行可能超时的操作
         client.containers.list(all=True)
@@ -181,32 +181,32 @@ func TestConcurrencyParallelCreation(t *testing.T) {
     concurrency := 50
     var wg sync.WaitGroup
     results := make(chan error, concurrency)
-    
+
     start := time.Now()
-    
+
     for i := 0; i < concurrency; i++ {
         wg.Add(1)
         go func(idx int) {
             defer wg.Done()
-            
+
             resp, err := cli.ContainerCreate(ctx, &container.Config{
                 Image: "alpine:latest",
             }, nil, nil, nil, fmt.Sprintf("concurrent-%d", idx))
-            
+
             if err == nil {
-                defer cli.ContainerRemove(ctx, resp.ID, 
+                defer cli.ContainerRemove(ctx, resp.ID,
                     types.ContainerRemoveOptions{Force: true})
             }
-            
+
             results <- err
         }(i)
     }
-    
+
     wg.Wait()
     close(results)
-    
+
     duration := time.Since(start)
-    
+
     // 统计结果
     successCount := 0
     for err := range results {
@@ -214,16 +214,16 @@ func TestConcurrencyParallelCreation(t *testing.T) {
             successCount++
         }
     }
-    
+
     successRate := float64(successCount) / float64(concurrency) * 100
     throughput := float64(successCount) / duration.Seconds()
-    
+
     t.Logf("并发测试结果:")
     t.Logf("  - 并发度: %d", concurrency)
     t.Logf("  - 成功率: %.2f%% (%d/%d)", successRate, successCount, concurrency)
     t.Logf("  - 总耗时: %v", duration)
     t.Logf("  - 吞吐量: %.2f ops/s", throughput)
-    
+
     assert.GreaterOrEqual(t, successRate, 95.0, "成功率应该 >= 95%")
 }
 ```
@@ -245,14 +245,14 @@ func TestConcurrencyParallelCreation(t *testing.T) {
 func BenchmarkContainerCreation(b *testing.B) {
     cli, _ := client.NewClientWithOpts(client.FromEnv)
     defer cli.Close()
-    
+
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
-        resp, err := cli.ContainerCreate(context.Background(), 
+        resp, err := cli.ContainerCreate(context.Background(),
             &container.Config{Image: "alpine"}, nil, nil, nil, "")
-        
+
         if err == nil {
-            cli.ContainerRemove(context.Background(), resp.ID, 
+            cli.ContainerRemove(context.Background(), resp.ID,
                 types.ContainerRemoveOptions{Force: true})
         }
     }
@@ -273,31 +273,31 @@ def test_performance_container_lifecycle(client):
     """性能测试：完整生命周期"""
     iterations = 100
     latencies = []
-    
+
     for i in range(iterations):
         start = time.time()
-        
+
         # 创建
         container = client.containers.create("alpine:latest")
-        
+
         # 启动
         container.start()
-        
+
         # 停止
         container.stop()
-        
+
         # 删除
         container.remove()
-        
+
         latency = time.time() - start
         latencies.append(latency)
-    
+
     # 统计分析
     avg_latency = statistics.mean(latencies)
     p50 = statistics.median(latencies)
     p95 = statistics.quantiles(latencies, n=20)[18]  # 95th percentile
     p99 = statistics.quantiles(latencies, n=100)[98]  # 99th percentile
-    
+
     print(f"性能指标 (n={iterations}):")
     print(f"  平均延迟: {avg_latency*1000:.2f}ms")
     print(f"  P50: {p50*1000:.2f}ms")
@@ -327,15 +327,15 @@ func TestIdempotencyMultipleStops(t *testing.T) {
         Cmd:   []string{"sleep", "30"},
     }, nil, nil, nil, "")
     defer cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true})
-    
+
     cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
-    
+
     // 多次停止（应该都成功或返回一致的结果）
     for i := 0; i < 5; i++ {
         err := cli.ContainerStop(ctx, resp.ID, container.StopOptions{})
         t.Logf("第%d次停止: %v", i+1, err)
     }
-    
+
     // 验证最终状态
     inspect, _ := cli.ContainerInspect(ctx, resp.ID)
     assert.False(t, inspect.State.Running)
@@ -363,36 +363,36 @@ def test_state_machine_full_lifecycle(client):
         "alpine:latest",
         command=["sleep", "30"]
     )
-    
+
     try:
         # 状态1: Created
         assert container.status == "created"
-        
+
         # 状态2: Running
         container.start()
         container.reload()
         assert container.status == "running"
-        
+
         # 状态3: Paused
         container.pause()
         container.reload()
         assert container.status == "paused"
-        
+
         # 状态4: Running (Unpause)
         container.unpause()
         container.reload()
         assert container.status == "running"
-        
+
         # 状态5: Exited
         container.stop()
         container.reload()
         assert container.status == "exited"
-        
+
         # 状态6: Running (Restart)
         container.restart()
         container.reload()
         assert container.status == "running"
-        
+
     finally:
         container.remove(force=True)
 ```
@@ -423,14 +423,14 @@ func TestResourceOOMKiller(t *testing.T) {
             MemorySwap: 10 * 1024 * 1024,  // 禁用swap
         },
     }, nil, nil, "")
-    
+
     require.NoError(t, err)
     defer cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true})
-    
+
     // 启动容器
     err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
     require.NoError(t, err)
-    
+
     // 等待容器完成或OOM
     statusCh, errCh := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
     select {
@@ -468,7 +468,7 @@ def test_complex_multi_container_network(client):
         "test-network",
         driver="bridge"
     )
-    
+
     try:
         # 创建服务端容器
         server = client.containers.run(
@@ -478,9 +478,9 @@ def test_complex_multi_container_network(client):
             name="server",
             detach=True
         )
-        
+
         time.sleep(1)
-        
+
         # 创建客户端容器
         client_container = client.containers.run(
             "alpine:latest",
@@ -488,13 +488,13 @@ def test_complex_multi_container_network(client):
             network="test-network",
             detach=True
         )
-        
+
         # 等待通信完成
         result = client_container.wait(timeout=5)
-        
+
         # 验证通信成功
         assert result['StatusCode'] == 0
-        
+
     finally:
         server.remove(force=True)
         client_container.remove(force=True)
@@ -538,7 +538,7 @@ def test_chaos_network_latency(client):
     start = time.time()
     containers = client.containers.list()
     latency = time.time() - start
-    
+
     assert latency < 2.0, f"高延迟下性能降级: {latency}s"
 ```
 
@@ -548,7 +548,7 @@ def test_chaos_network_latency(client):
 def test_chaos_random_termination(client):
     """随机终止容器测试恢复能力"""
     containers = []
-    
+
     # 创建10个容器
     for i in range(10):
         c = client.containers.run(
@@ -558,13 +558,13 @@ def test_chaos_random_termination(client):
             restart_policy={"Name": "always"}
         )
         containers.append(c)
-    
+
     # 随机终止3个容器
     import random
     victims = random.sample(containers, 3)
     for c in victims:
         c.kill()
-    
+
     # 验证自动重启
     time.sleep(5)
     for c in victims:
@@ -584,7 +584,7 @@ func TestParallel(t *testing.T) {
         t.Parallel()  // 启用并行
         // 测试逻辑
     })
-    
+
     t.Run("Test2", func(t *testing.T) {
         t.Parallel()
         // 测试逻辑
@@ -612,7 +612,7 @@ go test -count=1 ./...
 def docker_client():
     client = docker.from_env()
     yield client
-    
+
     # 清理所有测试容器
     for container in client.containers.list(all=True):
         if container.name.startswith("test-"):
@@ -649,6 +649,6 @@ def docker_client():
 
 ---
 
-**最后更新**: 2025年10月23日  
-**文档版本**: v1.0  
+**最后更新**: 2025年10月23日
+**文档版本**: v1.0
 **维护团队**: QA团队

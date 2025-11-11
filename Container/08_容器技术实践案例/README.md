@@ -1,5 +1,27 @@
 # 容器技术实践案例
 
+> **文档定位**: 容器技术实践案例完整指南，涵盖企业级实践、微服务案例、DevOps实践
+> **技术版本**: Docker, Kubernetes, CI/CD工具链
+> **最后更新**: 2025-11-11
+> **标准对齐**: [CNCF Case Studies][cncf-cases], [Kubernetes Case Studies][k8s-cases]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | Docker, Kubernetes, CI/CD工具链 |
+| **状态** | 生产就绪 |
+| **适用场景** | 容器化实践、案例学习、经验参考 |
+
+> **版本锚点**: 本文档基于2025年容器技术实践案例与最佳实践。
+
+---
+
 ## 目录
 
 - [概述](#概述)
@@ -7,6 +29,7 @@
 - [技术文档](#技术文档)
 - [学习路径](#学习路径)
 - [案例分析方法](#案例分析方法)
+- [相关文档](#相关文档)
 
 ## 概述
 
@@ -171,11 +194,41 @@
 - 参与社区讨论
 - 贡献案例经验
 
-## 相关资源
+## 相关文档
 
-- [CNCF案例研究](https://www.cncf.io/case-studies/)
-- [Docker企业案例](https://www.docker.com/customers/)
-- [Kubernetes案例](https://kubernetes.io/case-studies/)
+### 本模块相关
+
+- [企业级容器化实践](./01_企业级容器化实践.md) - 企业容器化转型案例
+- [微服务容器化案例](./02_微服务容器化案例.md) - 微服务架构实践
+- [DevOps容器化实践](./03_DevOps容器化实践.md) - DevOps流程实践
+- [容器技术最佳实践](./04_容器技术最佳实践.md) - 最佳实践总结
+
+### 其他模块相关
+
+- [容器编排技术](../04_容器编排技术/README.md) - 编排实践案例
+- [容器监控与运维](../06_容器监控与运维/README.md) - 监控运维实践
+- [容器安全技术](../05_容器安全技术/README.md) - 安全实践案例
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - K8s实践案例
+
+---
+
+## 参考资源
+
+[cncf-cases]: https://www.cncf.io/case-studies/ "CNCF案例研究"
+[k8s-cases]: https://kubernetes.io/case-studies/ "Kubernetes案例"
+
+### 案例研究
+
+- [CNCF案例研究][cncf-cases] - CNCF官方案例
+- [Docker企业案例](https://www.docker.com/customers/) - Docker客户案例
+- [Kubernetes案例][k8s-cases] - Kubernetes官方案例
+- [Red Hat案例](https://www.redhat.com/en/success-stories) - Red Hat客户案例
+
+### 实践指南
+
+- [容器化最佳实践](https://kubernetes.io/docs/concepts/containers/) - K8s容器化指南
+- [微服务实践](https://microservices.io/) - 微服务架构实践
+- [DevOps实践](https://www.devops.com/) - DevOps最佳实践
 
 ---
 

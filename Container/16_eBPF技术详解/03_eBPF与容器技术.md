@@ -40,6 +40,9 @@
     - [生产部署清单](#生产部署清单)
     - [故障排查手册](#故障排查手册)
   - [参考资料](#参考资料)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -183,19 +186,19 @@ Cilium核心特性:
     ✅ 多集群互联 (ClusterMesh)
     ✅ 透明加密 (WireGuard/IPsec)
     ✅ Egress Gateway
-    
+
   可观测性:
     ✅ Hubble: 深度网络可见性
     ✅ 服务拓扑图
     ✅ 实时流量分析
     ✅ L7协议可见 (HTTP/gRPC/Kafka/DNS)
-    
+
   安全:
     ✅ 网络策略 (L3-L7)
     ✅ 运行时安全 (Tetragon)
     ✅ 服务间mTLS
     ✅ 透明加密
-    
+
   性能:
     ✅ Service延迟: 20-50μs (vs 1-2ms)
     ✅ 吞吐量: 10Gbps+ (vs ~5Gbps)
@@ -567,7 +570,7 @@ spec:
     matchLabels:
       app: backend
       env: prod
-  
+
   # Ingress规则 (入站流量)
   ingress:
   # 规则1: 允许frontend访问backend的8080端口
@@ -579,7 +582,7 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-    
+
   # 规则2: 允许monitoring访问metrics端口
   - fromEndpoints:
     - matchLabels:
@@ -588,7 +591,7 @@ spec:
     - ports:
       - port: "9090"
         protocol: TCP
-  
+
   # Egress规则 (出站流量)
   egress:
   # 规则1: 允许backend访问database
@@ -600,7 +603,7 @@ spec:
     - ports:
       - port: "5432"
         protocol: TCP
-  
+
   # 规则2: 允许访问外部API (基于CIDR)
   - toCIDR:
     - "8.8.8.8/32"  # Google DNS
@@ -608,7 +611,7 @@ spec:
     - ports:
       - port: "53"
         protocol: UDP
-  
+
   # 规则3: 允许访问特定FQDN
   - toFQDNs:
     - matchName: "api.example.com"
@@ -650,7 +653,7 @@ spec:
   endpointSelector:
     matchLabels:
       app: api-server
-  
+
   ingress:
   # 允许frontend访问特定HTTP API
   - fromEndpoints:
@@ -665,15 +668,15 @@ spec:
         # 规则1: 允许GET /api/v1/users
         - method: "GET"
           path: "/api/v1/users.*"
-        
+
         # 规则2: 允许POST /api/v1/users (创建用户)
         - method: "POST"
           path: "/api/v1/users"
           headers:
           - "Content-Type: application/json"
-        
+
         # 规则3: 拒绝DELETE请求 (隐式拒绝，不列出即拒绝)
-  
+
   # 允许admin完全访问
   - fromEndpoints:
     - matchLabels:
@@ -701,7 +704,7 @@ spec:
   endpointSelector:
     matchLabels:
       app: kafka
-  
+
   ingress:
   # Consumer只能读取特定Topic
   - fromEndpoints:
@@ -717,7 +720,7 @@ spec:
           topic: "orders"
         - role: "consume"
           topic: "events"
-  
+
   # Producer可以写入特定Topic
   - fromEndpoints:
     - matchLabels:
@@ -780,7 +783,7 @@ kubectl -n kube-system exec -it cilium-xxxxx -- \
     吞吐: ~5Gbps
     规则复杂度: O(n) 线性匹配
     CPU: 高
-  
+
   Cilium eBPF:
     延迟: 20-50μs (50-100x faster!)
     吞吐: 10Gbps+ (2x faster)
@@ -920,13 +923,13 @@ metadata:
 data:
   # 负载均衡模式
   bpf-lb-algorithm: "maglev"  # random/maglev
-  
+
   # Maglev哈希表大小 (越大越均衡)
   bpf-lb-maglev-table-size: "65521"
-  
+
   # 会话亲和性 (Session Affinity)
   bpf-lb-session-affinity: "true"
-  
+
   # 会话超时时间
   bpf-lb-session-timeout: "300"  # 300秒
 ```
@@ -949,10 +952,10 @@ Maglev算法优势:
 示例:
   Backends: [Pod1, Pod2, Pod3]
   Maglev Table Size: 65521
-  
+
   Client A (Hash=1234) → Table[1234] → Pod2
   Client B (Hash=5678) → Table[5678] → Pod1
-  
+
   Pod2下线后:
   Client A → Table[1234] → Pod3 (重新映射)
   Client B → Table[5678] → Pod1 (不变!)
@@ -1080,7 +1083,7 @@ metadata:
   annotations:
     # 标记为全局Service (所有集群共享)
     io.cilium/global-service: "true"
-    
+
     # 可选: 跨集群亲和性 (优先本地)
     io.cilium/service-affinity: "local"
 spec:
@@ -1119,7 +1122,7 @@ Cluster 1 (us-west):
       - Pod B (cluster1) [本地]     权重: 70%
       - Pod C (cluster1) [本地]     权重: 30%
       - Pod D (cluster2) [远程]     权重: 0% (正常情况)
-  
+
   正常情况: 流量只到本地Backend (低延迟)
   故障情况: 本地Backend全部不可用 → 自动切换到cluster2
 
@@ -1130,7 +1133,7 @@ Cluster 2 (us-east):
     Backends:
       - Pod E (cluster2) [本地]     权重: 100%
       - Pod B (cluster1) [远程]     权重: 0% (正常情况)
-  
+
   跨集群故障转移自动化!
 ```
 
@@ -1149,19 +1152,19 @@ Hubble核心功能:
     ✅ 服务依赖拓扑图
     ✅ L3-L7流量分析
     ✅ DNS解析监控
-    
+
   协议可见性:
     ✅ HTTP/gRPC (方法、路径、状态码)
     ✅ Kafka (Topic、Partition)
     ✅ DNS查询和响应
     ✅ TCP连接追踪
-    
+
   安全监控:
     ✅ 网络策略验证
     ✅ 被拒绝的流量
     ✅ 安全事件追踪
     ✅ 异常流量检测
-    
+
   性能分析:
     ✅ 延迟统计
     ✅ 吞吐量监控
@@ -1344,7 +1347,7 @@ data:
     flow
     http
     icmp
-    
+
   # Hubble Metrics服务器配置
   hubble-metrics-server: ":9091"
 
@@ -1371,27 +1374,27 @@ Hubble Metrics:
   hubble_flows_total:
     描述: 总流量数
     标签: source, destination, verdict, protocol
-    
+
   hubble_drop_total:
     描述: 被丢弃的数据包数
     标签: reason, source, destination
-    
+
   hubble_tcp_flags_total:
     描述: TCP标志统计
     标签: flag (SYN/ACK/FIN/RST)
-    
+
   hubble_http_requests_total:
     描述: HTTP请求总数
     标签: method, status, source, destination
-    
+
   hubble_http_request_duration_seconds:
     描述: HTTP请求延迟
     类型: Histogram
-    
+
   hubble_dns_queries_total:
     描述: DNS查询总数
     标签: query, rcode
-    
+
   hubble_kafka_requests_total:
     描述: Kafka请求总数
     标签: topic, api_key
@@ -1712,7 +1715,7 @@ spec:
   endpointSelector:
     matchLabels:
       app: api-gateway
-  
+
   ingress:
   # 1. 公开API - 允许所有访问 (只读)
   - fromEndpoints:
@@ -1725,7 +1728,7 @@ spec:
         http:
         - method: "GET"
           path: "/api/v1/public/.*"
-  
+
   # 2. 用户API - 需要认证 (通过API Gateway的JWT验证)
   - fromEndpoints:
     - matchLabels:
@@ -1742,7 +1745,7 @@ spec:
           path: "/api/v1/users/profile"
           headers:
           - "Authorization: Bearer .*"
-  
+
   # 3. Admin API - 只允许admin服务访问
   - fromEndpoints:
     - matchLabels:
@@ -1757,7 +1760,7 @@ spec:
           path: "/api/v1/admin/.*"
           headers:
           - "X-Admin-Token: .*"
-  
+
   egress:
   # API Gateway可以访问后端微服务
   - toEndpoints:
@@ -1767,7 +1770,7 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  
+
   # 可以访问数据库
   - toEndpoints:
     - matchLabels:
@@ -1776,7 +1779,7 @@ spec:
     - ports:
       - port: "5432"
         protocol: TCP
-  
+
   # 可以访问外部认证服务
   - toFQDNs:
     - matchName: "auth.example.com"
@@ -1826,7 +1829,7 @@ Service负载均衡延迟:
   kube-proxy (iptables): 1.2ms
   kube-proxy (ipvs):     0.8ms
   Cilium eBPF:           0.035ms (25-35x faster!) ⚡
-  
+
 Service负载均衡吞吐量:
   kube-proxy (iptables): 5.2 Gbps
   kube-proxy (ipvs):     7.5 Gbps
@@ -1873,11 +1876,11 @@ Cilium配置推荐:
   tunnel: disabled              # Direct Routing (性能最佳)
   autoDirectNodeRoutes: true    # 自动路由配置
   ipv4NativeRoutingCIDR: 10.0.0.0/8  # Pod CIDR
-  
+
   loadBalancer:
     algorithm: maglev           # Maglev一致性哈希
     mode: dsr                   # Direct Server Return (可选)
-  
+
   hubble:
     enabled: true
     relay:
@@ -1885,14 +1888,14 @@ Cilium配置推荐:
       replicas: 2               # Relay高可用
     ui:
       enabled: true
-  
+
   encryption:
     enabled: true
     type: wireguard             # 或 ipsec
-  
+
   operator:
     replicas: 2                 # Operator高可用
-  
+
   resources:
     limits:
       cpu: 4000m
@@ -1975,8 +1978,8 @@ kubectl -n kube-system logs deploy/clustermesh-apiserver
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **本章总结**:
@@ -1996,3 +1999,30 @@ kubectl -n kube-system logs deploy/clustermesh-apiserver
 
 - [04_eBPF可观测性](./04_eBPF可观测性.md)
 - [05_eBPF安全技术](./05_eBPF安全技术.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF概述与架构](./01_eBPF概述与架构.md) - eBPF概述与架构详解
+- [eBPF网络技术](./02_eBPF网络技术.md) - eBPF网络技术详解
+- [eBPF可观测性](./04_eBPF可观测性.md) - eBPF可观测性详解
+- [eBPF安全技术](./05_eBPF安全技术.md) - eBPF安全技术详解
+- [eBPF性能优化](./06_eBPF性能优化.md) - eBPF性能优化详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [服务网格技术详解](../18_服务网格技术详解/README.md) - 服务网格技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

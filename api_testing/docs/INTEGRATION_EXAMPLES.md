@@ -72,7 +72,7 @@ func (s *TestSuite) TestCreateContainer() {
             "created_by": "manual",
         },
     }
-    
+
     hostConfig := &container.HostConfig{
         PortBindings: nat.PortMap{
             "80/tcp": []nat.PortBinding{
@@ -80,7 +80,7 @@ func (s *TestSuite) TestCreateContainer() {
             },
         },
     }
-    
+
     container, err := s.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "test-container")
     // ...
 }
@@ -98,14 +98,14 @@ func (s *TestSuite) TestCreateContainer() {
         WithContainerPorts("80/tcp"),
         WithContainerLabels(map[string]string{"test": "api"}),
     )
-    
+
     hostConfig := s.factory.CreateDockerHostConfig(
         WithPortBinding("80/tcp", "8080"),
     )
-    
+
     // ✅ 使用工厂生成随机名称
     containerName := s.factory.GenerateTestName("container")
-    
+
     container, err := s.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
     // ...
 }
@@ -120,13 +120,13 @@ func (s *TestSuite) TestWithRandomData() {
     randomPort := s.factory.RandomPort()                   // 随机端口 10000-65535
     randomIP := s.factory.RandomIPv4()                     // 随机IP 192.168.x.x
     randomString := s.factory.RandomString(8)              // 随机字符串
-    
+
     config := s.factory.CreateDockerContainerConfig(
         "nginx:alpine",
         WithContainerPorts(fmt.Sprintf("%d/tcp", randomPort)),
         WithContainerEnv(fmt.Sprintf("ID=%s", randomString)),
     )
-    
+
     // 使用随机数据创建容器...
 }
 ```
@@ -137,7 +137,7 @@ func (s *TestSuite) TestWithRandomData() {
 func (s *TestSuite) TestWithDatasets() {
     // ✅ 使用工厂的数据集
     datasets := s.factory.CreateTestDatasets()
-    
+
     for _, dataset := range datasets {
         switch dataset.Name {
         case "容器镜像列表":
@@ -147,11 +147,11 @@ func (s *TestSuite) TestWithDatasets() {
                 config := s.factory.CreateDockerContainerConfig(img)
                 // ...
             }
-            
+
         case "测试端口映射":
             mappings := dataset.Data["mappings"].(map[string]string)
             // 使用端口映射配置
-            
+
         case "环境变量模板":
             envs := dataset.Data["common"].(map[string]string)
             // 使用环境变量模板
@@ -173,10 +173,10 @@ func (s *TestSuite) TestStartContainer() {
     // 启动容器
     err := s.cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
     s.Require().NoError(err)
-    
+
     // ❌ 硬编码sleep等待
     time.Sleep(5 * time.Second)
-    
+
     // ❌ 手动轮询检查状态
     for i := 0; i < 10; i++ {
         inspect, err := s.cli.ContainerInspect(ctx, containerID)
@@ -195,11 +195,11 @@ func (s *TestSuite) TestStartContainer() {
     // 启动容器
     err := s.cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
     s.Require().NoError(err)
-    
+
     // ✅ 使用工具等待容器运行（带超时）
     err = s.utils.WaitForContainerRunning(ctx, s.cli, containerID, 30*time.Second)
     s.Require().NoError(err)
-    
+
     // ✅ 使用工具断言容器状态
     err = s.utils.AssertContainerRunning(ctx, s.cli, containerID)
     s.Require().NoError(err)
@@ -228,7 +228,7 @@ func (s *TestSuite) TestPerformance() {
         _, err := s.cli.Ping(ctx)
         return err
     })
-    
+
     // ✅ 使用工具格式化结果
     fmt.Println(s.utils.FormatBenchmarkResult(result))
     /*
@@ -241,7 +241,7 @@ func (s *TestSuite) TestPerformance() {
       错误数: 0
       成功率: 100.00%
     */
-    
+
     // 验证性能指标
     s.Require().Equal(100, result.Operations)
     s.Require().Zero(result.ErrorCount)
@@ -267,10 +267,10 @@ func (s *TestSuite) TestWithAutoCleanup() {
     // ✅ 单个测试的资源清理
     container, err := s.cli.ContainerCreate(...)
     s.Require().NoError(err)
-    
+
     // 确保测试结束后清理
     defer s.cli.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true})
-    
+
     // 测试逻辑...
 }
 ```
@@ -283,10 +283,10 @@ func (s *TestSuite) TestWithTiming() {
     duration, err := s.utils.MeasureTime(func() error {
         return s.utils.WaitForContainerRunning(ctx, s.cli, containerID, 30*time.Second)
     })
-    
+
     s.Require().NoError(err)
     color.Green("容器启动耗时: %v", duration)
-    
+
     // 验证性能要求
     s.Require().True(duration < 5*time.Second, "容器启动应该在5秒内完成")
 }
@@ -301,27 +301,27 @@ func (s *TestSuite) TestWithTiming() {
 ```go
 func (s *DockerAPITestSuite) TestCompleteLifecycleWithIntegration() {
     color.Cyan("\n完整示例: 集成测试数据工厂和测试工具")
-    
+
     // ===== 步骤1: 使用工厂创建网络 =====
     color.Yellow("步骤1: 创建测试网络")
     networkConfig := s.factory.CreateDockerNetworkConfig("bridge")
     networkName := s.factory.GenerateTestName("test-network")
-    
+
     networkResp, err := s.cli.NetworkCreate(s.ctx, networkName, networkConfig)
     s.Require().NoError(err)
     defer s.cli.NetworkRemove(s.ctx, networkResp.ID)
     color.Green("✅ 网络创建成功: %s", networkResp.ID[:12])
-    
+
     // ===== 步骤2: 使用工厂创建卷 =====
     color.Yellow("步骤2: 创建测试卷")
     volumeConfig := s.factory.CreateDockerVolumeConfig()
     volumeName := s.factory.GenerateTestName("test-volume")
-    
+
     volumeResp, err := s.cli.VolumeCreate(s.ctx, volumeConfig)
     s.Require().NoError(err)
     defer s.cli.VolumeRemove(s.ctx, volumeResp.Name, false)
     color.Green("✅ 卷创建成功: %s", volumeResp.Name)
-    
+
     // ===== 步骤3: 使用工厂创建容器配置 =====
     color.Yellow("步骤3: 创建容器配置")
     containerConfig := s.factory.CreateDockerContainerConfig(
@@ -333,19 +333,19 @@ func (s *DockerAPITestSuite) TestCompleteLifecycleWithIntegration() {
             "lifecycle": "complete",
         }),
     )
-    
+
     hostConfig := s.factory.CreateDockerHostConfig(
         WithNetworkMode(networkResp.ID),
         WithVolumeBinding(fmt.Sprintf("%s:/data", volumeResp.Name)),
         WithPortBinding("80/tcp", fmt.Sprintf("%d", s.factory.RandomPort())),
     )
-    
+
     containerName := s.factory.GenerateTestName("test-container")
     color.Green("✅ 容器配置创建成功: %s", containerName)
-    
+
     // ===== 步骤4: 创建并启动容器 =====
     color.Yellow("步骤4: 创建并启动容器")
-    
+
     // 使用重试机制创建容器
     var containerResp container.CreateResponse
     err = s.utils.Retry(3, time.Second, func() error {
@@ -357,11 +357,11 @@ func (s *DockerAPITestSuite) TestCompleteLifecycleWithIntegration() {
     s.Require().NoError(err)
     defer s.cli.ContainerRemove(s.ctx, containerResp.ID, types.ContainerRemoveOptions{Force: true})
     color.Green("✅ 容器创建成功: %s", containerResp.ID[:12])
-    
+
     // 启动容器
     err = s.cli.ContainerStart(s.ctx, containerResp.ID, types.ContainerStartOptions{})
     s.Require().NoError(err)
-    
+
     // ===== 步骤5: 使用工具等待容器运行 =====
     color.Yellow("步骤5: 等待容器运行")
     duration, err := s.utils.MeasureTime(func() error {
@@ -370,16 +370,16 @@ func (s *DockerAPITestSuite) TestCompleteLifecycleWithIntegration() {
     })
     s.Require().NoError(err)
     color.Green("✅ 容器运行成功 (耗时: %v)", duration)
-    
+
     // ===== 步骤6: 使用工具验证容器状态 =====
     color.Yellow("步骤6: 验证容器状态")
     err = s.utils.AssertContainerExists(s.ctx, s.cli, containerResp.ID)
     s.Require().NoError(err)
-    
+
     err = s.utils.AssertContainerRunning(s.ctx, s.cli, containerResp.ID)
     s.Require().NoError(err)
     color.Green("✅ 容器状态验证通过")
-    
+
     // ===== 步骤7: 性能测试 =====
     color.Yellow("步骤7: 容器操作性能测试")
     result := s.utils.Benchmark(10, func() error {
@@ -390,23 +390,23 @@ func (s *DockerAPITestSuite) TestCompleteLifecycleWithIntegration() {
     fmt.Printf("   平均耗时: %v, 成功率: %.2f%%\n",
         result.AverageDuration,
         float64(result.Operations-result.ErrorCount)/float64(result.Operations)*100)
-    
+
     // ===== 步骤8: 停止容器 =====
     color.Yellow("步骤8: 停止容器")
     timeout := 10
     err = s.cli.ContainerStop(s.ctx, containerResp.ID, &timeout)
     s.Require().NoError(err)
-    
+
     // 使用工具等待容器停止
     err = s.utils.WaitForContainerStopped(s.ctx, s.cli, containerResp.ID, 15*time.Second)
     s.Require().NoError(err)
     color.Green("✅ 容器停止成功")
-    
+
     // ===== 步骤9: 清理验证 =====
     color.Yellow("步骤9: 验证资源清理")
     // 资源会在defer中自动清理
     color.Green("✅ 所有资源将自动清理")
-    
+
     color.Green("\n🎉 完整生命周期测试成功！")
 }
 ```
@@ -429,7 +429,7 @@ type MyTestSuite struct {
 func (s *MyTestSuite) SetupSuite() {
     s.ctx = context.Background()
     s.client = createClient()
-    
+
     // ✅ 初始化工厂和工具
     s.factory = NewTestDataFactory()
     s.utils = NewTestUtils()
@@ -440,7 +440,7 @@ func (s *MyTestSuite) TearDownSuite() {
     s.utils.CleanupDockerContainers(s.ctx, s.client, "test")
     s.utils.CleanupDockerNetworks(s.ctx, s.client, "test")
     s.utils.CleanupDockerVolumes(s.ctx, s.client, "test")
-    
+
     s.client.Close()
 }
 ```
@@ -451,14 +451,14 @@ func (s *MyTestSuite) TearDownSuite() {
 func (s *MyTestSuite) TestExample() {
     // ✅ 使用工厂生成唯一的测试数据
     containerName := s.factory.GenerateTestName("test")
-    
+
     // ✅ 使用工厂链式调用创建配置
     config := s.factory.CreateDockerContainerConfig(
         "nginx:alpine",
         WithContainerPorts("80/tcp"),
         WithContainerLabels(map[string]string{"test": "example"}),
     )
-    
+
     // ✅ 使用工厂生成随机端口
     hostConfig := s.factory.CreateDockerHostConfig(
         WithPortBinding("80/tcp", fmt.Sprintf("%d", s.factory.RandomPort())),
@@ -485,11 +485,11 @@ func (s *MyTestSuite) TestExample() {
     // 创建并启动容器
     container, _ := s.client.ContainerCreate(...)
     s.client.ContainerStart(...)
-    
+
     // ✅ 使用工具等待（不要用sleep）
     err := s.utils.WaitForContainerRunning(s.ctx, s.client, container.ID, 30*time.Second)
     s.Require().NoError(err)
-    
+
     // ✅ 使用工具验证状态
     err = s.utils.AssertContainerRunning(s.ctx, s.client, container.ID)
     s.Require().NoError(err)
@@ -504,10 +504,10 @@ func (s *MyTestSuite) TestPerformance() {
     result := s.utils.Benchmark(100, func() error {
         return performOperation()
     })
-    
+
     // ✅ 使用工具格式化结果
     fmt.Println(s.utils.FormatBenchmarkResult(result))
-    
+
     // 验证性能要求
     s.Require().True(result.AverageDuration < time.Millisecond*100)
     s.Require().Zero(result.ErrorCount)

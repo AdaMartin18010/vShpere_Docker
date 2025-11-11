@@ -1,5 +1,27 @@
 # Podman技术详解
 
+> **文档定位**: Podman无守护进程容器技术完整指南，涵盖架构原理、容器管理、镜像技术、网络存储、安全机制
+> **技术版本**: Podman 5.0+, Buildah 1.35+, Skopeo 1.14+
+> **最后更新**: 2025-11-11
+> **标准对齐**: [Podman Docs][podman-docs], [OCI Runtime][oci-runtime], [Rootless Containers][rootless]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | Podman 5.0+, Buildah, Skopeo, OCI Runtime |
+| **状态** | 生产就绪 |
+| **适用场景** | 无守护进程容器、Rootless容器、Pod管理 |
+
+> **版本锚点**: 本文档对齐Podman 5.0+技术标准与Rootless容器最佳实践。
+
+---
+
 ## 摘要
 
 本文档提供Podman技术的全面学习资源，从基础概念到高级应用，帮助开发者掌握无守护进程容器技术。涵盖Podman架构原理、容器管理、镜像技术、网络技术、存储技术、安全机制等核心技术领域。
@@ -7,6 +29,7 @@
 ## 目录
 
 - [Podman技术详解](#podman技术详解)
+  - [文档元信息](#文档元信息)
   - [摘要](#摘要)
   - [目录](#目录)
   - [目录结构](#目录结构)
@@ -35,7 +58,13 @@
     - [诊断工具](#诊断工具)
   - [版本信息](#版本信息)
     - [Podman 5.0 重大更新 ⭐](#podman-50-重大更新-)
-  - [相关资源](#相关资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
+  - [参考资源](#参考资源)
+    - [官方文档](#官方文档)
+    - [社区资源](#社区资源)
+    - [学习资源](#学习资源)
   - [贡献指南](#贡献指南)
 
 ## 目录结构
@@ -237,12 +266,53 @@ podman pod inspect <pod_id>
 
 详细内容请参考：[Podman 5.0新特性详解](./07_Podman_5.0新特性详解.md)
 
-## 相关资源
+## 相关文档
 
-- [Podman官方文档](https://docs.podman.io/)
-- [Buildah文档](https://github.com/containers/buildah)
-- [Skopeo文档](https://github.com/containers/skopeo)
-- [Rootless容器指南](https://rootlesscontaine.rs/)
+### 本模块相关
+
+- [Podman架构原理](./01_Podman架构原理.md) - Podman架构深度解析
+- [Podman容器管理](./02_Podman容器管理.md) - Podman容器管理技术
+- [Podman镜像技术](./03_Podman镜像技术.md) - Podman镜像技术详解
+- [Podman网络技术](./04_Podman网络技术.md) - Podman网络技术详解
+- [Podman存储技术](./05_Podman存储技术.md) - Podman存储技术详解
+- [Podman安全机制](./06_Podman安全机制.md) - Podman安全机制详解
+- [Podman 5.0新特性详解](./07_Podman_5.0新特性详解.md) - Podman 5.0新特性
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术对比
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes容器编排
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全实践
+
+---
+
+## 参考资源
+
+[podman-docs]: https://docs.podman.io/ "Podman官方文档"
+[oci-runtime]: https://github.com/opencontainers/runtime-spec "OCI运行时规范"
+[rootless]: https://rootlesscontaine.rs/ "Rootless容器指南"
+
+### 官方文档
+
+- [Podman官方文档][podman-docs] - Podman完整文档
+- [Buildah文档](https://github.com/containers/buildah) - 镜像构建工具
+- [Skopeo文档](https://github.com/containers/skopeo) - 镜像管理工具
+- [Rootless容器指南][rootless] - Rootless容器最佳实践
+- [OCI运行时规范][oci-runtime] - OCI标准规范
+
+### 社区资源
+
+- [Podman GitHub](https://github.com/containers/podman) - Podman源代码
+- [Podman博客](https://podman.io/blogs/) - Podman官方博客
+- [Containers项目](https://github.com/containers) - Containers工具集
+
+### 学习资源
+
+- [Podman教程](https://docs.podman.io/en/latest/Tutorials.html) - 官方教程
+- [Podman vs Docker](https://podman.io/what-is-podman) - Podman与Docker对比
+
+---
 
 ## 贡献指南
 
@@ -252,5 +322,8 @@ podman pod inspect <pod_id>
 4. 提交Pull Request
 
 ---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新
 
 _本目录提供Podman技术的全面学习资源，从基础概念到高级应用，帮助开发者掌握无守护进程容器技术。_

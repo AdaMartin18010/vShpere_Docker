@@ -1,9 +1,9 @@
 # OCI标准详解
 
-> **文档定位**: OCI (Open Container Initiative) 标准完整解析和实施指南  
-> **技术版本**: OCI Image v1.0.2, Runtime v1.0.3, Distribution v1.0.1  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [OCI Official][oci], [CNCF Standards][cncf], [ISO Container][iso]  
+> **文档定位**: OCI (Open Container Initiative) 标准完整解析和实施指南
+> **技术版本**: OCI Image v1.0.2, Runtime v1.0.3, Distribution v1.0.1
+> **最后更新**: 2025-10-21
+> **标准对齐**: [OCI Official][oci], [CNCF Standards][cncf], [ISO Container][iso]
 > **文档版本**: v2.0 (Phase 1+2 标准化版)
 
 [oci]: https://opencontainers.org/ "OCI官方"
@@ -102,6 +102,9 @@
     - [学习资源](#学习资源)
   - [质量指标](#质量指标)
   - [变更记录](#变更记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -128,15 +131,15 @@ graph TB
     A[OCI标准体系] --> B[Image Spec<br/>镜像规范]
     A --> C[Runtime Spec<br/>运行时规范]
     A --> D[Distribution Spec<br/>分发规范]
-    
+
     B --> B1[清单 Manifest]
     B --> B2[配置 Config]
     B --> B3[层 Layers]
-    
+
     C --> C1[配置 config.json]
     C --> C2[生命周期 Lifecycle]
     C --> C3[钩子 Hooks]
-    
+
     D --> D1[HTTP API]
     D --> D2[认证 Auth]
     D --> D3[推送/拉取 Push/Pull]
@@ -151,15 +154,15 @@ graph TB
 ```yaml
 组织结构:
   上级组织: Linux Foundation
-  管理机构: 
+  管理机构:
     - Technical Oversight Board (TOB): 技术监督委员会
     - Trademark Board: 商标委员会
-  
+
   工作组:
     - Image Spec Working Group: 镜像规范工作组
     - Runtime Spec Working Group: 运行时规范工作组
     - Distribution Spec Working Group: 分发规范工作组
-  
+
   成员公司:
     创始成员: Docker, CoreOS, Google, IBM, Microsoft, Red Hat
     当前成员: 100+ 企业和组织
@@ -178,18 +181,18 @@ graph TB
   版本: v1.0.2
   发布日期: 2021-01-22
   状态: Stable
-  
+
 范围:
   - 定义容器镜像的格式和结构
   - 规定镜像的配置和元数据
   - 定义多平台镜像索引
-  
+
 核心组件:
   - Image Manifest: 镜像清单
   - Image Configuration: 镜像配置
   - Image Layers: 镜像层
   - Image Index: 镜像索引 (多平台支持)
-  
+
 媒体类型:
   - application/vnd.oci.image.manifest.v1+json
   - application/vnd.oci.image.config.v1+json
@@ -206,17 +209,17 @@ graph TB
   版本: v1.0.3
   发布日期: 2023-02-17
   状态: Stable
-  
+
 范围:
   - 定义容器运行时的标准接口
   - 规定容器的生命周期管理
   - 定义容器的配置格式
-  
+
 核心组件:
   - Runtime Configuration: 运行时配置 (config.json)
   - Container Lifecycle: 容器生命周期
   - Hooks: 生命周期钩子
-  
+
 支持平台:
   - Linux (主要实现)
   - Windows
@@ -233,17 +236,17 @@ graph TB
   版本: v1.0.1
   发布日期: 2021-05-24
   状态: Stable
-  
+
 范围:
   - 定义容器镜像分发协议
   - 规定Registry的HTTP API
   - 定义认证和授权机制
-  
+
 核心组件:
   - HTTP API Endpoints: REST API接口
   - Authentication: 认证机制
   - Push/Pull Protocol: 推送/拉取协议
-  
+
 兼容性:
   - 基于Docker Registry HTTP API V2
   - 向后兼容Docker镜像
@@ -645,7 +648,7 @@ stateDiagram-v2
     Created --> Running: start
     Running --> Stopped: stop/terminate
     Stopped --> [*]
-    
+
     Created --> [*]: delete
     Running --> [*]: kill
 ```
@@ -755,16 +758,16 @@ OCI定义了基于HTTP的Registry API[^distribution-api],兼容Docker Registry v
 sequenceDiagram
     participant C as Client
     participant R as Registry
-    
+
     C->>R: POST /v2/myapp/blobs/uploads/
     R->>C: 202 Accepted, Location: /v2/myapp/blobs/uploads/uuid
-    
+
     C->>R: PATCH /v2/myapp/blobs/uploads/uuid<br/>Content-Range: 0-1023<br/>[layer data]
     R->>C: 202 Accepted
-    
+
     C->>R: PUT /v2/myapp/blobs/uploads/uuid?digest=sha256:xxx
     R->>C: 201 Created
-    
+
     C->>R: PUT /v2/myapp/manifests/v1.0<br/>[manifest JSON]
     R->>C: 201 Created
 ```
@@ -780,13 +783,13 @@ sequenceDiagram
     participant C as Client
     participant R as Registry
     participant A as Auth Server
-    
+
     C->>R: GET /v2/myapp/manifests/latest
     R->>C: 401 Unauthorized<br/>WWW-Authenticate: Bearer realm="...",service="...",scope="..."
-    
+
     C->>A: GET /token?service=...&scope=...
     A->>C: 200 OK<br/>{token: "..."}
-    
+
     C->>R: GET /v2/myapp/manifests/latest<br/>Authorization: Bearer <token>
     R->>C: 200 OK<br/>[manifest]
 ```
@@ -943,7 +946,7 @@ runc delete mycontainer
 # RHEL/CentOS
 sudo yum install crun
 
-# Ubuntu/Debian  
+# Ubuntu/Debian
 sudo apt-get install crun
 
 # 使用方式与runc相同
@@ -1213,7 +1216,7 @@ OCI标准源于Docker,但进行了标准化和扩展[^oci-vs-docker]:
    ```bash
    # OCI镜像验证
    oci-image-tool validate --type imageLayout myimage/
-   
+
    # OCI运行时验证
    oci-runtime-tool validate
    ```
@@ -1469,5 +1472,28 @@ OCI标准源于Docker,但进行了标准化和扩展[^oci-vs-docker]:
 
 ---
 
-**文档完成度**: 100% ✅  
+**文档完成度**: 100% ✅
 **推荐使用场景**: OCI标准学习、容器镜像构建、运行时实现、技术选型
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [CNCF标准详解](./02_CNCF标准详解.md) - CNCF标准体系详解
+- [容器技术标准对比](./03_容器技术标准对比.md) - 标准对比分析
+- [容器技术规范实施指南](./04_容器技术规范实施.md) - 标准实施指南
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes标准
+- [容器编排技术](../04_容器编排技术/README.md) - 编排技术标准
+- [容器技术标准](../07_容器技术标准/README.md) - 技术标准总览
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

@@ -1,8 +1,8 @@
 # 04 - Velero备份恢复
 
-**作者**: 云原生存储专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生存储专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -47,6 +47,9 @@
   - [8. 总结](#8-总结)
     - [8.1 本章要点](#81-本章要点)
     - [8.2 推荐资源](#82-推荐资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -145,7 +148,7 @@ Velero架构:
      - 执行备份/恢复逻辑
      - 与对象存储交互
      - 协调Restic备份
-   
+
    部署:
      - Deployment (1 replica)
      - 运行在控制平面
@@ -156,7 +159,7 @@ Velero架构:
      - 文件级PV备份
      - 增量备份
      - 适用于不支持快照的PV
-   
+
    部署:
      - DaemonSet (每个节点)
      - privileged模式
@@ -167,7 +170,7 @@ Velero架构:
      - 定义对象存储位置
      - 存储备份元数据
      - 存储资源YAML
-   
+
    支持:
      - AWS S3
      - Azure Blob
@@ -180,7 +183,7 @@ Velero架构:
      - 定义卷快照位置
      - 使用CSI快照
      - 云原生快照
-   
+
    支持:
      - AWS EBS
      - Azure Disk
@@ -192,7 +195,7 @@ Velero架构:
      - 定义备份任务
      - 指定备份范围
      - 配置TTL
-   
+
    字段:
      - includedNamespaces
      - excludedResources
@@ -204,7 +207,7 @@ Velero架构:
      - 定义定时备份
      - Cron表达式
      - 自动化
-   
+
    示例:
      - 每日备份
      - 每周备份
@@ -215,7 +218,7 @@ Velero架构:
      - 定义恢复任务
      - 指定恢复范围
      - 冲突处理
-   
+
    字段:
      - backupName
      - includedNamespaces
@@ -243,13 +246,13 @@ Velero架构:
    - 序列化为JSON
    ↓
 5. 备份PV数据 (2种方式)
-   
+
    方式1: Restic (文件级)
      - Restic DaemonSet执行
      - 文件级增量备份
      - 适用于所有PV类型
      - 较慢，但通用
-   
+
    方式2: Volume Snapshot (快照)
      - CSI VolumeSnapshot
      - 块级快照
@@ -275,12 +278,12 @@ Velero架构:
     ✅ PVC定义
     ✅ ServiceAccounts, RBAC
     ✅ CRD和CR
-  
+
   PV数据:
     ✅ PVC关联的PV数据
     ✅ 使用Restic或Snapshot
     ✅ 可选择性备份
-  
+
   不备份:
     ❌ Events
     ❌ Node
@@ -294,7 +297,7 @@ Velero架构:
         velero-backup.json      # 备份元数据
         <backup-name>.tar.gz    # 压缩的资源YAML
         <backup-name>-logs.gz   # 备份日志
-    
+
     restic/
       <repo>/                   # Restic仓库
         config
@@ -325,38 +328,38 @@ Velero架构:
    - 根据includedNamespaces/excludedResources过滤
    ↓
 5. 恢复资源 (分阶段)
-   
+
    Phase 1: 预恢复
      - CustomResourceDefinitions (CRD)
      - Namespaces
      - PersistentVolumes (PV)
      - PersistentVolumeClaims (PVC)
-   
+
    Phase 2: 核心资源
      - ServiceAccounts
      - Secrets
      - ConfigMaps
      - Services
-   
+
    Phase 3: 工作负载
      - Deployments
      - StatefulSets
      - DaemonSets
      - Jobs, CronJobs
-   
+
    Phase 4: 其他资源
      - Ingress
      - NetworkPolicy
      - Custom Resources
    ↓
 6. 恢复PV数据
-   
+
    方式1: Restic恢复
      - Init Container恢复数据
      - 挂载PVC
      - Restic restore
      - 完成后启动应用容器
-   
+
    方式2: Snapshot恢复
      - 从快照创建PV
      - PVC绑定到新PV
@@ -374,11 +377,11 @@ Velero架构:
   资源冲突处理:
     - none: 跳过已存在资源
     - update: 更新已存在资源
-  
+
   命名空间映射:
     - 恢复到不同命名空间
     - 跨集群迁移
-  
+
   选择性恢复:
     - 按命名空间
     - 按资源类型
@@ -404,12 +407,12 @@ Velero架构:
 Kubernetes集群:
   版本: 1.16+
   推荐: 1.25+
-  
+
 节点资源:
   Velero Server:
     CPU: 500m - 1 core
     Memory: 256Mi - 512Mi
-  
+
   Restic DaemonSet (可选):
     CPU: 500m per node
     Memory: 512Mi per node
@@ -427,7 +430,7 @@ Kubernetes集群:
     - 创建CRD
     - 创建Namespace
     - RBAC权限
-  
+
   对象存储:
     - 读写权限
     - ListBucket
@@ -744,27 +747,27 @@ metadata:
 spec:
   # Cron表达式 (UTC时间)
   schedule: "0 2 * * *"  # 每天凌晨2点
-  
+
   # 备份模板
   template:
     includedNamespaces:
     - production
     - staging
-    
+
     excludedResources:
     - events
     - events.events.k8s.io
-    
+
     ttl: 168h0m0s  # 7天
-    
+
     storageLocation: default
-    
+
     volumeSnapshotLocations:
     - default
-    
+
     # Restic备份PV
     defaultVolumesToRestic: true
-    
+
     # 备份标签
     labels:
       schedule: daily
@@ -901,24 +904,24 @@ spec:
   includedNamespaces:
   - production
   - staging
-  
+
   # 排除的命名空间
   excludedNamespaces:
   - kube-system
   - kube-public
-  
+
   # 排除的资源类型
   excludedResources:
   - events
   - events.events.k8s.io
   - nodes
-  
+
   # 包含的资源类型 (如果设置，只备份这些)
   # includedResources:
   # - deployments
   # - services
   # - configmaps
-  
+
   # 标签选择器
   labelSelector:
     matchLabels:
@@ -929,23 +932,23 @@ spec:
       values:
       - production
       - staging
-  
+
   # 是否包含集群资源 (PV, StorageClass, etc.)
   includeClusterResources: true
-  
+
   # TTL (生命周期)
   ttl: 720h0m0s  # 30天
-  
+
   # 存储位置
   storageLocation: default
-  
+
   # 快照位置
   volumeSnapshotLocations:
   - default
-  
+
   # 默认使用Restic备份PV
   defaultVolumesToRestic: true
-  
+
   # 有序备份
   orderedResources:
     pods: namespaces/name
@@ -1014,7 +1017,7 @@ velero backup get | grep -E "([0-9]d|[0-9]h)"
     - 每日: 7天
     - 每周: 4周
     - 每月: 12个月
-  
+
   开发环境:
     - 每日: 3天
     - 每周: 2周
@@ -1463,8 +1466,37 @@ Restic性能:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生存储专家团队
 
 **Tags**: `#Velero` `#Backup` `#DisasterRecovery` `#Migration` `#CloudNativeStorage`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [云原生存储概述与架构](./01_云原生存储概述与架构.md) - 云原生存储概述与架构
+- [Kubernetes存储基础](./02_Kubernetes存储基础.md) - Kubernetes存储基础
+- [Rook Ceph深度解析](./03_Rook_Ceph深度解析.md) - Rook Ceph深度解析
+- [CSI驱动详解](./05_CSI驱动详解.md) - CSI驱动详解
+- [存储性能优化](./06_存储性能优化.md) - 存储性能优化
+- [多云存储](./07_多云存储.md) - 多云存储
+- [存储安全](./08_存储安全.md) - 存储安全
+- [实战案例](./09_实战案例.md) - 实战案例
+- [最佳实践](./10_最佳实践.md) - 最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器故障诊断](../06_容器监控与运维/04_容器故障诊断.md) - 容器故障诊断
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器技术实践案例
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

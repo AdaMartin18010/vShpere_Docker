@@ -206,13 +206,13 @@ Response: 201 Created
 service KV {
   // 存储键值对
   rpc Put(PutRequest) returns (PutResponse) {}
-  
+
   // 获取键值对
   rpc Range(RangeRequest) returns (RangeResponse) {}
-  
+
   // 删除键值对
   rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {}
-  
+
   // 事务操作
   rpc Txn(TxnRequest) returns (TxnResponse) {}
 }
@@ -273,7 +273,7 @@ API版本管理:
   当前版本: 1.43
   最低支持: 1.24
   版本协商: 自动选择兼容版本
-  
+
 向后兼容性:
   ✅ 新增字段不影响旧版本
   ✅ 废弃字段保留一定时间
@@ -291,7 +291,7 @@ GET /version:
   描述: 获取Docker版本信息
   认证: 不需要
   返回: 版本号、API版本、Go版本、操作系统等
-  
+
   测试场景:
     - 验证Docker守护进程可用
     - 检查API版本兼容性
@@ -301,7 +301,7 @@ GET /info:
   描述: 获取系统信息
   认证: 不需要
   返回: 容器数、镜像数、存储驱动、内核版本等
-  
+
   测试场景:
     - 验证系统资源
     - 检查存储驱动
@@ -311,7 +311,7 @@ GET /_ping:
   描述: 健康检查
   认证: 不需要
   返回: "OK"
-  
+
   测试场景:
     - 监控服务可用性
     - 负载均衡健康检查
@@ -352,10 +352,10 @@ if err != nil {
 ```yaml
 GET /images/json:
   描述: 列出所有镜像
-  参数: 
+  参数:
     - all: 显示中间层镜像
     - filters: 过滤条件(dangling, label等)
-  
+
   测试场景:
     - 验证镜像列表
     - 检查镜像存在
@@ -367,7 +367,7 @@ POST /images/create:
     - fromImage: 镜像名称
     - tag: 标签
   流式响应: 下载进度
-  
+
   测试场景:
     - 验证镜像拉取
     - 测试网络连接
@@ -376,7 +376,7 @@ POST /images/create:
 GET /images/{name}/json:
   描述: 检查镜像详情
   返回: 镜像元数据、层信息、配置等
-  
+
   测试场景:
     - 验证镜像完整性
     - 检查镜像配置
@@ -387,7 +387,7 @@ DELETE /images/{name}:
   参数:
     - force: 强制删除
     - noprune: 不删除未标记的父镜像
-  
+
   测试场景:
     - 清理测试镜像
     - 验证依赖检查
@@ -400,7 +400,7 @@ DELETE /images/{name}:
 // 列出镜像
 images, err := client.ImageList(ctx, types.ImageListOptions{})
 for _, img := range images {
-    fmt.Printf("镜像: %s, 大小: %d MB\n", 
+    fmt.Printf("镜像: %s, 大小: %d MB\n",
         img.RepoTags[0], img.Size/1024/1024)
 }
 
@@ -433,7 +433,7 @@ POST /containers/create:
   描述: 创建容器
   请求体: 容器配置(镜像、命令、环境变量、端口等)
   返回: 容器ID和警告
-  
+
   测试场景:
     - 创建基础容器
     - 测试端口映射
@@ -444,7 +444,7 @@ POST /containers/create:
 POST /containers/{id}/start:
   描述: 启动容器
   参数: detachKeys (分离键)
-  
+
   测试场景:
     - 验证容器启动
     - 检查启动时间
@@ -453,7 +453,7 @@ POST /containers/{id}/start:
 GET /containers/{id}/json:
   描述: 检查容器详情
   返回: 完整的容器状态和配置
-  
+
   测试场景:
     - 验证容器状态
     - 检查运行时配置
@@ -466,7 +466,7 @@ GET /containers/{id}/logs:
     - since/until: 时间范围
     - tail: 最后N行
   流式响应: 日志流
-  
+
   测试场景:
     - 验证应用输出
     - 调试容器问题
@@ -475,7 +475,7 @@ GET /containers/{id}/logs:
 GET /containers/{id}/stats:
   描述: 获取容器统计信息
   流式响应: 实时统计数据
-  
+
   测试场景:
     - 监控资源使用
     - 性能分析
@@ -484,7 +484,7 @@ GET /containers/{id}/stats:
 POST /containers/{id}/stop:
   描述: 停止容器
   参数: t (超时秒数)
-  
+
   测试场景:
     - 优雅停止
     - 超时处理
@@ -495,7 +495,7 @@ DELETE /containers/{id}:
   参数:
     - v: 删除关联卷
     - force: 强制删除运行中容器
-  
+
   测试场景:
     - 清理测试容器
     - 验证卷清理
@@ -562,7 +562,7 @@ err = client.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
 POST /networks/create:
   描述: 创建网络
   参数: 网络名称、驱动、IPAM配置
-  
+
   测试场景:
     - 创建自定义网络
     - 测试网络驱动
@@ -571,7 +571,7 @@ POST /networks/create:
 GET /networks/{id}:
   描述: 检查网络详情
   返回: 网络配置和连接的容器
-  
+
   测试场景:
     - 验证网络配置
     - 检查容器连接
@@ -579,7 +579,7 @@ GET /networks/{id}:
 
 POST /networks/{id}/connect:
   描述: 连接容器到网络
-  
+
   测试场景:
     - 动态网络连接
     - 多网络容器
@@ -587,7 +587,7 @@ POST /networks/{id}/connect:
 
 DELETE /networks/{id}:
   描述: 删除网络
-  
+
   测试场景:
     - 清理测试网络
     - 验证依赖检查
@@ -599,7 +599,7 @@ DELETE /networks/{id}:
 POST /volumes/create:
   描述: 创建卷
   参数: 卷名称、驱动、标签
-  
+
   测试场景:
     - 创建数据卷
     - 测试卷驱动
@@ -608,7 +608,7 @@ POST /volumes/create:
 GET /volumes/{name}:
   描述: 检查卷详情
   返回: 卷配置和挂载点
-  
+
   测试场景:
     - 验证卷配置
     - 检查挂载点
@@ -617,7 +617,7 @@ GET /volumes/{name}:
 DELETE /volumes/{name}:
   描述: 删除卷
   参数: force (强制删除)
-  
+
   测试场景:
     - 清理测试卷
     - 验证数据清除
@@ -634,7 +634,7 @@ API组织结构:
   核心API (Core API):
     - /api/v1/*
     - Pod, Service, Namespace, ConfigMap等
-  
+
   命名空间API (Named API):
     - /apis/{group}/{version}/*
     - apps/v1: Deployment, StatefulSet
@@ -658,7 +658,7 @@ API访问方式:
 POST /api/v1/namespaces/{namespace}/pods:
   描述: 创建Pod
   请求体: Pod规范
-  
+
   测试场景:
     - 创建单容器Pod
     - 创建多容器Pod
@@ -669,7 +669,7 @@ POST /api/v1/namespaces/{namespace}/pods:
 GET /api/v1/namespaces/{namespace}/pods/{name}:
   描述: 获取Pod详情
   返回: Pod状态、容器状态、事件等
-  
+
   测试场景:
     - 检查Pod状态
     - 验证容器就绪
@@ -678,7 +678,7 @@ GET /api/v1/namespaces/{namespace}/pods/{name}:
 GET /api/v1/namespaces/{namespace}/pods:
   描述: 列出Pods
   参数: labelSelector, fieldSelector
-  
+
   测试场景:
     - 按标签筛选
     - 按字段筛选
@@ -687,7 +687,7 @@ GET /api/v1/namespaces/{namespace}/pods:
 GET /api/v1/namespaces/{namespace}/pods/{name}/log:
   描述: 获取Pod日志
   参数: container, tailLines, since
-  
+
   测试场景:
     - 获取容器日志
     - 多容器日志
@@ -696,7 +696,7 @@ GET /api/v1/namespaces/{namespace}/pods/{name}/log:
 DELETE /api/v1/namespaces/{namespace}/pods/{name}:
   描述: 删除Pod
   参数: gracePeriodSeconds
-  
+
   测试场景:
     - 优雅删除
     - 强制删除
@@ -756,7 +756,7 @@ err = clientset.CoreV1().Pods("default").Delete(ctx, "test-pod", metav1.DeleteOp
 ```yaml
 POST /apis/apps/v1/namespaces/{namespace}/deployments:
   描述: 创建Deployment
-  
+
   测试场景:
     - 创建基础Deployment
     - 配置副本数
@@ -765,7 +765,7 @@ POST /apis/apps/v1/namespaces/{namespace}/deployments:
 
 GET /apis/apps/v1/namespaces/{namespace}/deployments/{name}:
   描述: 获取Deployment详情
-  
+
   测试场景:
     - 检查部署状态
     - 验证副本数
@@ -773,7 +773,7 @@ GET /apis/apps/v1/namespaces/{namespace}/deployments/{name}:
 
 PATCH /apis/apps/v1/namespaces/{namespace}/deployments/{name}/scale:
   描述: 扩缩容Deployment
-  
+
   测试场景:
     - 水平扩展
     - 缩容测试
@@ -785,7 +785,7 @@ PATCH /apis/apps/v1/namespaces/{namespace}/deployments/{name}/scale:
 ```yaml
 POST /api/v1/namespaces/{namespace}/services:
   描述: 创建Service
-  
+
   测试场景:
     - ClusterIP服务
     - NodePort服务
@@ -794,7 +794,7 @@ POST /api/v1/namespaces/{namespace}/services:
 
 GET /api/v1/namespaces/{namespace}/services/{name}:
   描述: 获取Service详情
-  
+
   测试场景:
     - 验证服务配置
     - 检查端点
@@ -806,7 +806,7 @@ GET /api/v1/namespaces/{namespace}/services/{name}:
 ```yaml
 POST /api/v1/namespaces/{namespace}/configmaps:
   描述: 创建ConfigMap
-  
+
   测试场景:
     - 配置数据存储
     - 环境变量注入
@@ -814,7 +814,7 @@ POST /api/v1/namespaces/{namespace}/configmaps:
 
 POST /api/v1/namespaces/{namespace}/secrets:
   描述: 创建Secret
-  
+
   测试场景:
     - 敏感数据存储
     - TLS证书管理
@@ -853,7 +853,7 @@ Put(PutRequest):
     - value: 值
     - lease: 租约ID
     - prev_kv: 返回前一个值
-  
+
   测试场景:
     - 基础存储
     - 带租约存储
@@ -865,7 +865,7 @@ Range(RangeRequest):
     - key: 键或范围起点
     - range_end: 范围终点
     - limit: 返回数量限制
-  
+
   测试场景:
     - 单键查询
     - 范围查询
@@ -876,7 +876,7 @@ DeleteRange(DeleteRangeRequest):
   参数:
     - key: 键或范围起点
     - range_end: 范围终点
-  
+
   测试场景:
     - 单键删除
     - 范围删除
@@ -888,7 +888,7 @@ Txn(TxnRequest):
     - compare: 比较条件
     - success: 成功操作
     - failure: 失败操作
-  
+
   测试场景:
     - 原子操作
     - 条件更新
@@ -936,7 +936,7 @@ if txnResp.Succeeded {
 Watch(WatchRequest):
   描述: 监听键变化
   流式响应: 变更事件流
-  
+
   测试场景:
     - 单键监听
     - 范围监听
@@ -966,7 +966,7 @@ watchChan := client.Watch(ctx, "/config/", clientv3.WithPrefix())
 LeaseGrant(LeaseGrantRequest):
   描述: 创建租约
   参数: TTL (生存时间)
-  
+
   测试场景:
     - 创建租约
     - TTL验证
@@ -974,14 +974,14 @@ LeaseGrant(LeaseGrantRequest):
 LeaseKeepAlive(LeaseKeepAliveRequest):
   描述: 续约
   流式请求/响应
-  
+
   测试场景:
     - 自动续约
     - 租约保持
 
 LeaseRevoke(LeaseRevokeRequest):
   描述: 撤销租约
-  
+
   测试场景:
     - 手动撤销
     - 级联删除
@@ -1291,25 +1291,25 @@ cat test_results/json_test_output.json
 // 在docker_api_test.go中添加新测试
 func (s *DockerAPITestSuite) TestNew_MyFeature() {
     color.Cyan("\n新测试: 我的功能")
-    
+
     // 1. 使用测试数据工厂
     config := s.factory.CreateDockerContainerConfig(
         "my-image:latest",
         WithContainerPorts("8080/tcp"),
     )
-    
+
     // 2. 执行操作
-    container, err := s.cli.ContainerCreate(s.ctx, config, nil, nil, nil, 
+    container, err := s.cli.ContainerCreate(s.ctx, config, nil, nil, nil,
         s.factory.GenerateTestName("test"))
     s.Require().NoError(err)
-    
+
     // 3. 使用测试工具验证
     err = s.utils.WaitForContainerRunning(s.ctx, s.cli, container.ID, 30*time.Second)
     s.Require().NoError(err)
-    
+
     // 4. 清理
     defer s.cli.ContainerRemove(s.ctx, container.ID, types.ContainerRemoveOptions{Force: true})
-    
+
     color.Green("✅ 测试通过")
 }
 ```
@@ -1345,22 +1345,22 @@ FIRST原则:
     - 单元测试应在秒级完成
     - 使用测试工具避免sleep
     - 并行运行独立测试
-  
+
   Independent (独立):
     - 测试间无依赖
     - 使用随机数据避免冲突
     - 每个测试清理资源
-  
+
   Repeatable (可重复):
     - 结果一致
     - 无时间依赖
     - 无外部依赖
-  
+
   Self-validating (自验证):
     - 明确的断言
     - 清晰的错误信息
     - 完整的验证
-  
+
   Timely (及时):
     - 测试驱动开发
     - 持续集成
@@ -1388,7 +1388,7 @@ port := 8080             // 可能被占用
 func (s *TestSuite) TestExample() {
     container, err := createContainer()
     defer cleanup(container) // 确保清理
-    
+
     // 测试逻辑...
 }
 
@@ -1429,7 +1429,7 @@ s.Require().Zero(result.ErrorCount)
 ### API标准覆盖
 
 ```yaml
-✅ Docker API: 
+✅ Docker API:
   - 20个测试用例
   - RESTful + Unix Socket
   - 完整生命周期覆盖

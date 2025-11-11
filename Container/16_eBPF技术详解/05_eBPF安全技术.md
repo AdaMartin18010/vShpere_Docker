@@ -27,6 +27,9 @@
     - [安全策略设计](#安全策略设计)
     - [性能影响评估](#性能影响评估)
   - [参考资料](#参考资料)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -195,19 +198,19 @@ LSM Hook分类:
     - file_permission: 文件权限检查
     - inode_create: 文件创建
     - inode_unlink: 文件删除
-  
+
   进程控制:
     - task_alloc: 进程创建
     - task_free: 进程销毁
     - task_kill: 信号发送
     - bprm_check_security: 程序执行
-  
+
   网络安全:
     - socket_create: Socket创建
     - socket_bind: Socket绑定
     - socket_connect: Socket连接
     - socket_sendmsg: 消息发送
-  
+
   IPC安全:
     - ipc_permission: IPC权限
     - msg_queue_msgsnd: 消息队列
@@ -284,11 +287,11 @@ int BPF_PROG(block_dangerous_exec, struct linux_binprm *bprm)
 {
     const char *filename;
     char path[256];
-    
+
     // 获取文件路径
     filename = BPF_CORE_READ(bprm, filename);
     bpf_probe_read_kernel_str(path, sizeof(path), filename);
-    
+
     // 检查是否在黑名单中
     for (int i = 0; i < sizeof(blocked_paths) / sizeof(char *); i++) {
         if (bpf_strncmp(path, strlen(blocked_paths[i]), blocked_paths[i]) == 0) {
@@ -296,7 +299,7 @@ int BPF_PROG(block_dangerous_exec, struct linux_binprm *bprm)
             return -EPERM;  // 拒绝执行
         }
     }
-    
+
     return 0;  // 允许执行
 }
 ```
@@ -337,15 +340,15 @@ int BPF_PROG(monitor_file_open, struct file *file, int mask)
     struct event_t *event;
     const char *filename;
     char path[256];
-    
+
     // 只监控写入操作
     if (!(mask & MAY_WRITE))
         return 0;
-    
+
     // 获取文件路径
     filename = BPF_CORE_READ(file, f_path.dentry, d_name.name);
     bpf_probe_read_kernel_str(path, sizeof(path), filename);
-    
+
     // 检查是否为监控文件
     bool is_watched = false;
     for (int i = 0; i < sizeof(watched_files) / sizeof(char *); i++) {
@@ -354,22 +357,22 @@ int BPF_PROG(monitor_file_open, struct file *file, int mask)
             break;
         }
     }
-    
+
     if (!is_watched)
         return 0;
-    
+
     // 记录事件
     event = bpf_ringbuf_reserve(&events, sizeof(*event), 0);
     if (!event)
         return 0;
-    
+
     event->pid = bpf_get_current_pid_tgid() >> 32;
     event->uid = bpf_get_current_uid_gid() & 0xFFFFFFFF;
     bpf_get_current_comm(&event->comm, sizeof(event->comm));
     bpf_probe_read_kernel_str(&event->path, sizeof(event->path), path);
-    
+
     bpf_ringbuf_submit(event, 0);
-    
+
     return 0;  // 允许但记录
 }
 ```
@@ -521,7 +524,7 @@ spec:
     seccompProfile:
       type: Localhost
       localhostProfile: profiles/custom-profile.json
-  
+
   containers:
   - name: app
     image: myapp:latest
@@ -529,7 +532,7 @@ spec:
       # 容器级别seccomp profile
       seccompProfile:
         type: RuntimeDefault
-      
+
       # 其他安全设置
       runAsNonRoot: true
       runAsUser: 1000
@@ -720,8 +723,8 @@ CPU开销:
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **本章总结**:
@@ -740,3 +743,30 @@ CPU开销:
 
 - [06_eBPF性能优化](./06_eBPF性能优化.md)
 - [07_eBPF实战案例](./07_eBPF实战案例.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF概述与架构](./01_eBPF概述与架构.md) - eBPF概述与架构详解
+- [eBPF网络技术](./02_eBPF网络技术.md) - eBPF网络技术详解
+- [eBPF与容器技术](./03_eBPF与容器技术.md) - eBPF与容器技术详解
+- [eBPF可观测性](./04_eBPF可观测性.md) - eBPF可观测性详解
+- [eBPF性能优化](./06_eBPF性能优化.md) - eBPF性能优化详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全技术
+- [容器安全威胁分析](../05_容器安全技术/01_容器安全威胁分析.md) - 安全威胁分析
+- [容器安全防护技术](../05_容器安全技术/02_容器安全防护技术.md) - 安全防护技术
+- [容器运行时安全](../05_容器安全技术/04_容器运行时安全.md) - 容器运行时安全
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

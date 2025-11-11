@@ -113,6 +113,9 @@
       - [11.3.2 故障恢复](#1132-故障恢复)
   - [总结](#总结)
   - [参考资源](#参考资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. WebAssembly 2.0 概述
 
@@ -151,7 +154,7 @@ WebAssembly 2.0 是2025年发布的重要版本，带来了多项重大更新和
 // 检查WebAssembly支持
 if (typeof WebAssembly === 'object') {
     console.log('WebAssembly is supported');
-    
+
     // 检查WASM 2.0特性
     WebAssembly.validate(new Uint8Array([...wasm2Bytes]))
         .then(result => {
@@ -185,13 +188,13 @@ if (typeof WebAssembly === 'object') {
     local.get $b
     i32x4.add
   )
-  
+
   (func $vector_multiply (param $a v128) (param $b v128) (result v128)
     local.get $a
     local.get $b
     i32x4.mul
   )
-  
+
   (export "vector_add" (func $vector_add))
   (export "vector_multiply" (func $vector_multiply))
 )
@@ -203,17 +206,17 @@ if (typeof WebAssembly === 'object') {
 ;; 多线程WebAssembly模块
 (module
   (memory (export "memory") 1 10 shared)
-  
+
   (func $worker_init
     (i32.store (i32.const 0) (i32.const 42))
   )
-  
+
   (func $atomic_add (param $ptr i32) (param $value i32) (result i32)
     local.get $ptr
     local.get $value
     i32.atomic.rmw.add
   )
-  
+
   (export "worker_init" (func $worker_init))
   (export "atomic_add" (func $atomic_add))
 )
@@ -225,9 +228,9 @@ if (typeof WebAssembly === 'object') {
 ;; 异常处理示例
 (module
   (type $exception (struct (field i32)))
-  
+
   (tag $div_by_zero (param i32))
-  
+
   (func $safe_divide (param $a i32) (param $b i32) (result i32)
     local.get $b
     i32.eqz
@@ -235,12 +238,12 @@ if (typeof WebAssembly === 'object') {
       i32.const 0
       throw $div_by_zero
     end
-    
+
     local.get $a
     local.get $b
     i32.div_s
   )
-  
+
   (export "safe_divide" (func $safe_divide))
 )
 ```
@@ -256,23 +259,23 @@ if (typeof WebAssembly === 'object') {
     (field $name (ref string))
     (field $age i32)
   ))
-  
+
   (type $Node (struct
     (field $value i32)
     (field $next (ref null $Node))
   ))
-  
+
   (func $create_person (param $name (ref string)) (param $age i32) (result (ref $Person))
     local.get $name
     local.get $age
     struct.new $Person
   )
-  
+
   (func $get_name (param $person (ref $Person)) (result (ref string))
     local.get $person
     struct.get $Person $name
   )
-  
+
   (export "create_person" (func $create_person))
   (export "get_name" (func $get_name))
 )
@@ -284,23 +287,23 @@ if (typeof WebAssembly === 'object') {
 ;; 引用类型示例
 (module
   (type $Box (struct (field $value i32)))
-  
+
   (func $box_new (param $value i32) (result (ref $Box))
     local.get $value
     struct.new $Box
   )
-  
+
   (func $box_get (param $box (ref $Box)) (result i32)
     local.get $box
     struct.get $Box $value
   )
-  
+
   (func $box_set (param $box (ref $Box)) (param $value i32)
     local.get $box
     local.get $value
     struct.set $Box $value
   )
-  
+
   (export "box_new" (func $box_new))
   (export "box_get" (func $box_get))
   (export "box_set" (func $box_set))
@@ -315,20 +318,20 @@ if (typeof WebAssembly === 'object') {
 ;; 共享内存示例
 (module
   (memory (export "shared_memory") 1 10 shared)
-  
+
   (func $init_shared_data
     (i32.store (i32.const 0) (i32.const 100))
     (i32.store (i32.const 4) (i32.const 200))
   )
-  
+
   (func $read_shared_data (result i32)
     (i32.load (i32.const 0))
   )
-  
+
   (func $write_shared_data (param $value i32)
     (i32.store (i32.const 8) (local.get $value))
   )
-  
+
   (export "init_shared_data" (func $init_shared_data))
   (export "read_shared_data" (func $read_shared_data))
   (export "write_shared_data" (func $write_shared_data))
@@ -341,25 +344,25 @@ if (typeof WebAssembly === 'object') {
 ;; 原子操作示例
 (module
   (memory (export "memory") 1 10 shared)
-  
+
   (func $atomic_increment (param $ptr i32) (result i32)
     local.get $ptr
     i32.const 1
     i32.atomic.rmw.add
   )
-  
+
   (func $atomic_compare_exchange (param $ptr i32) (param $expected i32) (param $replacement i32) (result i32)
     local.get $ptr
     local.get $expected
     local.get $replacement
     i32.atomic.rmw.cmpxchg
   )
-  
+
   (func $atomic_load (param $ptr i32) (result i32)
     local.get $ptr
     i32.atomic.load
   )
-  
+
   (export "atomic_increment" (func $atomic_increment))
   (export "atomic_compare_exchange" (func $atomic_compare_exchange))
   (export "atomic_load" (func $atomic_load))
@@ -385,15 +388,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         OpenFlags::CREATE | OpenFlags::WRITE,
         FilePerms::READ | FilePerms::WRITE,
     ).await?;
-    
+
     // 写入数据
     let data = b"Hello, WASI 2.0!";
     let written = file.write(data).await?;
     println!("Written {} bytes", written);
-    
+
     // 关闭文件
     file.close().await?;
-    
+
     Ok(())
 }
 ```
@@ -408,16 +411,16 @@ use wasi::filesystem::*;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建目录
     create_directory("/tmp/wasi_example").await?;
-    
+
     // 列出目录内容
     let entries = read_directory("/tmp/wasi_example").await?;
     for entry in entries {
         println!("Entry: {:?}", entry);
     }
-    
+
     // 删除目录
     remove_directory("/tmp/wasi_example").await?;
-    
+
     Ok(())
 }
 ```
@@ -435,7 +438,7 @@ use wasi::io::streams::*;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建HTTP客户端
     let client = Client::new();
-    
+
     // 发送GET请求
     let request = Request::new(
         Method::Get,
@@ -443,14 +446,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Headers::new(),
         None,
     );
-    
+
     let response = client.send(request).await?;
     println!("Status: {}", response.status());
-    
+
     // 读取响应体
     let body = response.body().read_all().await?;
     println!("Response: {}", String::from_utf8_lossy(&body));
-    
+
     Ok(())
 }
 ```
@@ -467,12 +470,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建TCP监听器
     let listener = TcpListener::bind("0.0.0.0:8080").await?;
     println!("Server listening on port 8080");
-    
+
     loop {
         // 接受连接
         let (stream, addr) = listener.accept().await?;
         println!("New connection from: {}", addr);
-        
+
         // 处理连接
         handle_connection(stream).await?;
     }
@@ -480,16 +483,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn handle_connection(mut stream: TcpStream) -> Result<(), Box<dyn std::error::Error>> {
     let mut buffer = [0; 1024];
-    
+
     // 读取数据
     let bytes_read = stream.read(&mut buffer).await?;
     let request = String::from_utf8_lossy(&buffer[..bytes_read]);
     println!("Received: {}", request);
-    
+
     // 发送响应
     let response = "HTTP/1.1 200 OK\r\n\r\nHello, WASI 2.0!";
     stream.write(response.as_bytes()).await?;
-    
+
     Ok(())
 }
 ```
@@ -513,15 +516,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .stdout(Stdio::Piped)
             .stderr(Stdio::Piped),
     ).await?;
-    
+
     // 等待进程完成
     let exit_code = child.wait().await?;
     println!("Process exited with code: {}", exit_code);
-    
+
     // 读取输出
     let stdout = child.stdout().read_all().await?;
     println!("Stdout: {}", String::from_utf8_lossy(&stdout));
-    
+
     Ok(())
 }
 ```
@@ -540,7 +543,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // 清理资源
         std::process::exit(0);
     }).await?;
-    
+
     // 主循环
     loop {
         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
@@ -568,16 +571,16 @@ data:
     wasi_nn = true
     wasi_crypto = true
     wasi_sockets = true
-    
+
     [wasmedge.wasi]
     preopens = ["/tmp:/tmp", "/home:/home"]
-    
+
     [wasmedge.wasi_nn]
     backend = "openvino"
-    
+
     [wasmedge.wasi_crypto]
     enabled = true
-    
+
     [wasmedge.wasi_sockets]
     enabled = true
 ```
@@ -633,16 +636,16 @@ data:
     wasi_nn = true
     wasi_crypto = true
     wasi_sockets = true
-    
+
     [wasmtime.wasi]
     preopens = ["/tmp:/tmp", "/home:/home"]
-    
+
     [wasmtime.wasi_nn]
     backend = "openvino"
-    
+
     [wasmtime.wasi_crypto]
     enabled = true
-    
+
     [wasmtime.wasi_sockets]
     enabled = true
 ```
@@ -698,16 +701,16 @@ data:
     wasi_nn = true
     wasi_crypto = true
     wasi_sockets = true
-    
+
     [wasmer.wasi]
     preopens = ["/tmp:/tmp", "/home:/home"]
-    
+
     [wasmer.wasi_nn]
     backend = "openvino"
-    
+
     [wasmer.wasi_crypto]
     enabled = true
-    
+
     [wasmer.wasi_sockets]
     enabled = true
 ```
@@ -813,26 +816,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     config.wasm_bulk_memory(true);
     config.wasm_mutable_globals(true);
     config.strategy(Strategy::Cranelift);
-    
+
     // 创建引擎
     let engine = Engine::new(&config)?;
-    
+
     // 创建模块
     let module = Module::from_file(&engine, "main.wasm")?;
-    
+
     // 创建存储
     let mut store = Store::new(&engine, ());
-    
+
     // 创建实例
     let instance = Instance::new(&mut store, &module, &[])?;
-    
+
     // 获取函数
     let func = instance.get_typed_func::<(), i32>(&mut store, "main")?;
-    
+
     // 调用函数
     let result = func.call(&mut store, ())?;
     println!("Result: {}", result);
-    
+
     Ok(())
 }
 ```
@@ -883,19 +886,19 @@ impl PoolAllocator {
 unsafe impl GlobalAlloc for PoolAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let mut pool = self.pool.lock().unwrap();
-        
+
         // 尝试从池中获取内存
         if let Some(ptr) = pool.pop() {
             return ptr;
         }
-        
+
         // 池为空，从系统分配
         System.alloc(layout)
     }
-    
+
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
         let mut pool = self.pool.lock().unwrap();
-        
+
         // 如果池未满，将内存返回池中
         if pool.len() < self.pool_size {
             pool.push(ptr);
@@ -929,11 +932,11 @@ impl GCObject {
             references: Vec::new(),
         }))
     }
-    
+
     fn add_reference(&mut self, obj: Rc<RefCell<GCObject>>) {
         self.references.push(obj);
     }
-    
+
     fn cleanup(&mut self) {
         // 清理循环引用
         self.references.retain(|obj| {
@@ -946,10 +949,10 @@ impl GCObject {
 fn main() {
     let obj1 = GCObject::new(vec![1, 2, 3]);
     let obj2 = GCObject::new(vec![4, 5, 6]);
-    
+
     obj1.borrow_mut().add_reference(obj2.clone());
     obj2.borrow_mut().add_reference(obj1.clone());
-    
+
     // 清理循环引用
     obj1.borrow_mut().cleanup();
     obj2.borrow_mut().cleanup();
@@ -973,21 +976,21 @@ data:
     [sandbox]
     enabled = true
     isolation_level = "strict"
-    
+
     [sandbox.filesystem]
     read_only = true
     allowed_paths = ["/tmp", "/app"]
     denied_paths = ["/etc", "/usr", "/var"]
-    
+
     [sandbox.network]
     enabled = true
     allowed_hosts = ["api.example.com", "cdn.example.com"]
     denied_hosts = ["*"]
-    
+
     [sandbox.process]
     enabled = false
     max_processes = 0
-    
+
     [sandbox.memory]
     max_memory = "128MiB"
     max_stack_size = "1MiB"
@@ -1005,16 +1008,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if !has_capability(Capability::FilesystemRead) {
         return Err("No filesystem read permission".into());
     }
-    
+
     // 检查网络权限
     if !has_capability(Capability::NetworkAccess) {
         return Err("No network access permission".into());
     }
-    
+
     // 执行操作
     let file = open_file("/tmp/data.txt", OpenFlags::READ, FilePerms::READ).await?;
     let data = file.read_all().await?;
-    
+
     Ok(())
 }
 ```
@@ -1033,20 +1036,20 @@ data:
   permissions.toml: |
     [permissions]
     default = "deny"
-    
+
     [permissions.filesystem]
     read = ["/tmp", "/app"]
     write = ["/tmp"]
     execute = []
-    
+
     [permissions.network]
     tcp = ["api.example.com:443", "cdn.example.com:443"]
     udp = []
-    
+
     [permissions.process]
     spawn = false
     kill = false
-    
+
     [permissions.environment]
     read = ["PATH", "HOME"]
     write = []
@@ -1066,7 +1069,7 @@ impl PermissionManager {
     fn new(permissions: Permissions) -> Self {
         Self { permissions }
     }
-    
+
     fn check_filesystem_permission(&self, path: &str, operation: FileOperation) -> bool {
         match operation {
             FileOperation::Read => self.permissions.filesystem.read.contains(path),
@@ -1074,7 +1077,7 @@ impl PermissionManager {
             FileOperation::Execute => self.permissions.filesystem.execute.contains(path),
         }
     }
-    
+
     fn check_network_permission(&self, host: &str, port: u16) -> bool {
         let endpoint = format!("{}:{}", host, port);
         self.permissions.network.tcp.contains(&endpoint)
@@ -1085,12 +1088,12 @@ impl PermissionManager {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let permissions = load_permissions().await?;
     let pm = PermissionManager::new(permissions);
-    
+
     // 检查权限
     if !pm.check_filesystem_permission("/tmp/data.txt", FileOperation::Read) {
         return Err("No read permission for /tmp/data.txt".into());
     }
-    
+
     Ok(())
 }
 ```
@@ -1110,21 +1113,21 @@ data:
     [security]
     enabled = true
     policy_version = "2.0"
-    
+
     [security.sandbox]
     isolation = "strict"
     resource_limits = true
-    
+
     [security.crypto]
     enabled = true
     allowed_algorithms = ["AES-256-GCM", "ChaCha20-Poly1305"]
     key_management = "hardware"
-    
+
     [security.network]
     tls_required = true
     certificate_validation = true
     allowed_ciphers = ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"]
-    
+
     [security.audit]
     enabled = true
     log_level = "info"
@@ -1148,7 +1151,7 @@ impl SecurityAuditor {
             logger: AuditLogger::new(),
         }
     }
-    
+
     async fn log_file_access(&self, path: &str, operation: FileOperation, success: bool) {
         let event = AuditEvent {
             timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
@@ -1159,10 +1162,10 @@ impl SecurityAuditor {
                 success,
             },
         };
-        
+
         self.logger.log(event).await;
     }
-    
+
     async fn log_network_access(&self, host: &str, port: u16, success: bool) {
         let event = AuditEvent {
             timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
@@ -1173,7 +1176,7 @@ impl SecurityAuditor {
                 success,
             },
         };
-        
+
         self.logger.log(event).await;
     }
 }
@@ -1181,13 +1184,13 @@ impl SecurityAuditor {
 #[wasi::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let auditor = SecurityAuditor::new();
-    
+
     // 记录文件访问
     auditor.log_file_access("/tmp/data.txt", FileOperation::Read, true).await;
-    
+
     // 记录网络访问
     auditor.log_network_access("api.example.com", 443, true).await;
-    
+
     Ok(())
 }
 ```
@@ -1279,15 +1282,15 @@ data:
     [debug]
     enabled = true
     log_level = "debug"
-    
+
     [debug.breakpoints]
     enabled = true
     file = "/tmp/breakpoints.json"
-    
+
     [debug.profiling]
     enabled = true
     output = "/tmp/profile.json"
-    
+
     [debug.tracing]
     enabled = true
     events = ["function_call", "memory_access", "system_call"]
@@ -1329,17 +1332,17 @@ data:
     [profiler]
     enabled = true
     output_format = "json"
-    
+
     [profiler.metrics]
     cpu_usage = true
     memory_usage = true
     function_calls = true
     system_calls = true
-    
+
     [profiler.sampling]
     interval = "10ms"
     duration = "60s"
-    
+
     [profiler.output]
     file = "/tmp/profile.json"
     compress = true
@@ -1610,10 +1613,10 @@ use serde_json::{Value, json};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建HTTP服务器
     let server = Server::new("0.0.0.0:8080").await?;
-    
+
     // 处理请求
     server.handle_request(handle_function).await?;
-    
+
     Ok(())
 }
 
@@ -1621,22 +1624,22 @@ async fn handle_function(request: Request) -> Result<Response, Box<dyn std::erro
     // 解析请求
     let body = request.body().read_all().await?;
     let input: Value = serde_json::from_slice(&body)?;
-    
+
     // 处理业务逻辑
     let result = process_data(input).await?;
-    
+
     // 返回响应
     let response_body = json!({
         "result": result,
         "timestamp": chrono::Utc::now().to_rfc3339()
     });
-    
+
     let response = Response::new(
         200,
         Headers::new().set("Content-Type", "application/json"),
         Some(response_body.to_string().into_bytes()),
     );
-    
+
     Ok(response)
 }
 
@@ -1647,7 +1650,7 @@ async fn process_data(input: Value) -> Result<Value, Box<dyn std::error::Error>>
         "input_size": input.to_string().len(),
         "output": "Hello, WASM 2.0!"
     });
-    
+
     Ok(result)
 }
 ```
@@ -1668,15 +1671,15 @@ data:
     enabled = true
     threads = 8
     memory_limit = "1GiB"
-    
+
     [hpc.simd]
     enabled = true
     width = 256
-    
+
     [hpc.parallel]
     enabled = true
     workers = 4
-    
+
     [hpc.optimization]
     level = "aggressive"
     vectorization = true
@@ -1695,10 +1698,10 @@ use std::sync::atomic::{AtomicU64, Ordering};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建线程池
     let thread_pool = ThreadPool::new(8);
-    
+
     // 创建共享数据
     let counter = Arc::new(AtomicU64::new(0));
-    
+
     // 启动并行任务
     let mut handles = Vec::new();
     for i in 0..8 {
@@ -1708,14 +1711,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         });
         handles.push(handle);
     }
-    
+
     // 等待所有任务完成
     for handle in handles {
         handle.join().await?;
     }
-    
+
     println!("Final counter: {}", counter.load(Ordering::SeqCst));
-    
+
     Ok(())
 }
 
@@ -1838,7 +1841,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 #[wasi::export]
 pub fn vector_add(a: &[f32], b: &[f32]) -> Vec<f32> {
     let mut result = Vec::with_capacity(a.len());
-    
+
     // 使用SIMD优化
     for i in (0..a.len()).step_by(4) {
         let a_simd = f32x4::from_slice(&a[i..i+4]);
@@ -1846,7 +1849,7 @@ pub fn vector_add(a: &[f32], b: &[f32]) -> Vec<f32> {
         let result_simd = a_simd + b_simd;
         result.extend_from_slice(&result_simd.to_array());
     }
-    
+
     result
 }
 
@@ -1886,13 +1889,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             enabled: false,
         },
     })?;
-    
+
     // 在沙箱中运行代码
     sandbox.run(|| {
         // 安全代码
         println!("Running in sandbox");
     }).await?;
-    
+
     Ok(())
 }
 ```
@@ -2052,3 +2055,26 @@ WebAssembly 2.0 带来了多项重要更新和改进，包括新的指令集扩�
 - [Wasmtime 文档](https://docs.wasmtime.dev/)
 - [WasmEdge 文档](https://wasmedge.org/docs/)
 - [Wasmer 文档](https://docs.wasmer.io/)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [WebAssembly架构原理](./01_WebAssembly架构原理.md) - WebAssembly架构深度解析
+- [WebAssembly运行时技术](./02_WebAssembly运行时技术.md) - WebAssembly运行时技术详解
+- [WebAssembly安全机制](./03_WebAssembly安全机制.md) - WebAssembly安全机制详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+- [新兴容器技术分析](../09_容器技术发展趋势/02_新兴容器技术分析.md) - 新兴容器技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

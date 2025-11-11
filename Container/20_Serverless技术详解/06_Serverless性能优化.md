@@ -1,8 +1,8 @@
 # 06 - Serverless性能优化
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -43,6 +43,9 @@
     - [8.2 分布式追踪](#82-分布式追踪)
     - [8.3 Profiling工具](#83-profiling工具)
   - [9. 总结](#9-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -134,7 +137,7 @@
      - 大型代码包
      - 多层依赖
      - VPC配置
-   识别: 
+   识别:
      - 查看InitDuration指标
      - 分析冷启动比例
 
@@ -251,16 +254,16 @@ const mysql = require('mysql2/promise')
 // ❌ 问题: 每次调用都初始化
 exports.handler_bad = async (event) => {
     console.log('Init Start')  // 冷启动时执行
-    
+
     const s3 = new AWS.S3()
     const connection = await mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD
     })
-    
+
     console.log('Init End')
-    
+
     // 业务逻辑
     const result = await connection.query('SELECT * FROM users')
     return { statusCode: 200, body: JSON.stringify(result) }
@@ -280,7 +283,7 @@ exports.handler_good = async (event) => {
             password: process.env.DB_PASSWORD
         })
     }
-    
+
     // 业务逻辑 (热启动快速执行)
     const result = await connection.query('SELECT * FROM users')
     return { statusCode: 200, body: JSON.stringify(result) }
@@ -317,7 +320,7 @@ exports.main = async (event) => {
         console.log('Warmup invocation')
         return { statusCode: 200, body: 'Warmed up!' }
     }
-    
+
     // 正常业务逻辑
     return handleRequest(event)
 }
@@ -354,7 +357,7 @@ exports.main = async (event, context) => {
     if (event.source === 'serverless-plugin-warmup') {
         return 'Lambda warmed'
     }
-    
+
     return handleRequest(event, context)
 }
 ```
@@ -405,7 +408,7 @@ Resources:
       ScalableDimension: lambda:function:ProvisionedConcurrentExecutions
       MinCapacity: 1
       MaxCapacity: 100
-  
+
   # Auto Scaling Policy
   ScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
@@ -521,7 +524,7 @@ exports.handler = async (event) => {
   1. 测试不同内存配置
   2. 找到性价比最优点
   3. 考虑成本 vs 性能
-  
+
 示例:
   128MB: 执行10s = $0.0000002083
   1024MB: 执行2s = $0.0000003334
@@ -588,23 +591,23 @@ exports.handler = async (event) => {
 // 监控内存使用
 exports.handler = async (event, context) => {
     const used = process.memoryUsage()
-    
+
     console.log(JSON.stringify({
         rss: Math.round(used.rss / 1024 / 1024) + 'MB',  // 常驻集大小
         heapTotal: Math.round(used.heapTotal / 1024 / 1024) + 'MB',
         heapUsed: Math.round(used.heapUsed / 1024 / 1024) + 'MB',
         external: Math.round(used.external / 1024 / 1024) + 'MB'
     }))
-    
+
     // 业务逻辑
     const result = await handleRequest(event)
-    
+
     // 检查剩余内存
     const remaining = context.memoryLimitInMB - Math.round(used.heapUsed / 1024 / 1024)
     if (remaining < 50) {
         console.warn('Low memory warning:', remaining, 'MB remaining')
     }
-    
+
     return result
 }
 ```
@@ -622,22 +625,22 @@ let configExpiry = null
 
 async function getConfig() {
     const now = Date.now()
-    
+
     // 检查缓存
     if (config && configExpiry && now < configExpiry) {
         return config
     }
-    
+
     // 从Parameter Store获取
     const ssm = new AWS.SSM()
     const result = await ssm.getParameter({
         Name: '/myapp/config',
         WithDecryption: true
     }).promise()
-    
+
     config = JSON.parse(result.Parameter.Value)
     configExpiry = now + (5 * 60 * 1000)  // 缓存5分钟
-    
+
     return config
 }
 
@@ -659,14 +662,14 @@ async function getConnection() {
     if (connection && connection.connection._closing === false) {
         return connection
     }
-    
+
     connection = await mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME
     })
-    
+
     return connection
 }
 
@@ -703,7 +706,7 @@ function findPairs_slow(arr, target) {
 function findPairs_fast(arr, target) {
     const pairs = []
     const seen = new Set()
-    
+
     for (const num of arr) {
         const complement = target - num
         if (seen.has(complement)) {
@@ -711,7 +714,7 @@ function findPairs_fast(arr, target) {
         }
         seen.add(num)
     }
-    
+
     return pairs
 }
 
@@ -751,7 +754,7 @@ exports.handler = async (event) => {
     const posts = await fetchPosts(event.userId)      // 150ms
     const comments = await fetchComments(event.userId) // 120ms
     // 总时间: 100 + 150 + 120 = 370ms
-    
+
     return { user, posts, comments }
 }
 
@@ -763,7 +766,7 @@ exports.handler = async (event) => {
         fetchComments(event.userId)     // 并行
     ])
     // 总时间: max(100, 150, 120) = 150ms (2.5x faster!)
-    
+
     return { user, posts, comments }
 }
 ```
@@ -774,21 +777,21 @@ exports.handler = async (event) => {
 // 批量处理记录
 exports.handler = async (event) => {
     const records = event.Records  // SQS/Kinesis批次
-    
+
     // ❌ 逐个处理
     for (const record of records) {
         await processRecord(record)  // 串行，慢
     }
-    
+
     // ✅ 批量并行处理
     await Promise.all(
         records.map(record => processRecord(record))
     )
-    
+
     // ✅ 限制并发数 (避免压垮下游)
     const pLimit = require('p-limit')
     const limit = pLimit(10)  // 最多10个并发
-    
+
     await Promise.all(
         records.map(record => limit(() => processRecord(record)))
     )
@@ -894,13 +897,13 @@ function getClient() {
 
 exports.handler = async (event) => {
     const client = getClient()
-    
+
     return new Promise((resolve, reject) => {
         const req = client.request({
             ':path': '/data',
             ':method': 'GET'
         })
-        
+
         let data = ''
         req.on('data', chunk => data += chunk)
         req.on('end', () => resolve(data))
@@ -924,7 +927,7 @@ exports.handler = async (event) => {
             'Accept-Encoding': 'gzip, deflate'
         }
     })
-    
+
     return response.data
 }
 ```
@@ -1021,25 +1024,25 @@ exports.handler = async (event) => {
 // ❌ N+1查询问题
 exports.handler = async (event) => {
     const users = await db.query('SELECT * FROM users')
-    
+
     for (const user of users) {
         // N次额外查询!
         user.posts = await db.query('SELECT * FROM posts WHERE user_id = ?', [user.id])
     }
-    
+
     return users
 }
 
 // ✅ JOIN查询
 exports.handler = async (event) => {
     const [rows] = await db.query(`
-        SELECT 
+        SELECT
             u.id, u.name, u.email,
             p.id as post_id, p.title, p.content
         FROM users u
         LEFT JOIN posts p ON p.user_id = u.id
     `)
-    
+
     // 在代码中组装数据
     const users = {}
     for (const row of rows) {
@@ -1059,7 +1062,7 @@ exports.handler = async (event) => {
             })
         }
     }
-    
+
     return Object.values(users)
 }
 ```
@@ -1106,23 +1109,23 @@ function getRedis() {
 exports.handler = async (event) => {
     const redis = getRedis()
     const cacheKey = `user:${event.id}`
-    
+
     // 1. 检查缓存
     const cached = await redis.get(cacheKey)
     if (cached) {
         console.log('Cache hit')
         return { statusCode: 200, body: cached }
     }
-    
+
     // 2. 缓存未命中，查询数据库
     console.log('Cache miss')
     const conn = await getDBConnection()
     const [rows] = await conn.query('SELECT * FROM users WHERE id = ?', [event.id])
     const user = rows[0]
-    
+
     // 3. 写入缓存 (TTL 5分钟)
     await redis.setex(cacheKey, 300, JSON.stringify(user))
-    
+
     return { statusCode: 200, body: JSON.stringify(user) }
 }
 ```
@@ -1136,14 +1139,14 @@ exports.handler = async (event) => {
 ```yaml
 成本计算 (AWS Lambda):
   成本 = (执行时间 × 内存配置 × 价格) + 请求费用
-  
+
   示例:
     128MB内存:
       执行10秒 = $0.0000208
-    
+
     1024MB内存:
       执行2秒 = $0.0000334
-    
+
     结论: 虽然1024MB单价更高，但总成本更低!
 
 优化策略:
@@ -1180,11 +1183,11 @@ for memory in memory_sizes:
         FunctionName=function_name,
         MemorySize=memory
     )
-    
+
     # 等待更新完成
     waiter = lambda_client.get_waiter('function_updated')
     waiter.wait(FunctionName=function_name)
-    
+
     # 测试10次
     durations = []
     for i in range(10):
@@ -1195,19 +1198,19 @@ for memory in memory_sizes:
         log_result = json.loads(response['LogResult'])
         duration = extract_duration(log_result)
         durations.append(duration)
-    
+
     avg_duration = sum(durations) / len(durations)
-    
+
     # 计算成本
     gb_seconds = (memory / 1024) * (avg_duration / 1000)
     cost_per_invocation = gb_seconds * 0.0000166667
-    
+
     results.append({
         'memory': memory,
         'avg_duration': avg_duration,
         'cost': cost_per_invocation
     })
-    
+
     print(f'{memory}MB: {avg_duration:.2f}ms, ${cost_per_invocation:.10f}')
 
 # 找到最优配置
@@ -1257,7 +1260,7 @@ fields @timestamp, @duration
 -- 冷启动率
 fields @timestamp, @duration, @initDuration
 | filter @type = "REPORT"
-| stats 
+| stats
     count(*) as total,
     sum(@initDuration > 0) as coldStarts,
     sum(@initDuration > 0) / count(*) * 100 as coldStartRate
@@ -1265,7 +1268,7 @@ fields @timestamp, @duration, @initDuration
 -- 内存使用
 fields @timestamp, @maxMemoryUsed, @memorySize
 | filter @type = "REPORT"
-| stats 
+| stats
     max(@maxMemoryUsed) as maxUsed,
     avg(@maxMemoryUsed) as avgUsed,
     min(@memorySize) as allocated
@@ -1274,7 +1277,7 @@ fields @timestamp, @maxMemoryUsed, @memorySize
 -- 错误率
 fields @timestamp
 | filter @type = "REPORT"
-| stats 
+| stats
     count(*) as total,
     sum(statusCode >= 400) as errors,
     sum(statusCode >= 400) / count(*) * 100 as errorRate
@@ -1296,14 +1299,14 @@ exports.handler = async (event, context) => {
     // 创建子段
     const segment = AWSXRay.getSegment()
     const subsegment = segment.addNewSubsegment('CustomOperation')
-    
+
     try {
         // 业务逻辑
         subsegment.addAnnotation('userId', event.userId)
         subsegment.addMetadata('requestData', event)
-        
+
         const result = await processRequest(event)
-        
+
         subsegment.close()
         return result
     } catch (error) {
@@ -1320,10 +1323,10 @@ async function processRequest(event) {
         TableName: 'Users',
         Key: { id: event.userId }
     }).promise()
-    
+
     // HTTP调用 (自动追踪)
     const response = await fetch('https://api.example.com/data')
-    
+
     return { data, response }
 }
 ```
@@ -1354,13 +1357,13 @@ exports.handler = async (event, context) => {
         isProfiling = true
         const profileId = `profile-${Date.now()}`
         v8Profiler.startProfiling(profileId, true)
-        
+
         try {
             const result = await handleRequest(event)
-            
+
             // 停止profiling
             const profile = v8Profiler.stopProfiling(profileId)
-            
+
             // 导出到S3
             const profileJson = JSON.stringify(profile)
             const s3 = new AWS.S3()
@@ -1369,17 +1372,17 @@ exports.handler = async (event, context) => {
                 Key: `${profileId}.cpuprofile`,
                 Body: profileJson
             }).promise()
-            
+
             profile.delete()
             isProfiling = false
-            
+
             return result
         } catch (error) {
             isProfiling = false
             throw error
         }
     }
-    
+
     return handleRequest(event)
 }
 ```
@@ -1442,8 +1445,36 @@ exports.handler = async (event, context) => {
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#ServerlessPerformance` `#ColdStart` `#Optimization` `#Monitoring` `#Profiling`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Serverless概述与架构](./01_Serverless概述与架构.md) - Serverless概述与架构
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [OpenFaaS实战](./03_OpenFaaS实战.md) - OpenFaaS实战
+- [边缘Serverless](./04_边缘Serverless.md) - 边缘Serverless
+- [Serverless安全](./05_Serverless安全.md) - Serverless安全
+- [Serverless CI/CD](./07_Serverless_CICD.md) - Serverless CI/CD
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器性能调优](../06_容器监控与运维/03_容器性能调优.md) - 容器性能调优
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [服务网格性能优化](../18_服务网格技术详解/08_服务网格性能优化与故障排查.md) - 服务网格性能优化
+- [eBPF性能优化](../16_eBPF技术详解/06_eBPF性能优化.md) - eBPF性能优化
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

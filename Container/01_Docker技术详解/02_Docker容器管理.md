@@ -132,6 +132,9 @@
     - [4. 最佳实践与标准](#4-最佳实践与标准)
   - [质量指标](#质量指标)
   - [变更记录](#变更记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -708,14 +711,14 @@ http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Database unavailable: %v", err)
         return
     }
-    
+
     // 检查Redis连接
     if err := redis.Ping(); err != nil {
         w.WriteHeader(http.StatusServiceUnavailable)
         fmt.Fprintf(w, "Redis unavailable: %v", err)
         return
     }
-    
+
     w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "OK")
 })
@@ -859,7 +862,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-  
+
   db:
     image: postgres:15
     healthcheck:
@@ -867,7 +870,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   redis:
     image: redis:7
 ```
@@ -953,12 +956,12 @@ services:
       - NODE_ENV=production
       - DEBUG=false
       - DATABASE_URL=postgresql://user:pass@db:5432/mydb
-    
+
     # 方式2: 从文件加载
     env_file:
       - .env
       - .env.production
-    
+
     # 方式3: 使用变量替换
     environment:
       - DATABASE_HOST=${DB_HOST:-localhost}
@@ -1066,12 +1069,12 @@ THRESHOLD_MEM=90
 docker stats --no-stream --format "{{.Name}},{{.CPUPerc}},{{.MemPerc}}" | tail -n +2 | while IFS=',' read name cpu mem; do
     cpu_num=$(echo $cpu | sed 's/%//')
     mem_num=$(echo $mem | sed 's/%//')
-    
+
     if (( $(echo "$cpu_num > $THRESHOLD_CPU" | bc -l) )); then
         echo "ALERT: $name CPU usage ${cpu}% exceeds threshold ${THRESHOLD_CPU}%"
         # 发送告警（邮件/Slack/PagerDuty）
     fi
-    
+
     if (( $(echo "$mem_num > $THRESHOLD_MEM" | bc -l) )); then
         echo "ALERT: $name Memory usage ${mem}% exceeds threshold ${THRESHOLD_MEM}%"
     fi
@@ -1737,10 +1740,10 @@ CMD service nginx start && service mysql start && service redis-server start && 
 services:
   web:
     image: nginx:latest
-  
+
   database:
     image: mysql:8.0
-  
+
   cache:
     image: redis:7
 ```
@@ -1792,7 +1795,7 @@ process.on('SIGTERM', () => {
     db.close();
     process.exit(0);
   });
-  
+
   // 强制退出（15秒超时）
   setTimeout(() => {
     console.error('Forcefully shutting down');
@@ -1875,10 +1878,10 @@ services:
       timeout: 3s
       start_period: 30s  # 启动宽限期
       retries: 3
-    
+
     # 资源预热
     command: sh -c "sleep 5 && node server.js"  # 等待依赖服务
-    
+
     # 并行启动
     depends_on:
       db:
@@ -1909,18 +1912,18 @@ services:
       timeout: 3s
       retries: 3
     restart: unless-stopped
-    
+
   monitor:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
-    
+
   alert:
     image: prom/alertmanager:latest
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    
+
 volumes:
   prometheus-data:
 ```
@@ -2116,3 +2119,27 @@ services:
 
 **文档完成度**: 100%
 **生产就绪状态**: Ready for Production
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Docker架构原理](./01_Docker架构原理.md) - Docker架构深度解析
+- [Docker镜像技术](./03_Docker镜像技术.md) - Docker镜像技术详解
+- [Docker网络技术](./04_Docker网络技术.md) - Docker网络技术详解
+- [Docker存储技术](./05_Docker存储技术.md) - Docker存储技术详解
+- [Docker安全机制](./06_Docker安全机制.md) - Docker安全机制详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器编排技术](../04_容器编排技术/README.md) - Docker Swarm编排
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器化实践案例
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

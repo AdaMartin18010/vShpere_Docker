@@ -58,6 +58,9 @@
     - [9.1 参考文档](#91-参考文档)
     - [9.2 相关工具](#92-相关工具)
     - [9.3 更新记录](#93-更新记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 文档信息
 
@@ -83,19 +86,19 @@ Kubernetes GPU集成通过Device Plugin机制、GPU Operator等工具，实现GP
     - Kubernetes编排
     - 自动化运维
     - 弹性伸缩
-  
+
   资源管理:
     - 资源调度
     - 资源隔离
     - 资源监控
     - 资源优化
-  
+
   多租户:
     - 多租户支持
     - 资源共享
     - 公平调度
     - 成本优化
-  
+
   开发效率:
     - 简化部署
     - 自动化管理
@@ -116,13 +119,13 @@ Device Plugin:
     - 资源上报
     - 设备分配
     - 健康检查
-  
+
   架构组件:
     - Device Plugin Manager
     - Device Plugin Server
     - Device Plugin Client
     - Kubelet集成
-  
+
   工作流程:
     1. Device Plugin注册
     2. 资源发现
@@ -159,7 +162,7 @@ func (s *GPUServer) ListAndWatch(e *pluginapi.Empty, stream pluginapi.DevicePlug
         {ID: "GPU0", Health: pluginapi.Healthy},
         {ID: "GPU1", Health: pluginapi.Healthy},
     }
-    
+
     for {
         if err := stream.Send(&pluginapi.ListAndWatchResponse{Devices: devices}); err != nil {
             return err
@@ -170,7 +173,7 @@ func (s *GPUServer) ListAndWatch(e *pluginapi.Empty, stream pluginapi.DevicePlug
 
 func (s *GPUServer) Allocate(ctx context.Context, req *pluginapi.AllocateRequest) (*pluginapi.AllocateResponse, error) {
     var responses pluginapi.AllocateResponse
-    
+
     for _, containerReq := range req.ContainerRequests {
         response := pluginapi.ContainerAllocateResponse{
             Devices: []*pluginapi.DeviceSpec{
@@ -182,21 +185,21 @@ func (s *GPUServer) Allocate(ctx context.Context, req *pluginapi.AllocateRequest
         }
         responses.ContainerResponses = append(responses.ContainerResponses, &response)
     }
-    
+
     return &responses, nil
 }
 
 func main() {
     server := &GPUServer{}
-    
+
     lis, err := net.Listen("unix", "/var/lib/kubelet/device-plugins/nvidia-gpu.sock")
     if err != nil {
         log.Fatal(err)
     }
-    
+
     s := grpc.NewServer()
     pluginapi.RegisterDevicePluginServer(s, server)
-    
+
     if err := s.Serve(lis); err != nil {
         log.Fatal(err)
     }
@@ -214,14 +217,14 @@ GPU Operator:
     - Kubernetes GPU管理
     - 自动化部署
     - 生命周期管理
-  
+
   核心组件:
     - GPU Operator
     - NVIDIA Driver
     - NVIDIA Container Toolkit
     - NVIDIA Device Plugin
     - NVIDIA DCGM Exporter
-  
+
   功能特性:
     - 自动部署
     - 版本管理
@@ -260,17 +263,17 @@ kubectl get nodes -o json | jq '.items[] | select(.status.capacity."nvidia.com/g
     - GPU设备数量
     - 整数类型
     - 示例: 1, 2, 4
-  
+
   nvidia.com/mig-1g.10gb:
     - MIG 1/7 GPU
     - 10GB显存
     - MIG实例
-  
+
   nvidia.com/mig-2g.20gb:
     - MIG 1/3 GPU
     - 20GB显存
     - MIG实例
-  
+
   nvidia.com/mig-3g.40gb:
     - MIG 1/2 GPU
     - 40GB显存
@@ -342,10 +345,10 @@ kubectl get nodes -o json | jq '.items[] | select(.status.capacity."nvidia.com/g
 节点标签:
   添加标签:
     kubectl label nodes <node-name> accelerator=nvidia-tesla-k80
-  
+
   查询标签:
     kubectl get nodes -l accelerator=nvidia-tesla-k80
-  
+
   使用标签:
     apiVersion: v1
     kind: Pod
@@ -431,10 +434,10 @@ DCGM Exporter:
     - Prometheus集成
     - 性能监控
     - 健康检查
-  
+
   安装:
     kubectl apply -f https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/deployments/kubernetes/dcgm-exporter.yaml
-  
+
   配置:
     apiVersion: v1
     kind: Service
@@ -632,16 +635,16 @@ Prometheus配置:
   检查步骤:
     1. 检查GPU节点状态
        kubectl get nodes -o wide
-    
+
     2. 检查GPU资源
        kubectl describe node <node-name>
-    
+
     3. 检查Device Plugin
        kubectl get pods -n kube-system | grep nvidia
-    
+
     4. 检查GPU驱动
        kubectl logs -n kube-system <device-plugin-pod>
-  
+
   解决方案:
     - 重启Device Plugin
     - 更新GPU驱动
@@ -656,16 +659,16 @@ Prometheus配置:
   检查步骤:
     1. 检查Pod事件
        kubectl describe pod <pod-name>
-    
+
     2. 检查资源配额
        kubectl describe quota -n <namespace>
-    
+
     3. 检查节点资源
        kubectl describe node <node-name>
-    
+
     4. 检查调度器日志
        kubectl logs -n kube-system <scheduler-pod>
-  
+
   解决方案:
     - 增加资源配额
     - 添加GPU节点
@@ -688,7 +691,7 @@ Prometheus配置:
       initialDelaySeconds: 30
       periodSeconds: 10
       failureThreshold: 3
-  
+
   Node重启:
     - 节点自动恢复
     - Pod自动迁移
@@ -703,13 +706,13 @@ Prometheus配置:
   步骤:
     1. 诊断问题
        kubectl describe pod <pod-name>
-    
+
     2. 检查日志
        kubectl logs <pod-name>
-    
+
     3. 重启Pod
        kubectl delete pod <pod-name>
-    
+
     4. 检查状态
        kubectl get pods
 ```
@@ -729,13 +732,13 @@ Kubernetes GPU集成通过Device Plugin机制、GPU Operator等工具，实现�
     - 原因: 简单易用
     - 配置: 基础配置
     - 适用: 小规模部署
-  
+
   生产环境:
     - 推荐: GPU Operator
     - 原因: 自动化管理
     - 配置: 完整配置
     - 适用: 大规模部署
-  
+
   高性能场景:
     - 推荐: 自定义调度器
     - 原因: 灵活调度
@@ -752,13 +755,13 @@ Kubernetes GPU集成通过Device Plugin机制、GPU Operator等工具，实现�
     - 自动化运维
     - 性能优化
     - 易用性提升
-  
+
   功能增强:
     - 更多GPU支持
     - 更好的调度
     - 更强的监控
     - 更快的故障恢复
-  
+
   应用扩展:
     - 更多应用场景
     - 更好的性能
@@ -789,5 +792,30 @@ Kubernetes GPU集成通过Device Plugin机制、GPU Operator等工具，实现�
 
 ---
 
-**文档状态**: 已完成  
+**文档状态**: 已完成
 **下一步行动**: 创建GPU虚拟化最佳实践文档
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [GPU虚拟化概述](./01_GPU虚拟化概述.md) - GPU虚拟化概述
+- [NVIDIA MIG技术](./02_NVIDIA_MIG技术.md) - NVIDIA MIG技术详解
+- [Alibaba cGPU技术](./03_Alibaba_cGPU技术.md) - Alibaba cGPU技术详解
+- [GPU容器调度](./04_GPU容器调度.md) - GPU容器调度详解
+- [GPU性能优化](./05_GPU性能优化.md) - GPU性能优化详解
+- [GPU安全隔离](./06_GPU安全隔离.md) - GPU安全隔离详解
+- [GPU虚拟化最佳实践](./08_GPU虚拟化最佳实践.md) - GPU虚拟化最佳实践
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [Kubernetes架构原理](../03_Kubernetes技术详解/01_Kubernetes架构原理.md) - Kubernetes架构原理
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

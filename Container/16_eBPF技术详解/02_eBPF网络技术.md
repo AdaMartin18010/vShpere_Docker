@@ -28,6 +28,9 @@
     - [sockmap - Socket映射](#sockmap---socket映射)
   - [实战案例](#实战案例)
     - [DDoS防护 - XDP黑名单](#ddos防护---xdp黑名单)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -219,7 +222,7 @@ int xdp_prog(struct xdp_md *ctx)
 
     // 解析以太网头
     struct ethhdr *eth = data;
-    
+
     // 边界检查 (验证器要求)
     if ((void *)(eth + 1) > data_end)
         return XDP_DROP;
@@ -388,22 +391,22 @@ char _license[] SEC("license") = "GPL";
 int main() {
     int map_fd;
     __u32 key = 0, ifindex;
-    
+
     // 加载XDP程序 (略)
     struct bpf_object *obj = bpf_object__open_file("xdp_redirect.o", NULL);
     bpf_object__load(obj);
-    
+
     // 获取map文件描述符
     map_fd = bpf_object__find_map_fd_by_name(obj, "tx_port");
-    
+
     // 获取目标网卡eth1的接口索引
     ifindex = if_nametoindex("eth1");
-    
+
     // 设置重定向目标
     bpf_map_update_elem(map_fd, &key, &ifindex, BPF_ANY);
-    
+
     printf("Redirecting to eth1 (ifindex=%d)\n", ifindex);
-    
+
     return 0;
 }
 ```
@@ -492,12 +495,12 @@ TC vs XDP:
     ✅ 支持Ingress + Egress (双向)
     ✅ 可与现有TC配合 (qdisc, class, filter)
     ✅ 所有网卡通用 (无需驱动支持)
-    
+
   XDP优势:
     ✅ 更早的钩子点 (更高性能)
     ✅ 零拷贝 (无sk_buff分配)
     ✅ 更低延迟
-    
+
   选择建议:
     - 需要极致性能 (DDoS防护): XDP
     - 需要双向处理 (流量整形): TC
@@ -626,7 +629,7 @@ int tc_qos_ingress(struct __sk_buff *skb)
     if (priority) {
         // 设置sk_buff优先级
         skb->priority = *priority;
-        
+
         // 可选: 设置DSCP (Differentiated Services Code Point)
         if (*priority == PRIORITY_HIGH) {
             // 设置EF (Expedited Forwarding) DSCP=46
@@ -655,27 +658,27 @@ int main() {
     int map_fd;
     __u16 port;
     __u32 priority;
-    
+
     // 加载TC程序 (略)
     struct bpf_object *obj = bpf_object__open_file("tc_qos.o", NULL);
     bpf_object__load(obj);
-    
+
     map_fd = bpf_object__find_map_fd_by_name(obj, "port_priority");
-    
+
     // 配置高优先级端口 (SSH, DNS, HTTPS)
     port = 22; priority = PRIORITY_HIGH;
     bpf_map_update_elem(map_fd, &port, &priority, BPF_ANY);
-    
+
     port = 53; priority = PRIORITY_HIGH;
     bpf_map_update_elem(map_fd, &port, &priority, BPF_ANY);
-    
+
     port = 443; priority = PRIORITY_HIGH;
     bpf_map_update_elem(map_fd, &port, &priority, BPF_ANY);
-    
+
     // 配置低优先级端口 (BitTorrent)
     port = 6881; priority = PRIORITY_LOW;
     bpf_map_update_elem(map_fd, &port, &priority, BPF_ANY);
-    
+
     printf("QoS policy configured\n");
     return 0;
 }
@@ -741,7 +744,7 @@ int tc_rate_limit_egress(struct __sk_buff *skb)
     tb->tokens += new_tokens;
     if (tb->tokens > tb->burst)
         tb->tokens = tb->burst;
-    
+
     tb->last_update_ns = now;
 
     // 检查是否有足够令牌
@@ -791,14 +794,14 @@ SEC("xdp")
 int xdp_mark_suspicious(struct xdp_md *ctx)
 {
     // 解析数据包 (略)
-    
+
     // 如果检测到可疑流量，标记并传递给TC进一步分析
     if (is_suspicious(ctx)) {
         // 使用metadata传递信息给TC
         // (需要调整data指针并写入metadata)
         return XDP_PASS;
     }
-    
+
     return XDP_PASS;
 }
 
@@ -808,11 +811,11 @@ int tc_process_suspicious(struct __sk_buff *skb)
 {
     // 读取XDP传递的metadata
     // 进行更复杂的分析
-    
+
     // 如果确认恶意，丢弃
     if (confirmed_malicious(skb))
         return TC_ACT_SHOT;
-    
+
     return TC_ACT_OK;
 }
 ```
@@ -831,15 +834,15 @@ Socket eBPF程序类型:
      - 拦截Socket操作 (connect, listen, accept等)
      - 设置Socket选项
      - 用于: 透明代理、连接追踪
-     
+
   2. sk_msg (BPF_PROG_TYPE_SK_MSG):
      - 重定向消息到其他Socket
      - 用于: Service Mesh数据平面加速
-     
+
   3. sk_skb (BPF_PROG_TYPE_SK_SKB):
      - Socket级数据包过滤
      - 用于: Socket防火墙
-     
+
   4. sockmap/sockhash:
      - 存储Socket引用的BPF Map
      - 用于: Socket重定向、负载均衡
@@ -864,19 +867,19 @@ SEC("sockops")
 int bpf_sockops_nodelay(struct bpf_sock_ops *skops)
 {
     int op = skops->op;
-    
+
     // 在TCP连接建立时触发
     if (op == BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB ||
         op == BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB) {
-        
+
         // 设置TCP_NODELAY (禁用Nagle算法)
         int val = 1;
         bpf_setsockopt(skops, SOL_TCP, TCP_NODELAY, &val, sizeof(val));
-        
+
         // 可选: 设置其他Socket选项
         // TCP_QUICKACK, SO_KEEPALIVE, etc.
     }
-    
+
     return 1; // 继续处理
 }
 
@@ -923,17 +926,17 @@ int bpf_sockmap_add(struct bpf_sock_ops *skops)
 {
     __u32 key;
     int op = skops->op;
-    
+
     if (op == BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB ||
         op == BPF_SOCK_OPS_ACTIVE_ESTABLISHED_CB) {
-        
+
         // 使用4元组作为key (简化示例)
         key = skops->local_port; // 实际应使用完整4元组hash
-        
+
         // 将Socket添加到sockmap
         bpf_sock_map_update(skops, &sock_map, &key, BPF_NOEXIST);
     }
-    
+
     return 1;
 }
 
@@ -942,14 +945,14 @@ SEC("sk_msg")
 int bpf_msg_redirect(struct sk_msg_md *msg)
 {
     __u32 src_key, dst_key;
-    
+
     // 获取源Socket key
     src_key = msg->local_port;
-    
+
     // 查找目标Socket (例如: 负载均衡到后端)
     // 这里简化为固定映射
     dst_key = 8080; // 目标端口
-    
+
     // 重定向消息到目标Socket (零拷贝!)
     return bpf_msg_redirect_map(msg, &sock_map, dst_key, BPF_F_INGRESS);
 }
@@ -1003,13 +1006,13 @@ int bpf_skb_parser(struct __sk_buff *skb)
 {
     // 解析数据包 (略)
     __u32 src_ip = skb->remote_ip4;
-    
+
     // 检查黑名单
     __u8 *blocked = bpf_map_lookup_elem(&ip_blacklist, &src_ip);
     if (blocked && *blocked) {
         return SK_DROP; // 丢弃
     }
-    
+
     return SK_PASS; // 放行
 }
 
@@ -1032,7 +1035,7 @@ sockmap (BPF_MAP_TYPE_SOCKMAP):
   - 数组索引 (key=整数)
   - 适用于固定Socket数量
   - 性能: O(1)
-  
+
 sockhash (BPF_MAP_TYPE_SOCKHASH):
   - 哈希表 (key=任意类型, 如4元组)
   - 适用于动态Socket管理
@@ -1071,13 +1074,13 @@ SEC("sk_msg")
 int bpf_service_lb(struct sk_msg_md *msg)
 {
     struct sock_key key = {};
-    
+
     // 构建4元组key
     key.sip = msg->remote_ip4;
     key.dip = msg->local_ip4;
     key.sport = msg->remote_port;
     key.dport = msg->local_port;
-    
+
     // 重定向到后端Pod Socket
     return bpf_msg_redirect_hash(msg, &service_lb, &key, BPF_F_INGRESS);
 }
@@ -1168,7 +1171,7 @@ int xdp_ddos_protection(struct xdp_md *ctx)
         .prefixlen = 32,
     };
     __builtin_memcpy(lpm_key.data, &src_ip, sizeof(src_ip));
-    
+
     __u64 *blocked_count = bpf_map_lookup_elem(&ip_blacklist, &lpm_key);
     if (blocked_count) {
         __sync_fetch_and_add(blocked_count, 1);
@@ -1187,7 +1190,7 @@ int xdp_ddos_protection(struct xdp_md *ctx)
         if (tcp->syn && !tcp->ack) {
             __u64 now = bpf_ktime_get_ns();
             __u64 *last_syn_time = bpf_map_lookup_elem(&syn_tracker, &src_ip);
-            
+
             if (last_syn_time) {
                 // 计算距离上次SYN的时间
                 if (now - *last_syn_time < SYN_RATE_LIMIT_NS) {
@@ -1197,7 +1200,7 @@ int xdp_ddos_protection(struct xdp_md *ctx)
                     return XDP_DROP;
                 }
             }
-            
+
             // 更新或插入SYN时间戳
             bpf_map_update_elem(&syn_tracker, &src_ip, &now, BPF_ANY);
         }
@@ -1206,7 +1209,7 @@ int xdp_ddos_protection(struct xdp_md *ctx)
     // 3. 放行
     if (st)
         __sync_fetch_and_add(&st->passed_pkts, 1);
-    
+
     return XDP_PASS;
 }
 
@@ -1217,8 +1220,8 @@ char _license[] SEC("license") = "GPL";
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **本章总结**:
@@ -1237,3 +1240,30 @@ char _license[] SEC("license") = "GPL";
 - [03_eBPF与容器技术](./03_eBPF与容器技术.md)
 - [04_eBPF可观测性](./04_eBPF可观测性.md)
 - [05_eBPF安全技术](./05_eBPF安全技术.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF概述与架构](./01_eBPF概述与架构.md) - eBPF概述与架构详解
+- [eBPF与容器技术](./03_eBPF与容器技术.md) - eBPF与容器技术详解
+- [eBPF可观测性](./04_eBPF可观测性.md) - eBPF可观测性详解
+- [eBPF安全技术](./05_eBPF安全技术.md) - eBPF安全技术详解
+- [eBPF性能优化](./06_eBPF性能优化.md) - eBPF性能优化详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker网络技术](../01_Docker技术详解/04_Docker网络技术.md) - Docker网络技术
+- [Kubernetes网络策略](../03_Kubernetes技术详解/05_网络策略与安全.md) - K8s网络策略
+- [服务网格技术详解](../18_服务网格技术详解/README.md) - 服务网格技术
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

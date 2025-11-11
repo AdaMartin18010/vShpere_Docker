@@ -65,6 +65,9 @@
     - [10.1 参考文档](#101-参考文档)
     - [10.2 相关工具](#102-相关工具)
     - [10.3 更新记录](#103-更新记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 文档信息
 
@@ -89,19 +92,19 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 降低性能损失
     - 提升应用性能
     - 优化资源配置
-  
+
   成本优化:
     - 降低部署成本
     - 提高资源利用率
     - 减少资源浪费
     - 优化投资回报
-  
+
   稳定性:
     - 提高系统稳定性
     - 减少故障发生
     - 快速故障恢复
     - 保障服务可用性
-  
+
   可维护性:
     - 简化运维管理
     - 降低维护成本
@@ -121,17 +124,17 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 高性能: NVIDIA MIG
     - 中等性能: NVIDIA vGPU
     - 一般性能: Container Toolkit
-  
+
   安全要求:
     - 高安全: NVIDIA MIG
     - 中等安全: NVIDIA vGPU
     - 一般安全: Container Toolkit
-  
+
   成本要求:
     - 低成本: Container Toolkit
     - 中等成本: NVIDIA vGPU
     - 高成本: NVIDIA MIG
-  
+
   易用性:
     - 易用: Container Toolkit
     - 中等: NVIDIA vGPU
@@ -147,19 +150,19 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 原因: 性能隔离、低延迟
     - 配置: 7x 1/7 GPU
     - 成本: 高
-  
+
   多租户云平台:
     - 推荐: NVIDIA MIG + Container Toolkit
     - 原因: 安全隔离、灵活配置
     - 配置: MIG + 容器
     - 成本: 中高
-  
+
   开发测试环境:
     - 推荐: Container Toolkit
     - 原因: 低成本、易用
     - 配置: 容器共享GPU
     - 成本: 低
-  
+
   企业虚拟化:
     - 推荐: NVIDIA vGPU
     - 原因: 驱动级隔离、稳定
@@ -178,13 +181,13 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 算力: 高
     - 显存: 大
     - 成本: 高
-  
+
   推理场景:
     - 推荐: A30/T4
     - 算力: 中等
     - 显存: 中等
     - 成本: 中低
-  
+
   混合场景:
     - 推荐: A100/A30
     - 算力: 高
@@ -200,12 +203,12 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 训练: 1x 1 GPU
     - 推理: 7x 1/7 GPU
     - 混合: 3x 1/3 GPU
-  
+
   A30配置:
     - 训练: 1x 1 GPU
     - 推理: 7x 1/7 GPU
     - 混合: 3x 1/3 GPU
-  
+
   V100配置:
     - 训练: 1x 1 GPU
     - 推理: 容器共享
@@ -225,13 +228,13 @@ GPU虚拟化最佳实践是在实际应用中总结出的GPU虚拟化技术使�
     - 预留20%余量
     - 避免资源不足
     - 合理分配资源
-  
+
   性能平衡:
     - 平衡实例数量
     - 平衡资源分配
     - 平衡性能需求
     - 平衡成本控制
-  
+
   配置持久化:
     - 配置持久化
     - 自动配置
@@ -273,7 +276,7 @@ nvidia-smi -L
     - 避免资源浪费
     - 避免资源不足
     - 性能优化
-  
+
   配置示例:
     apiVersion: v1
     kind: Pod
@@ -301,7 +304,7 @@ nvidia-smi -L
     - 性能优化变量
     - 安全相关变量
     - 调试相关变量
-  
+
   配置示例:
     env:
     - name: CUDA_VISIBLE_DEVICES
@@ -323,18 +326,18 @@ nvidia-smi -L
   安装步骤:
     1. 添加Helm仓库
        helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
-    
+
     2. 更新仓库
        helm repo update
-    
+
     3. 安装GPU Operator
        helm install --wait gpu-operator nvidia/gpu-operator \
          --namespace gpu-operator \
          --create-namespace
-    
+
     4. 验证安装
        kubectl get pods -n gpu-operator
-  
+
   配置优化:
     - 资源限制
     - 节点选择
@@ -389,7 +392,7 @@ Prometheus配置:
       endpoints:
       - port: metrics
         interval: 30s
-  
+
   Grafana Dashboard:
     - 导入Dashboard
     - 配置数据源
@@ -416,7 +419,7 @@ Prometheus配置:
           severity: warning
         annotations:
           summary: "GPU utilization is high"
-      
+
       - alert: GPUOOM
         expr: gpu_memory_usage > 0.95
         for: 1m
@@ -439,13 +442,13 @@ Prometheus配置:
     - 性能提升: 2-4倍
     - 精度损失: <1%
     - 适用: 推理场景
-  
+
   剪枝:
     - 模型剪枝
     - 性能提升: 1.5-2倍
     - 精度损失: <2%
     - 适用: 推理场景
-  
+
   蒸馏:
     - 知识蒸馏
     - 性能提升: 2-3倍
@@ -462,13 +465,13 @@ Prometheus配置:
     - XLA优化
     - TensorRT优化
     - 性能提升: 2-5倍
-  
+
   PyTorch:
     - Mixed Precision
     - JIT编译
     - TorchScript优化
     - 性能提升: 2-4倍
-  
+
   ONNX Runtime:
     - CUDA优化
     - TensorRT优化
@@ -486,13 +489,13 @@ Prometheus配置:
     - 提高I/O性能
     - 优化内存管理
     - 性能提升: 10-20%
-  
+
   驱动优化:
     - 最新驱动
     - 性能模式
     - 功耗优化
     - 性能提升: 5-15%
-  
+
   网络优化:
     - 优化网络栈
     - 提高带宽
@@ -509,13 +512,13 @@ Prometheus配置:
     - 减小镜像大小
     - 优化缓存
     - 启动速度提升: 20-40%
-  
+
   资源优化:
     - 合理资源限制
     - 优化资源分配
     - 提高利用率
     - 性能提升: 10-20%
-  
+
   启动优化:
     - 预热模型
     - 延迟加载
@@ -536,7 +539,7 @@ RBAC最佳实践:
     - 按需授权
     - 定期审查
     - 安全审计
-  
+
   配置示例:
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
@@ -561,7 +564,7 @@ RBAC最佳实践:
     - 最小开放
     - 流量加密
     - 安全监控
-  
+
   配置示例:
     apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
@@ -592,13 +595,13 @@ RBAC最佳实践:
     - 端到端加密
     - 证书管理
     - 密钥管理
-  
+
   存储加密:
     - 静态加密
     - 加密密钥
     - 密钥管理
     - 加密策略
-  
+
   配置示例:
     apiVersion: v1
     kind: Secret
@@ -619,7 +622,7 @@ RBAC最佳实践:
     - 增量备份
     - 异地备份
     - 备份验证
-  
+
   配置示例:
     apiVersion: batch/v1
     kind: CronJob
@@ -652,13 +655,13 @@ RBAC最佳实践:
     - GPU内存使用
     - 应用性能
     - 系统资源
-  
+
   告警配置:
     - 资源告警
     - 性能告警
     - 安全告警
     - 故障告警
-  
+
   配置示例:
     apiVersion: monitoring.coreos.com/v1
     kind: PrometheusRule
@@ -682,13 +685,13 @@ RBAC最佳实践:
     - 系统日志
     - 审计日志
     - 错误日志
-  
+
   日志存储:
     - 集中存储
     - 数据保留
     - 日志分析
     - 日志检索
-  
+
   配置示例:
     apiVersion: v1
     kind: Pod
@@ -714,13 +717,13 @@ RBAC最佳实践:
     - Readiness探针
     - 启动探针
     - 健康检查
-  
+
   资源监控:
     - 资源使用监控
     - 资源超限告警
     - 资源泄漏检测
     - 资源优化
-  
+
   配置示例:
     apiVersion: v1
     kind: Pod
@@ -744,13 +747,13 @@ RBAC最佳实践:
     - 节点自动恢复
     - 服务自动迁移
     - 资源自动恢复
-  
+
   手动恢复:
     - 故障诊断
     - 日志分析
     - 问题定位
     - 手动修复
-  
+
   配置示例:
     apiVersion: v1
     kind: Pod
@@ -780,13 +783,13 @@ RBAC最佳实践:
     - 避免资源浪费
     - 提高利用率
     - 降低成本
-  
+
   负载均衡:
     - 均匀分布负载
     - 避免热点
     - 提高利用率
     - 降低成本
-  
+
   动态调整:
     - 弹性伸缩
     - 按需分配
@@ -803,13 +806,13 @@ RBAC最佳实践:
     - 限制资源使用
     - 成本控制
     - 预算管理
-  
+
   监控告警:
     - 成本监控
     - 超预算告警
     - 成本分析
     - 成本优化
-  
+
   配置示例:
     apiVersion: v1
     kind: ResourceQuota
@@ -832,13 +835,13 @@ RBAC最佳实践:
     - 性价比评估
     - 性能评估
     - 成本评估
-  
+
   采购策略:
     - 批量采购
     - 分期采购
     - 租赁选项
     - 云服务选项
-  
+
   成本分析:
     - TCO分析
     - ROI分析
@@ -855,13 +858,13 @@ RBAC最佳实践:
     - Spot实例
     - Reserved实例
     - Dedicated实例
-  
+
   成本优化:
     - 使用Spot实例
     - 预留实例
     - 自动伸缩
     - 成本监控
-  
+
   配置示例:
     apiVersion: v1
     kind: Pod
@@ -890,13 +893,13 @@ GPU虚拟化最佳实践涵盖了技术选型、配置、部署、监控、运�
     - 性能安全平衡
     - 成本效益评估
     - 易用性考虑
-  
+
   配置优化:
     - 合理资源配置
     - 性能优化
     - 安全配置
     - 监控配置
-  
+
   运维管理:
     - 自动化运维
     - 监控告警
@@ -913,13 +916,13 @@ GPU虚拟化最佳实践涵盖了技术选型、配置、部署、监控、运�
     - 新技术应用
     - 最佳实践更新
     - 经验总结
-  
+
   成本优化:
     - 持续成本优化
     - 资源优化
     - 采购优化
     - 成本控制
-  
+
   安全增强:
     - 持续安全增强
     - 漏洞修复
@@ -950,5 +953,32 @@ GPU虚拟化最佳实践涵盖了技术选型、配置、部署、监控、运�
 
 ---
 
-**文档状态**: 已完成  
+**文档状态**: 已完成
 **下一步行动**: GPU容器虚拟化技术文档创建完成，开始更新Docker文档
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [GPU虚拟化概述](./01_GPU虚拟化概述.md) - GPU虚拟化概述
+- [NVIDIA MIG技术](./02_NVIDIA_MIG技术.md) - NVIDIA MIG技术详解
+- [Alibaba cGPU技术](./03_Alibaba_cGPU技术.md) - Alibaba cGPU技术详解
+- [GPU容器调度](./04_GPU容器调度.md) - GPU容器调度详解
+- [GPU性能优化](./05_GPU性能优化.md) - GPU性能优化详解
+- [GPU安全隔离](./06_GPU安全隔离.md) - GPU安全隔离详解
+- [Kubernetes GPU集成](./07_Kubernetes_GPU集成.md) - Kubernetes GPU集成详解
+- [2025年GPU虚拟化新特性](./09_2025年GPU虚拟化新特性.md) - 2025年GPU虚拟化新特性
+- [国产GPU容器虚拟化技术](./10_国产GPU容器虚拟化技术.md) - 国产GPU容器虚拟化技术
+
+### 其他模块相关
+
+- [容器技术最佳实践](../08_容器技术实践案例/04_容器技术最佳实践.md) - 容器技术最佳实践
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器技术实践案例
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

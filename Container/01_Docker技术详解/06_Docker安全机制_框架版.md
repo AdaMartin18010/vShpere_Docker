@@ -442,52 +442,52 @@ Docker默认允许的200+个系统调用中，常用安全子集[^syscalls-man]�
 **文件操作**（读写、权限、目录）:
 
 ```
-read, write, open, openat, close, creat, lseek, stat, fstat, lstat, 
-access, chmod, chown, mkdir, rmdir, rename, link, unlink, readlink, 
+read, write, open, openat, close, creat, lseek, stat, fstat, lstat,
+access, chmod, chown, mkdir, rmdir, rename, link, unlink, readlink,
 symlink, dup, dup2, pipe, pipe2, fcntl, ioctl
 ```
 
 **进程管理**（创建、信号、等待）:
 
 ```
-fork, vfork, clone, execve, exit, exit_group, wait4, waitid, kill, 
-tkill, tgkill, getpid, getppid, getuid, geteuid, getgid, getegid, 
+fork, vfork, clone, execve, exit, exit_group, wait4, waitid, kill,
+tkill, tgkill, getpid, getppid, getuid, geteuid, getgid, getegid,
 setuid, setgid, setpgid, getpgrp, setpgrp, setsid, getsid
 ```
 
 **内存管理**（分配、映射、保护）:
 
 ```
-brk, mmap, mmap2, munmap, mprotect, madvise, mlock, munlock, 
+brk, mmap, mmap2, munmap, mprotect, madvise, mlock, munlock,
 mlockall, munlockall, mincore, msync, mremap
 ```
 
 **网络通信**（套接字、连接、传输）:
 
 ```
-socket, socketpair, bind, connect, listen, accept, accept4, 
-sendto, recvfrom, sendmsg, recvmsg, sendmmsg, recvmmsg, 
+socket, socketpair, bind, connect, listen, accept, accept4,
+sendto, recvfrom, sendmsg, recvmsg, sendmmsg, recvmmsg,
 setsockopt, getsockopt, shutdown, getpeername, getsockname
 ```
 
 **时间与定时器**:
 
 ```
-time, gettimeofday, clock_gettime, clock_getres, nanosleep, 
+time, gettimeofday, clock_gettime, clock_getres, nanosleep,
 timer_create, timer_settime, timer_gettime, timer_delete, alarm
 ```
 
 **信号处理**:
 
 ```
-rt_sigaction, rt_sigprocmask, rt_sigreturn, rt_sigsuspend, 
+rt_sigaction, rt_sigprocmask, rt_sigreturn, rt_sigsuspend,
 rt_sigpending, rt_sigtimedwait, rt_sigqueueinfo, sigaltstack
 ```
 
 **用户与组管理**:
 
 ```
-setuid, setgid, setreuid, setregid, setresuid, setresgid, 
+setuid, setgid, setreuid, setregid, setresuid, setresgid,
 getgroups, setgroups, capget, capset, prctl
 ```
 
@@ -500,12 +500,12 @@ getgroups, setgroups, capget, capset, prctl
   "syscalls": [
     {
       "names": [
-        "accept", "accept4", "access", "bind", "brk", "chmod", "chown", 
-        "clone", "close", "connect", "dup", "dup2", "dup3", "execve", 
-        "exit", "exit_group", "fcntl", "fork", "fstat", "getcwd", 
-        "getpid", "getuid", "listen", "lseek", "mmap", "mprotect", 
-        "munmap", "open", "openat", "read", "readlink", "recvfrom", 
-        "recvmsg", "rt_sigaction", "rt_sigprocmask", "rt_sigreturn", 
+        "accept", "accept4", "access", "bind", "brk", "chmod", "chown",
+        "clone", "close", "connect", "dup", "dup2", "dup3", "execve",
+        "exit", "exit_group", "fcntl", "fork", "fstat", "getcwd",
+        "getpid", "getuid", "listen", "lseek", "mmap", "mprotect",
+        "munmap", "open", "openat", "read", "readlink", "recvfrom",
+        "recvmsg", "rt_sigaction", "rt_sigprocmask", "rt_sigreturn",
         "sendmsg", "sendto", "socket", "stat", "write"
       ],
       "action": "SCMP_ACT_ALLOW"
@@ -596,13 +596,13 @@ cat > /etc/apparmor.d/docker-web << EOF
 
 profile docker-web flags=(attach_disconnected,mediate_deleted) {
   #include <abstractions/base>
-  
+
   # 允许访问网络
   network,
-  
+
   # 允许访问文件系统
   /var/www/html/** rw,
-  
+
   # 拒绝敏感文件访问
   deny /etc/passwd r,
   deny /etc/shadow r,
@@ -1293,7 +1293,7 @@ docker run --rm --runtime=runsc networkstatic/iperf3 -c server_ip
         |           |               |         |
      Kata      gVisor          runc    runc+Rootless
     (隔离)    (过滤)         (高性能)   (平衡)
-    
+
     +额外考虑因素:
     - 启动时间要求 → runc/runc+Rootless
     - 网络密集型 → Kata
@@ -1969,7 +1969,7 @@ echo "请运行 'docker info' 验证配置"
 - rule: Sensitive File Access
   desc: Detect access to sensitive files
   condition: >
-    container.id != host and 
+    container.id != host and
     fd.name in (/etc/passwd, /etc/shadow, /etc/sudoers)
   output: Sensitive file accessed (user=%user.name file=%fd.name)
   priority: ERROR
@@ -2348,7 +2348,7 @@ allowed_path {
   mTLS握手延迟: +2-5ms (首次) / +0.1ms (会话复用)
   吞吐量: -3-8% (CPU加解密开销)
   内存: +50-100MB (证书缓存)
-  
+
 安全收益:
   中间人攻击: 100%防御
   未授权访问: 99.9%拦截
@@ -2480,7 +2480,7 @@ allowed_path {
   完整版行数: 2,520
   新增行数: +1,239 (+96.7%)
   Phase 2新增: +825行
-  
+
 引用统计:
   总引用数: 51个
   官方文档: 12个
@@ -2488,7 +2488,7 @@ allowed_path {
   Linux内核: 10个
   安全工具: 7个
   性能基准: 2个
-  
+
 引用覆盖率: 92%+ (全章节深度覆盖)
 代码示例: 65+个
 配置文件: 18+个
@@ -2502,19 +2502,19 @@ allowed_path {
   OWASP Container Security: 95%
   Capabilities完整性: 100% (37个能力位详解)
   Seccomp白名单: 100% (44个禁用调用分类+200+允许调用)
-  
+
 可操作性:
   可运行脚本: 100%
   配置文件有效性: 100%
   命令验证: 100%
   生产就绪: 是 (金融级/多租户/零信任完整案例)
-  
+
 性能数据完整性:
   基准测试: 7组完整数据
   真实应用: 3个 (Nginx/Redis/PostgreSQL)
   运行时对比: 4个 (runc/runc+Rootless/Kata/gVisor)
   资源消耗: 100个容器规模测试
-  
+
 更新频率: 季度更新
 最后审核: 2025-10-21
 审核状态: Phase 2完成 ✅
@@ -2532,11 +2532,11 @@ allowed_path {
 
 ---
 
-**文档状态**: ✅ Phase 2完整版完成（生产就绪）  
-**质量评分**: 96/100（达成Phase 2目标）  
-**完成度**: 100%  
-**生产就绪**: ✅ 金融级/多租户/零信任完整案例  
-**性能基准**: ✅ 7组完整测试数据（CPU/内存/磁盘/网络/启动/应用/资源）  
+**文档状态**: ✅ Phase 2完整版完成（生产就绪）
+**质量评分**: 96/100（达成Phase 2目标）
+**完成度**: 100%
+**生产就绪**: ✅ 金融级/多租户/零信任完整案例
+**性能基准**: ✅ 7组完整测试数据（CPU/内存/磁盘/网络/启动/应用/资源）
 
 <!-- 脚注引用 -->
 [^docker-security]: Docker Security Documentation, https://docs.docker.com/engine/security/

@@ -325,7 +325,7 @@ func TestMultipleEndpoints(t *testing.T) {
         {"Local", "localhost:2379", ""},
         {"Remote", "remote:2379", ""},
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             // 测试逻辑

@@ -1,7 +1,7 @@
 # 贡献指南
 
-> **为API测试体系做出贡献**  
-> **创建日期**: 2025年10月23日  
+> **为API测试体系做出贡献**
+> **创建日期**: 2025年10月23日
 > **文档版本**: v1.0
 
 ---
@@ -252,12 +252,12 @@ test/*      # 测试改进
      - 每个提交专注一个更改
      - 提交前运行测试
      - 编写清晰的commit message
-  
+
   2. 定期同步
      - git fetch upstream
      - git rebase upstream/main
      - 解决冲突
-  
+
   3. 自我审查
      - 检查代码质量
      - 运行linter
@@ -311,15 +311,15 @@ git push origin feature/add-podman-support --force-with-lease
 # ✅ 好的示例
 class DockerAPITestSuite(unittest.TestCase):
     """Docker API测试套件
-    
+
     测试Docker Engine API的各种功能，包括容器、镜像、网络和卷管理。
     """
-    
+
     def setUp(self):
         """测试前准备"""
         self.client = docker.DockerClient(base_url='unix://var/run/docker.sock')
         self.test_containers = []
-    
+
     def tearDown(self):
         """测试后清理"""
         for container in self.test_containers:
@@ -327,13 +327,13 @@ class DockerAPITestSuite(unittest.TestCase):
                 container.remove(force=True)
             except Exception as e:
                 logger.warning(f"清理容器失败: {e}")
-    
+
     def test_create_container(self):
         """测试创建容器"""
         # Arrange
         image = "nginx:alpine"
         name = f"test-nginx-{uuid.uuid4().hex[:8]}"
-        
+
         # Act
         container = self.client.containers.run(
             image,
@@ -341,7 +341,7 @@ class DockerAPITestSuite(unittest.TestCase):
             detach=True
         )
         self.test_containers.append(container)
-        
+
         # Assert
         self.assertEqual(container.status, "running")
         self.assertIn(name, container.name)
@@ -409,7 +409,7 @@ func (s *DockerAPITestSuite) SetupSuite() {
  var err error
  s.cli, err = client.NewClientWithOpts(client.FromEnv)
  s.Require().NoError(err, "创建Docker客户端失败")
- 
+
  s.ctx = context.Background()
  s.testContainers = make([]string, 0)
 }
@@ -434,12 +434,12 @@ func (s *DockerAPITestSuite) Test01_CreateContainer() {
    "test": "true",
   },
  }
- 
+
  // Act
  resp, err := s.cli.ContainerCreate(s.ctx, config, nil, nil, nil, "")
  s.Require().NoError(err, "创建容器失败")
  s.testContainers = append(s.testContainers, resp.ID)
- 
+
  // Assert
  s.NotEmpty(resp.ID, "容器ID应该非空")
 }
@@ -505,7 +505,7 @@ import pytest
 
 class TestDockerAPI:
     """Docker API测试类"""
-    
+
     @pytest.fixture(autouse=True)
     def setup(self):
         """每个测试前的设置"""
@@ -513,7 +513,7 @@ class TestDockerAPI:
         yield
         # 清理代码
         self.cleanup()
-    
+
     @pytest.mark.parametrize("image,expected_status", [
         ("nginx:alpine", "running"),
         ("redis:alpine", "running"),
@@ -535,7 +535,7 @@ func (s *DockerAPITestSuite) TestRunContainer() {
   {"nginx", "nginx:alpine", "running"},
   {"redis", "redis:alpine", "running"},
  }
- 
+
  for _, tt := range tests {
   s.Run(tt.name, func() {
    // 测试逻辑
@@ -786,12 +786,12 @@ Related to #456
      - 运行测试
      - 检查格式
      - 生成覆盖率
-  
+
   2. 代码审查
      - 至少1个maintainer审查
      - 响应评论
      - 进行必要修改
-  
+
   3. 合并
      - 所有检查通过
      - 获得批准
@@ -969,7 +969,7 @@ Related to #456
 - [FAQ.md](./FAQ.md) - 常见问题
 - [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) - 行为准则
 
-**最后更新**: 2025年10月23日  
+**最后更新**: 2025年10月23日
 **文档版本**: v1.0
 
 ---

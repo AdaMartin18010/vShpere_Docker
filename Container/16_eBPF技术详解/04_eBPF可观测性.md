@@ -32,6 +32,9 @@
     - [生产环境使用指南](#生产环境使用指南)
     - [性能影响评估](#性能影响评估)
   - [参考资料](#参考资料)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -179,7 +182,7 @@ Kprobes类型:
     - 函数被调用时触发
     - 可以访问函数参数
     - 示例: kprobe:tcp_sendmsg
-  
+
   kretprobe: 函数返回追踪
     - 函数返回时触发
     - 可以访问返回值
@@ -260,7 +263,7 @@ Uprobe类型:
     - 应用函数被调用时触发
     - 访问函数参数
     - 示例: uprobe:/bin/bash:readline
-  
+
   uretprobe: 用户函数返回追踪
     - 函数返回时触发
     - 访问返回值
@@ -286,7 +289,7 @@ Uprobe能力:
 # 追踪OpenSSL的SSL_write函数，捕获明文数据
 sudo bpftrace -e '
 uprobe:/usr/lib/x86_64-linux-gnu/libssl.so.3:SSL_write {
-  printf("PID %d writing %d bytes: %s\n", 
+  printf("PID %d writing %d bytes: %s\n",
     pid, arg2, str(arg1, arg2));
 }'
 
@@ -333,7 +336,7 @@ interval:s:10 {
 # @size[12346]: 52428800   # 50MB分配
 #
 # Top allocation stacks:
-# @allocs[12345, 
+# @allocs[12345,
 #   0x7f1234567890 malloc+0
 #   0x7f1234567900 my_function+32
 #   0x7f1234567a00 main+128
@@ -350,21 +353,21 @@ Tracepoint分类:
     - sys_enter_*: 系统调用入口
     - sys_exit_*: 系统调用出口
     - 示例: tracepoint:syscalls:sys_enter_openat
-  
+
   sched: 进程调度 (30+)
     - sched_switch: 进程切换
     - sched_wakeup: 进程唤醒
     - sched_process_fork: 进程创建
-  
+
   net: 网络 (50+)
     - net_dev_xmit: 网络发送
     - net_dev_queue: 网络队列
     - netif_receive_skb: 网络接收
-  
+
   block: 块设备I/O (20+)
     - block_rq_issue: I/O请求发起
     - block_rq_complete: I/O请求完成
-  
+
   其他: irq, kmem, power, workqueue...
 
 Tracepoint优势:
@@ -414,12 +417,12 @@ tracepoint:syscalls:sys_exit_read /@start[tid]/ {
 sudo bpftrace -e '
 tracepoint:sched:sched_switch {
   // $prev = args->prev_comm; $next = args->next_comm;
-  
+
   if (@start[args->prev_pid]) {
     $runtime_us = (nsecs - @start[args->prev_pid]) / 1000;
     @runtime[args->prev_comm] = hist($runtime_us);
   }
-  
+
   @start[args->next_pid] = nsecs;
 }
 
@@ -442,21 +445,21 @@ USDT支持的应用:
     - query-start: 查询开始
     - query-done: 查询完成
     - query-parse-start/done
-  
+
   PostgreSQL:
     - transaction-start/commit
     - query-start/done
     - lock-wait-start/done
-  
+
   Java/JVM (HotSpot):
     - gc-begin/end: GC事件
     - thread-start/stop
     - method-entry/return
-  
+
   Node.js:
     - http-server-request/response
     - gc-start/done
-  
+
   Python:
     - function-entry/return
     - gc-start/done
@@ -494,11 +497,11 @@ usdt:/usr/sbin/mysqld:mysql:query__start {
 
 usdt:/usr/sbin/mysqld:mysql:query__done /@start[arg1]/ {
   $duration_ms = (nsecs - @start[arg1]) / 1000000;
-  
+
   if ($duration_ms > 100) {
     printf("Slow query (%d ms): %s\n", $duration_ms, @query[arg1]);
   }
-  
+
   delete(@start[arg1]);
   delete(@query[arg1]);
 }'
@@ -530,12 +533,12 @@ bpftrace vs 其他工具:
     ✅ Linux原生支持
     ✅ 更现代的语法
     ✅ 活跃的社区
-  
+
   vs SystemTap:
     ✅ 无需调试符号
     ✅ 更简洁的语法
     ✅ 更安全（eBPF验证器）
-  
+
   vs perf:
     ✅ 更灵活的过滤
     ✅ 自定义聚合
@@ -694,17 +697,17 @@ usdt:/usr/sbin/mysqld:mysql:query__done
 /@start[arg1]/
 {
   $duration_ms = (nsecs - @start[arg1]) / 1000000;
-  
+
   if ($duration_ms > 100) {
     time("%H:%M:%S ");
     printf("Slow query (%d ms, conn_id=%d):\n", $duration_ms, arg1);
     printf("  SQL: %s\n\n", @query[arg1]);
-    
+
     // 记录到慢查询统计
     @slow_count = @slow_count + 1;
     @slow_total_ms = @slow_total_ms + $duration_ms;
   }
-  
+
   // 清理
   delete(@start[arg1]);
   delete(@query[arg1]);
@@ -716,7 +719,7 @@ interval:s:10
   printf("Slow queries: %d\n", @slow_count);
   printf("Total time: %d ms\n", @slow_total_ms);
   printf("Average: %d ms\n\n", @slow_total_ms / @slow_count);
-  
+
   clear(@slow_count);
   clear(@slow_total_ms);
 }
@@ -746,10 +749,10 @@ uretprobe:/usr/sbin/nginx:ngx_http_process_request
 /@start[tid]/
 {
   $latency_us = (nsecs - @start[tid]) / 1000;
-  
+
   // 延迟直方图
   @latency_hist = hist($latency_us);
-  
+
   // 按延迟分类
   if ($latency_us < 1000) {
     @fast = @fast + 1;  // <1ms
@@ -759,7 +762,7 @@ uretprobe:/usr/sbin/nginx:ngx_http_process_request
     @slow = @slow + 1;  // >10ms
     printf("%s: Slow request %d us\n", comm, $latency_us);
   }
-  
+
   delete(@start[tid]);
 }
 
@@ -772,7 +775,7 @@ interval:s:5
   printf("  Slow (>10ms):  %d (%.1f%%)\n", @slow, @slow * 100.0 / @req_count);
   printf("\nLatency distribution (μs):\n");
   print(@latency_hist);
-  
+
   clear(@req_count);
   clear(@fast);
   clear(@medium);
@@ -803,24 +806,24 @@ BCC工具分类:
     - opensnoop: 追踪文件打开
     - biolatency: 块I/O延迟
     - tcplife: TCP连接生命周期
-  
+
   网络分析:
     - tcpconnect: TCP连接追踪
     - tcpaccept: TCP接受追踪
     - tcpretrans: TCP重传追踪
     - tcptop: TCP流量Top
-  
+
   I/O分析:
     - biosnoop: 块I/O追踪
     - filelife: 文件生命周期
     - vfsstat: VFS统计
     - cachestat: 页缓存统计
-  
+
   CPU分析:
     - cpudist: CPU使用分布
     - runqlat: 运行队列延迟
     - profile: CPU性能剖析
-  
+
   内存分析:
     - memleak: 内存泄漏检测
     - slabratetop: Slab分配Top
@@ -998,13 +1001,13 @@ BPF_PERF_OUTPUT(events);
 // Kprobe: 追踪sys_execve
 int trace_execve(struct pt_regs *ctx) {
     struct data_t data = {};
-    
+
     data.pid = bpf_get_current_pid_tgid() >> 32;
     bpf_get_current_comm(&data.comm, sizeof(data.comm));
-    
+
     // 发送事件到用户空间
     events.perf_submit(ctx, &data, sizeof(data));
-    
+
     return 0;
 }
 """
@@ -1060,10 +1063,10 @@ BPF_PERF_OUTPUT(events);
 int trace_connect(struct pt_regs *ctx, struct sock *sk) {
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u64 ts = bpf_ktime_get_ns();
-    
+
     // 保存开始时间
     start.update(&pid_tgid, &ts);
-    
+
     return 0;
 }
 
@@ -1071,27 +1074,27 @@ int trace_connect(struct pt_regs *ctx, struct sock *sk) {
 int trace_connect_return(struct pt_regs *ctx) {
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u64 *tsp = start.lookup(&pid_tgid);
-    
+
     if (tsp == 0) {
         return 0;  // 找不到开始时间
     }
-    
+
     // 计算延迟
     u64 delta_ns = bpf_ktime_get_ns() - *tsp;
     u64 delta_us = delta_ns / 1000;
-    
+
     // 准备事件
     struct connect_event_t event = {};
     event.ts_us = delta_us;
     event.pid = pid_tgid >> 32;
     bpf_get_current_comm(&event.comm, sizeof(event.comm));
-    
+
     // 发送事件
     events.perf_submit(ctx, &event, sizeof(event));
-    
+
     // 清理
     start.delete(&pid_tgid);
-    
+
     return 0;
 }
 """
@@ -1285,8 +1288,8 @@ CPU开销:
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **本章总结**:
@@ -1305,3 +1308,30 @@ CPU开销:
 
 - [05_eBPF安全技术](./05_eBPF安全技术.md)
 - [06_eBPF性能优化](./06_eBPF性能优化.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF概述与架构](./01_eBPF概述与架构.md) - eBPF概述与架构详解
+- [eBPF网络技术](./02_eBPF网络技术.md) - eBPF网络技术详解
+- [eBPF与容器技术](./03_eBPF与容器技术.md) - eBPF与容器技术详解
+- [eBPF安全技术](./05_eBPF安全技术.md) - eBPF安全技术详解
+- [eBPF性能优化](./06_eBPF性能优化.md) - eBPF性能优化详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [容器日志管理](../06_容器监控与运维/02_容器日志管理.md) - 容器日志管理
+- [容器性能调优](../06_容器监控与运维/03_容器性能调优.md) - 容器性能调优
+- [Kubernetes监控与日志管理](../03_Kubernetes技术详解/06_监控与日志管理.md) - K8s监控日志
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

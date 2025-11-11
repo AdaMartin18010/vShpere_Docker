@@ -41,6 +41,9 @@
   - [参考资料](#参考资料)
     - [标准文档](#标准文档)
     - [技术资源](#技术资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -136,12 +139,12 @@ MEC关键特征:
     网络延迟: 30-50ms
     处理延迟: 10-20ms
     总延迟: 40-70ms
-  
+
   MEC处理:
     网络延迟: 1-5ms
     处理延迟: 5-10ms
     总延迟: 6-15ms
-  
+
   提升: 延迟降低70-85%
 
 应用价值:
@@ -159,7 +162,7 @@ MEC关键特征:
     └─ 所有数据上传云端
     └─ 占用大量回传带宽
     └─ 成本高、效率低
-  
+
   MEC架构:
     └─ 80%数据本地处理
     └─ 仅关键数据上云
@@ -276,7 +279,7 @@ MEC关键特征:
      - 多站点应用编排
      - 资源调度
      - 应用迁移
-   
+
    接口:
      - Mm1: 与OSS交互
      - Mm2: 与Platform Manager交互
@@ -288,7 +291,7 @@ MEC关键特征:
      - 应用实例化
      - 平台配置
      - 性能监控
-   
+
    接口:
      - Mm5: 与MEC Platform交互
      - Mm6: 与Orchestrator交互
@@ -299,7 +302,7 @@ MEC关键特征:
      - 数据平面控制
      - DNS代理
      - 流量规则控制
-   
+
    服务类型:
      - RNIS: 无线网络信息服务
      - Location: 位置服务
@@ -341,7 +344,7 @@ MEC关键特征:
   - GS MEC 010-1: 应用打包
   - GS MEC 010-2: 应用LCM
   - GS MEC 011: 边缘平台应用使能
-  
+
 服务规范:
   - GS MEC 012: RNIS API
   - GS MEC 013: Location API
@@ -415,15 +418,15 @@ N接口定义:
   N2 (AMF-RAN): 控制面
     - 接入管理
     - 会话管理
-  
+
   N3 (UPF-RAN): 用户面
     - 数据传输
     - GTP隧道
-  
+
   N4 (SMF-UPF): 会话管理
     - 会话建立
     - QoS控制
-  
+
   N6 (UPF-DN): 数据网络
     - 连接互联网
     - 连接MEC
@@ -433,7 +436,7 @@ NEF (Network Exposure Function):
     - 向第三方应用暴露5G能力
     - API网关
     - 认证授权
-  
+
   暴露能力:
     - 位置信息
     - 网络QoS
@@ -451,17 +454,17 @@ NEF (Network Exposure Function):
      - 将用户流量路由到MEC平台
      - 支持本地break-out
      - 多UPF链式部署
-  
+
   2. QoS保障:
      - 按应用设置QoS策略
      - 带宽保障
      - 延迟控制
-  
+
   3. 会话锚点:
      - 维护PDU会话
      - 支持UPF切换 (移动性)
      - 会话连续性
-  
+
   4. 流量检测:
      - DPI (深度包检测)
      - 应用识别
@@ -472,12 +475,12 @@ UPF部署模式:
     └─ 部署在核心网
     └─ 覆盖大区域
     └─ 适合: 非实时业务
-  
+
   模式2: 边缘UPF
     └─ 部署在基站侧
     └─ 与MEC共址
     └─ 适合: 超低延迟业务
-  
+
   模式3: 分布式UPF
     └─ 多级UPF部署
     └─ 灵活流量控制
@@ -527,12 +530,12 @@ UPF部署模式:
     - 高带宽
     - 中等延迟
     - 适用: 4K/8K视频、AR/VR
-  
+
   URLLC (Ultra-Reliable Low-Latency):
     - 超低延迟 (<1ms)
     - 高可靠性 (99.999%)
     - 适用: 自动驾驶、工业控制
-  
+
   mMTC (Massive Machine Type Communications):
     - 海量连接
     - 低功耗
@@ -547,11 +550,11 @@ UPF部署模式:
      └─ 切片A → MEC-A (自动驾驶)
      └─ 切片B → MEC-B (AR/VR)
      └─ 切片C → MEC-C (工业)
-  
+
   2. 切片共享MEC:
      └─ 多个切片 → 共享MEC平台
      └─ 资源隔离 (容器/VM)
-  
+
   3. 动态切片-MEC绑定:
      └─ 根据业务需求动态分配
      └─ 灵活资源调度
@@ -575,16 +578,16 @@ spec:
   sliceType: URLLC
   sst: 1  # Slice/Service Type
   sd: "000001"  # Slice Differentiator
-  
+
   qos:
     latency: 5ms
     reliability: 99.999%
     bandwidth: 100Mbps
-  
+
   upf:
     deployment: edge
     location: ["site-a", "site-b"]
-  
+
   mecBinding:
     platform: mec-urllc-cluster
     namespace: urllc-apps
@@ -623,7 +626,7 @@ UE → gNB → UPF(边缘) → MEC (本地)
     - DPI识别应用
     - 匹配流量规则
     - 路由到MEC或Internet
-  
+
   示例:
     VR应用 → MEC (本地渲染)
     社交媒体 → Internet
@@ -635,7 +638,7 @@ UE → gNB → UPF(边缘) → MEC (本地)
     - 根据用户位置
     - 选择最近的MEC
     - 动态切换
-  
+
   场景:
     用户在Site A → MEC-A
     用户移动到Site B → 切换到MEC-B
@@ -661,7 +664,7 @@ UE → gNB → UPF(边缘) → MEC (本地)
   方式1: UPF本地Break-out
     └─ 边缘UPF直接连接Internet
     └─ SMF配置PDU会话
-  
+
   方式2: MEC平台Break-out
     └─ MEC平台提供NAT/路由
     └─ 应用直接访问Internet
@@ -696,7 +699,7 @@ DNS优化:
     - MEC平台提供DNS服务
     - 返回最近的服务器IP
     - 减少DNS解析延迟
-  
+
   示例:
     用户请求: video.example.com
     Local DNS返回: 192.168.10.5 (MEC本地CDN)
@@ -707,7 +710,7 @@ TCP优化:
     - MEC作为TCP代理
     - 分段优化
     - 减少RTT影响
-  
+
   流程:
     UE ↔ MEC (优化连接, 5ms RTT)
     MEC ↔ Server (可能较高RTT, 但对用户透明)
@@ -727,7 +730,7 @@ HTTP缓存:
     - 5QI (QoS Identifier)
     - GBR/Non-GBR
     - 优先级
-  
+
   MEC QoS:
     - 资源预留
     - CPU/内存优先级
@@ -739,7 +742,7 @@ HTTP缓存:
   Priority: 20 (高)
   PDB (Packet Delay Budget): 10ms
   PER (Packet Error Rate): 10^-6
-  
+
   # MEC资源配置
   Pod QoS Class: Guaranteed
   CPU: 4 (专用)
@@ -810,7 +813,7 @@ HTTP缓存:
      - 服务注册与发现
      - 服务订阅通知
      - 健康检查
-   
+
    API:
      POST /services: 注册服务
      GET /services: 查询服务
@@ -822,7 +825,7 @@ HTTP缓存:
      - 流量分类
      - 路由规则
      - 流量重定向
-   
+
    规则类型:
      - 基于IP/端口
      - 基于应用ID
@@ -834,7 +837,7 @@ HTTP缓存:
      - 本地DNS解析
      - 智能应答
      - 缓存优化
-   
+
    特性:
      - 支持FQDN重定向
      - 与Traffic Rules联动
@@ -984,13 +987,13 @@ Instantiate (实例化):
     - 应用描述符 (AppD)
     - 虚拟化要求
     - 网络配置
-  
+
   操作:
     1. 分配资源
     2. 创建VM/容器
     3. 配置网络
     4. 安装应用
-  
+
   输出:
     - 应用实例ID
     - Endpoint信息
@@ -1027,7 +1030,7 @@ Migrate (迁移):
     - 用户移动
     - 负载均衡
     - 故障恢复
-  
+
   操作:
     1. 在目标MEC实例化应用
     2. 同步状态
@@ -1087,7 +1090,7 @@ mecAppRequirements:
       version: "2.1"
       requestedPermissions:
         - GET_RADIO_INFO
-  
+
   maxLatency: 10  # ms
   maxJitter: 2    # ms
   maxPacketLoss: 0.001  # 0.1%
@@ -1113,16 +1116,16 @@ MEC支持场景:
     - 碰撞预警
     - 协作式自适应巡航
     - 车队管理
-  
+
   V2I (车对基础设施):
     - 交通信号优化
     - 路况信息
     - 停车引导
-  
+
   V2P (车对行人):
     - 行人检测
     - 安全预警
-  
+
   V2N (车对网络):
     - 高精地图更新
     - 远程驾驶
@@ -1173,24 +1176,24 @@ class V2XMessageHandler:
         self.mec = MECPlatform()
         self.location = LocationService()
         self.v2x = V2XService()
-    
+
     async def handle_cam_message(self, cam_msg):
         """处理CAM (Cooperative Awareness Message)"""
         vehicle_id = cam_msg['station_id']
         position = cam_msg['position']
         speed = cam_msg['speed']
         heading = cam_msg['heading']
-        
+
         # 获取周边车辆
         nearby_vehicles = await self.location.get_nearby(
             position, radius=500  # 500米范围
         )
-        
+
         # 碰撞风险检测
         risks = await self.detect_collision_risk(
             vehicle_id, position, speed, heading, nearby_vehicles
         )
-        
+
         if risks:
             # 发送DENM (Decentralized Environmental Notification)
             await self.v2x.send_denm(
@@ -1199,7 +1202,7 @@ class V2XMessageHandler:
                 affected_vehicles=risks['vehicles'],
                 severity='HIGH'
             )
-    
+
     async def detect_collision_risk(self, vehicle_id, pos, speed, heading, nearby):
         """AI模型预测碰撞风险"""
         # 调用边缘AI推理
@@ -1229,7 +1232,7 @@ if __name__ == '__main__':
     - 网络传输: 5ms
     - 渲染: 8ms
     - 显示: 2ms
-  
+
   超过20ms: 用户眩晕
 
 MEC优势:
@@ -1237,7 +1240,7 @@ MEC优势:
     网络延迟: 30-50ms
     总MTP: 50-70ms
     体验: 差
-  
+
   MEC边缘渲染:
     网络延迟: 3-5ms
     总MTP: 15-25ms
@@ -1305,19 +1308,19 @@ MEC优势:
      - 边缘AI缺陷检测
      - 实时反馈产线
      - 延迟要求: <100ms
-  
+
   2. 预测性维护:
      - 设备振动/温度监测
      - 边缘实时分析
      - 异常预警
      - 数据本地化
-  
+
   3. AGV (自动导引车) 调度:
      - 实时路径规划
      - 多AGV协同
      - 障碍物检测
      - 延迟要求: <50ms
-  
+
   4. 数字孪生:
      - 实时数据同步
      - 仿真优化
@@ -1336,7 +1339,7 @@ spec:
   location:
     factory: ShenzhenPlant01
     workshop: AssemblyLine3
-  
+
   applications:
   - name: visual-inspection
     type: AI-inference
@@ -1346,7 +1349,7 @@ spec:
       memory: 16Gi
     latency: 100ms
     throughput: 30fps
-  
+
   - name: agv-scheduler
     type: realtime-control
     hardware:
@@ -1354,18 +1357,18 @@ spec:
       memory: 8Gi
     latency: 50ms
     reliability: 99.99%
-  
+
   - name: digital-twin
     type: simulation
     hardware:
       cpu: 16
       memory: 32Gi
       storage: 500Gi
-  
+
   connectivity:
     protocols: [OPC-UA, MQTT, Modbus]
     security: TSN  # Time-Sensitive Networking
-  
+
   dataManagement:
     retention: 7days
     backup: cloud
@@ -1446,7 +1449,7 @@ MEC优势:
   降低延迟:
     - 云端: 70-100ms (不可玩)
     - MEC: 20-30ms (流畅)
-  
+
   成本优化:
     - GPU资源共享
     - 用户就近分配
@@ -1469,7 +1472,7 @@ spec:
     - type: NVIDIA-RTX4090
       count: 100
       location: mec-site-b
-  
+
   loadBalancing:
     algorithm: latency-aware
     rules:
@@ -1479,7 +1482,7 @@ spec:
         weight: 30
       - metric: user-location
         weight: 20
-  
+
   scaling:
     minInstances: 50
     maxInstances: 200
@@ -1503,12 +1506,12 @@ spec:
     内存: 256GB+
     存储: NVMe SSD 2TB+
     网卡: 25GbE+
-  
+
   加速器:
     GPU: NVIDIA T4/A100 (AI推理/渲染)
     SmartNIC: NVIDIA BlueField (网络加速)
     FPGA: Intel Stratix (特定加速)
-  
+
   网络:
     接入: 10GbE (UPF连接)
     回传: 100GbE (核心网连接)
@@ -1518,7 +1521,7 @@ spec:
   Virtualization:
     Container: Kubernetes 1.30+
     VM: OpenStack Victoria+
-  
+
   MEC Platform:
     开源选项:
       - OpenNESS (Intel)
@@ -1707,13 +1710,13 @@ from mec_sdk import (
 class EdgeAIApp(MECApp):
     def __init__(self):
         super().__init__(app_name="EdgeAI-FaceRecognition")
-        
+
         # 初始化MEC服务客户端
         self.service_registry = ServiceRegistry()
         self.location = LocationAPI()
         self.rnis = RNIS_API()
         self.traffic = TrafficRulesAPI()
-    
+
     def on_start(self):
         """应用启动时调用"""
         # 1. 注册服务
@@ -1723,7 +1726,7 @@ class EdgeAIApp(MECApp):
             endpoint=f"http://{self.get_local_ip()}:8080/api/v1",
             scope="MEC_HOST"
         )
-        
+
         # 2. 配置流量规则
         self.traffic.add_rule(
             rule_id="face-api-traffic",
@@ -1735,26 +1738,26 @@ class EdgeAIApp(MECApp):
             action="FORWARD",
             target=self.get_local_ip()
         )
-        
+
         # 3. 订阅位置更新
         self.location.subscribe(
             callback=self.on_location_update,
             radius=100  # 100米范围
         )
-        
+
         print("EdgeAI App started successfully")
-    
+
     def on_location_update(self, users):
         """用户位置变化回调"""
         print(f"Nearby users: {len(users)}")
         # 根据用户位置调整服务策略
-    
+
     async def process_frame(self, image_data):
         """处理图像识别请求"""
         # 1. 获取网络状态
         network_info = await self.rnis.get_network_info()
         quality = network_info['bandwidth']
-        
+
         # 2. 根据网络质量调整处理
         if quality > 50:  # Mbps
             # 高质量网络，使用高精度模型
@@ -1762,9 +1765,9 @@ class EdgeAIApp(MECApp):
         else:
             # 低质量网络，使用快速模型
             result = await self.ai_inference_fast(image_data)
-        
+
         return result
-    
+
     def on_stop(self):
         """应用停止时调用"""
         # 注销服务
@@ -1834,12 +1837,12 @@ trafficRuleDescriptor:
      - 0-RTT连接建立
      - 多路复用
      - 更好的拥塞控制
-  
+
   2. TCP优化:
      - TCP Fast Open
      - BBR拥塞控制
      - 增大初始拥塞窗口
-  
+
   3. 边缘DNS:
      - 本地DNS缓存
      - 智能解析
@@ -1850,12 +1853,12 @@ trafficRuleDescriptor:
      - 预测用户行为
      - 提前加载资源
      - 缓存热点数据
-  
+
   2. 增量更新:
      - Delta编码
      - 差分传输
      - 减少数据量
-  
+
   3. 流水线处理:
      - 异步处理
      - 并行计算
@@ -1870,12 +1873,12 @@ trafficRuleDescriptor:
      - LRU/LFU缓存
      - 预取策略
      - 缓存命中率优化
-  
+
   2. 数据压缩:
      - Gzip/Brotli (HTTP)
      - H.265/AV1 (视频)
      - WebP (图像)
-  
+
   3. 自适应流:
      - 根据带宽调整质量
      - ABR (Adaptive Bitrate)
@@ -1884,13 +1887,13 @@ trafficRuleDescriptor:
 配置示例:
   # Nginx边缘缓存
   proxy_cache_path /data/cache levels=1:2 keys_zone=edge_cache:100m max_size=10g;
-  
+
   location /api/v1/content/ {
     proxy_pass http://origin;
     proxy_cache edge_cache;
     proxy_cache_valid 200 1h;
     proxy_cache_use_stale error timeout;
-    
+
     # 带宽限制
     limit_rate_after 5m;
     limit_rate 1m;
@@ -1908,33 +1911,33 @@ class OptimizedInference:
         # 1. 模型量化 (FP32 → FP16/INT8)
         self.model = torch.load(model_path)
         self.model.half()  # FP16
-        
+
         # 2. TensorRT优化
         self.engine = self.build_tensorrt_engine(self.model)
-        
+
         # 3. 批处理
         self.batch_size = 8
         self.batch_buffer = []
-    
+
     def build_tensorrt_engine(self, model):
         """使用TensorRT优化"""
         # 转换为ONNX
         torch.onnx.export(model, ...)
-        
+
         # TensorRT构建
         builder = trt.Builder(...)
         # ... 构建引擎
         return engine
-    
+
     async def infer(self, input_data):
         """批处理推理"""
         self.batch_buffer.append(input_data)
-        
+
         if len(self.batch_buffer) >= self.batch_size:
             # 批处理推理
             batch = torch.stack(self.batch_buffer)
             results = self.engine.infer(batch)
-            
+
             self.batch_buffer.clear()
             return results
         else:
@@ -1961,7 +1964,7 @@ class OptimizedInference:
       - 全局分析
       - 集中管理
     延迟: 50-100ms
-  
+
   Layer 2 - 区域边缘:
     位置: 市级/区级汇聚机房
     功能:
@@ -1970,7 +1973,7 @@ class OptimizedInference:
       - 模型推理
       - 边缘编排
     延迟: 10-20ms
-  
+
   Layer 3 - 本地边缘:
     位置: 基站侧/企业机房
     功能:
@@ -1998,12 +2001,12 @@ class OptimizedInference:
      - 数据网络 (用户流量)
      - 存储网络 (后端存储)
      - 通过VLAN/VxLAN隔离
-  
+
   2. 加密通信:
      - TLS 1.3 (API通信)
      - IPSec (UPF连接)
      - WireGuard (VPN)
-  
+
   3. 防火墙:
      - 边界防火墙
      - 应用防火墙 (WAF)
@@ -2014,12 +2017,12 @@ class OptimizedInference:
      - OAuth 2.0
      - JWT Token
      - mTLS (双向TLS)
-  
+
   2. 容器安全:
      - 镜像扫描
      - 运行时保护
      - Seccomp/AppArmor
-  
+
   3. 数据加密:
      - 传输加密 (TLS)
      - 存储加密 (LUKS)
@@ -2041,17 +2044,17 @@ class OptimizedInference:
     - CPU/内存/磁盘/网络
     - GPU利用率
     - 温度/功耗
-  
+
   MEC平台:
     - API响应时间
     - 服务注册数量
     - 流量规则命中率
-  
+
   应用层:
     - 应用延迟
     - 请求成功率
     - 用户并发数
-  
+
   网络层:
     - UPF吞吐量
     - 端到端延迟
@@ -2073,12 +2076,12 @@ class OptimizedInference:
     - 多副本部署 (K8s)
     - 健康检查
     - 自动故障转移
-  
+
   应用HA:
     - 多实例运行
     - 负载均衡
     - 跨站点冗余
-  
+
   数据HA:
     - 数据复制
     - 定期备份
@@ -2088,11 +2091,11 @@ class OptimizedInference:
   1. 单应用故障:
      - 自动重启
      - 熔断降级
-  
+
   2. 节点故障:
      - Pod迁移
      - 服务重路由
-  
+
   3. 站点故障:
      - 跨站点迁移
      - 流量切换
@@ -2141,8 +2144,8 @@ class OptimizedInference:
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **下一步阅读**:
@@ -2151,3 +2154,30 @@ class OptimizedInference:
 - [02_KubeEdge技术详解](./02_KubeEdge技术详解.md)
 - [03_K3s轻量级Kubernetes](./03_K3s轻量级Kubernetes.md)
 - [05_边缘存储与数据管理](./05_边缘存储与数据管理.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [边缘计算概述与架构](./01_边缘计算概述与架构.md) - 边缘计算概述与架构
+- [KubeEdge技术详解](./02_KubeEdge技术详解.md) - KubeEdge技术详解
+- [K3s轻量级Kubernetes](./03_K3s轻量级Kubernetes.md) - K3s轻量级Kubernetes详解
+- [边缘存储与数据管理](./05_边缘存储与数据管理.md) - 边缘存储与数据管理
+- [边缘AI与推理优化](./06_边缘AI与推理优化.md) - 边缘AI与推理优化
+- [边缘网络与通信](./07_边缘网络与通信.md) - 边缘网络与通信
+- [边缘安全与运维](./08_边缘安全与运维.md) - 边缘安全与运维
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器网络技术](../01_Docker技术详解/04_Docker网络技术.md) - Docker网络技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

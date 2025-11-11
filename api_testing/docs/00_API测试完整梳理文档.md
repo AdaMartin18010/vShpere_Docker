@@ -1,9 +1,9 @@
 # 虚拟化容器化分布式系统OpenAPI与技术规范API测试完整梳理
 
-> **文档类型**: 技术规范API测试梳理  
-> **创建日期**: 2025年10月22日  
-> **最后更新**: 2025年10月22日  
-> **维护负责人**: 技术团队  
+> **文档类型**: 技术规范API测试梳理
+> **创建日期**: 2025年10月22日
+> **最后更新**: 2025年10月22日
+> **维护负责人**: 技术团队
 > **文档版本**: v1.0
 
 ---
@@ -141,17 +141,17 @@ vSphere_API:
     - SOAP API (vSphere Web Services API)
     - REST API (vSphere Automation API)
     - PowerCLI (PowerShell Cmdlets)
-  
+
   版本支持:
     - vSphere 7.0
     - vSphere 8.0 U2
     - vSphere 8.0 U3
-  
+
   认证方式:
     - Session-based Authentication
     - Token-based Authentication
     - SSO (Single Sign-On)
-  
+
   传输协议:
     - HTTPS (443)
     - SOAP over HTTPS
@@ -165,16 +165,16 @@ vSphere_API:
 ```yaml
 基础端点:
   - Base URL: https://vcenter.example.com/api
-  
+
 会话管理:
   - POST /rest/com/vmware/cis/session
     功能: 创建会话
     返回: session-id
-  
+
   - DELETE /rest/com/vmware/cis/session
     功能: 删除会话
     返回: 无内容(204)
-  
+
   - GET /rest/com/vmware/cis/session
     功能: 获取当前会话信息
     返回: session详情
@@ -183,46 +183,46 @@ vSphere_API:
   - GET /rest/vcenter/vm
     功能: 列出所有虚拟机
     参数: filter.names, filter.power_states
-  
+
   - GET /rest/vcenter/vm/{vm}
     功能: 获取虚拟机详情
     参数: vm (虚拟机标识符)
-  
+
   - POST /rest/vcenter/vm
     功能: 创建虚拟机
     Body: VM Spec (JSON)
-  
+
   - PATCH /rest/vcenter/vm/{vm}
     功能: 更新虚拟机配置
     Body: Update Spec (JSON)
-  
+
   - DELETE /rest/vcenter/vm/{vm}
     功能: 删除虚拟机
-  
+
   - POST /rest/vcenter/vm/{vm}/power
     功能: 虚拟机电源操作 (start/stop/reset/suspend)
 
 主机管理:
   - GET /rest/vcenter/host
     功能: 列出所有主机
-  
+
   - GET /rest/vcenter/host/{host}
     功能: 获取主机详情
-  
+
   - POST /rest/vcenter/host/{host}/connect
     功能: 连接主机
 
 数据存储管理:
   - GET /rest/vcenter/datastore
     功能: 列出所有数据存储
-  
+
   - GET /rest/vcenter/datastore/{datastore}
     功能: 获取数据存储详情
 
 网络管理:
   - GET /rest/vcenter/network
     功能: 列出所有网络
-  
+
   - GET /rest/vcenter/network/{network}
     功能: 获取网络详情
 ```
@@ -307,18 +307,18 @@ class vSphereAPITest:
         self.password = password
         self.base_url = f"https://{vcenter_host}/api"
         self.session_id: Optional[str] = None
-    
+
     def create_session(self) -> bool:
         """测试: 创建vSphere会话"""
         print("测试: 创建vSphere会话")
-        
+
         url = f"{self.base_url}/session"
         response = requests.post(
             url,
             auth=(self.username, self.password),
             verify=False
         )
-        
+
         if response.status_code == 201:
             self.session_id = response.json()['value']
             print(f"✅ 会话创建成功: {self.session_id}")
@@ -326,16 +326,16 @@ class vSphereAPITest:
         else:
             print(f"❌ 会话创建失败: {response.status_code}")
             return False
-    
+
     def list_vms(self) -> Dict:
         """测试: 列出所有虚拟机"""
         print("\n测试: 列出所有虚拟机")
-        
+
         url = f"{self.base_url}/vcenter/vm"
         headers = {"vmware-api-session-id": self.session_id}
-        
+
         response = requests.get(url, headers=headers, verify=False)
-        
+
         if response.status_code == 200:
             vms = response.json()['value']
             print(f"✅ 虚拟机列表获取成功, 共 {len(vms)} 台虚拟机")
@@ -345,16 +345,16 @@ class vSphereAPITest:
         else:
             print(f"❌ 虚拟机列表获取失败: {response.status_code}")
             return []
-    
+
     def get_vm_details(self, vm_id: str) -> Optional[Dict]:
         """测试: 获取虚拟机详细信息"""
         print(f"\n测试: 获取虚拟机详情 (ID: {vm_id})")
-        
+
         url = f"{self.base_url}/vcenter/vm/{vm_id}"
         headers = {"vmware-api-session-id": self.session_id}
-        
+
         response = requests.get(url, headers=headers, verify=False)
-        
+
         if response.status_code == 200:
             vm_details = response.json()['value']
             print("✅ 虚拟机详情获取成功:")
@@ -366,84 +366,84 @@ class vSphereAPITest:
         else:
             print(f"❌ 虚拟机详情获取失败: {response.status_code}")
             return None
-    
+
     def power_on_vm(self, vm_id: str) -> bool:
         """测试: 启动虚拟机"""
         print(f"\n测试: 启动虚拟机 (ID: {vm_id})")
-        
+
         url = f"{self.base_url}/vcenter/vm/{vm_id}/power"
         headers = {"vmware-api-session-id": self.session_id}
         data = {"action": "start"}
-        
+
         response = requests.post(url, headers=headers, json=data, verify=False)
-        
+
         if response.status_code in [200, 204]:
             print("✅ 虚拟机启动命令发送成功")
             return True
         else:
             print(f"❌ 虚拟机启动失败: {response.status_code}")
             return False
-    
+
     def power_off_vm(self, vm_id: str) -> bool:
         """测试: 关闭虚拟机"""
         print(f"\n测试: 关闭虚拟机 (ID: {vm_id})")
-        
+
         url = f"{self.base_url}/vcenter/vm/{vm_id}/power"
         headers = {"vmware-api-session-id": self.session_id}
         data = {"action": "stop"}
-        
+
         response = requests.post(url, headers=headers, json=data, verify=False)
-        
+
         if response.status_code in [200, 204]:
             print("✅ 虚拟机关闭命令发送成功")
             return True
         else:
             print(f"❌ 虚拟机关闭失败: {response.status_code}")
             return False
-    
+
     def delete_session(self) -> bool:
         """测试: 删除vSphere会话"""
         print("\n测试: 删除vSphere会话")
-        
+
         url = f"{self.base_url}/session"
         headers = {"vmware-api-session-id": self.session_id}
-        
+
         response = requests.delete(url, headers=headers, verify=False)
-        
+
         if response.status_code == 204:
             print("✅ 会话删除成功")
             return True
         else:
             print(f"❌ 会话删除失败: {response.status_code}")
             return False
-    
+
     def run_tests(self):
         """运行所有测试"""
         print("=" * 60)
         print("vSphere API 虚拟机生命周期测试")
         print("=" * 60)
-        
+
         # 测试1: 创建会话
         if not self.create_session():
             return
-        
+
         # 测试2: 列出虚拟机
         vms = self.list_vms()
         if not vms:
             self.delete_session()
             return
-        
+
         # 测试3: 获取第一台虚拟机详情
         vm_id = vms[0]['vm']
         self.get_vm_details(vm_id)
-        
+
         # 测试4: 电源操作(可选,根据实际情况决定是否执行)
         # self.power_on_vm(vm_id)
         # self.power_off_vm(vm_id)
-        
+
         # 测试5: 删除会话
         self.delete_session()
-        
+
         print("\n" + "=" * 60)
         print("所有测试完成")
         print("=" * 60)
@@ -454,7 +454,7 @@ if __name__ == "__main__":
     VCENTER_HOST = "vcenter.example.com"
     USERNAME = "administrator@vsphere.local"
     PASSWORD = "your_password"
-    
+
     # 运行测试
     tester = vSphereAPITest(VCENTER_HOST, USERNAME, PASSWORD)
     tester.run_tests()
@@ -479,13 +479,13 @@ function Test-vCenterConnection {
         [string]$User,
         [string]$Password
     )
-    
+
     Write-Host "测试: 连接到vCenter服务器" -ForegroundColor Yellow
-    
+
     try {
         $SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
         $Credential = New-Object System.Management.Automation.PSCredential ($User, $SecurePassword)
-        
+
         Connect-VIServer -Server $Server -Credential $Credential -ErrorAction Stop
         Write-Host "✅ vCenter连接成功" -ForegroundColor Green
         return $true
@@ -499,14 +499,14 @@ function Test-vCenterConnection {
 # 测试虚拟机列表
 function Test-GetVMs {
     Write-Host "`n测试: 获取虚拟机列表" -ForegroundColor Yellow
-    
+
     try {
         $VMs = Get-VM
         Write-Host "✅ 虚拟机列表获取成功, 共 $($VMs.Count) 台虚拟机" -ForegroundColor Green
-        
+
         # 显示前5台虚拟机
         $VMs | Select-Object -First 5 | Format-Table Name, PowerState, NumCpu, MemoryGB -AutoSize
-        
+
         return $VMs
     }
     catch {
@@ -518,13 +518,13 @@ function Test-GetVMs {
 # 测试主机信息
 function Test-GetHosts {
     Write-Host "`n测试: 获取ESXi主机列表" -ForegroundColor Yellow
-    
+
     try {
         $VMHosts = Get-VMHost
         Write-Host "✅ 主机列表获取成功, 共 $($VMHosts.Count) 台主机" -ForegroundColor Green
-        
+
         $VMHosts | Format-Table Name, ConnectionState, PowerState, NumCpu, MemoryTotalGB -AutoSize
-        
+
         return $VMHosts
     }
     catch {
@@ -536,13 +536,13 @@ function Test-GetHosts {
 # 测试数据存储
 function Test-GetDatastores {
     Write-Host "`n测试: 获取数据存储列表" -ForegroundColor Yellow
-    
+
     try {
         $Datastores = Get-Datastore
         Write-Host "✅ 数据存储列表获取成功, 共 $($Datastores.Count) 个数据存储" -ForegroundColor Green
-        
+
         $Datastores | Format-Table Name, Type, CapacityGB, FreeSpaceGB -AutoSize
-        
+
         return $Datastores
     }
     catch {
@@ -554,13 +554,13 @@ function Test-GetDatastores {
 # 测试网络
 function Test-GetNetworks {
     Write-Host "`n测试: 获取网络列表" -ForegroundColor Yellow
-    
+
     try {
         $Networks = Get-VirtualPortGroup
         Write-Host "✅ 网络列表获取成功, 共 $($Networks.Count) 个网络" -ForegroundColor Green
-        
+
         $Networks | Format-Table Name, VirtualSwitch, VLanId -AutoSize
-        
+
         return $Networks
     }
     catch {
@@ -572,7 +572,7 @@ function Test-GetNetworks {
 # 断开连接
 function Test-Disconnect {
     Write-Host "`n测试: 断开vCenter连接" -ForegroundColor Yellow
-    
+
     try {
         Disconnect-VIServer -Confirm:$false
         Write-Host "✅ vCenter连接已断开" -ForegroundColor Green
@@ -591,25 +591,25 @@ function Run-AllTests {
         [string]$Username,
         [string]$Password
     )
-    
+
     Write-Host "=" * 60 -ForegroundColor Cyan
     Write-Host "vSphere PowerCLI API 测试套件" -ForegroundColor Cyan
     Write-Host "=" * 60 -ForegroundColor Cyan
-    
+
     # 连接测试
     if (-not (Test-vCenterConnection -Server $VCenterServer -User $Username -Password $Password)) {
         return
     }
-    
+
     # 运行各项测试
     Test-GetVMs
     Test-GetHosts
     Test-GetDatastores
     Test-GetNetworks
-    
+
     # 断开连接
     Test-Disconnect
-    
+
     Write-Host "`n=" * 60 -ForegroundColor Cyan
     Write-Host "所有测试完成" -ForegroundColor Cyan
     Write-Host "=" * 60 -ForegroundColor Cyan
@@ -669,7 +669,7 @@ paths:
                 value: "abc123def456..."
         '401':
           description: 认证失败
-    
+
     get:
       summary: 获取当前会话信息
       description: 返回当前会话的详细信息
@@ -687,7 +687,7 @@ paths:
                 properties:
                   value:
                     $ref: '#/components/schemas/SessionInfo'
-    
+
     delete:
       summary: 删除当前会话
       description: 注销并删除当前会话
@@ -698,7 +698,7 @@ paths:
       responses:
         '204':
           description: 会话已删除
-  
+
   /vcenter/vm:
     get:
       summary: 列出所有虚拟机
@@ -737,7 +737,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/VMSummary'
-    
+
     post:
       summary: 创建虚拟机
       description: 创建新的虚拟机
@@ -762,7 +762,7 @@ paths:
                   value:
                     type: string
                     description: 虚拟机ID
-  
+
   /vcenter/vm/{vm}:
     get:
       summary: 获取虚拟机详情
@@ -790,7 +790,7 @@ paths:
                     $ref: '#/components/schemas/VMInfo'
         '404':
           description: 虚拟机不存在
-    
+
     delete:
       summary: 删除虚拟机
       description: 删除指定的虚拟机
@@ -820,7 +820,7 @@ components:
     basicAuth:
       type: http
       scheme: basic
-  
+
   schemas:
     SessionInfo:
       type: object
@@ -836,7 +836,7 @@ components:
           type: string
           format: date-time
           description: 最后访问时间
-    
+
     VMSummary:
       type: object
       properties:
@@ -856,7 +856,7 @@ components:
         memory_size_MiB:
           type: integer
           description: 内存大小(MiB)
-    
+
     VMInfo:
       type: object
       properties:
@@ -874,7 +874,7 @@ components:
           $ref: '#/components/schemas/BootInfo'
         hardware:
           $ref: '#/components/schemas/HardwareInfo'
-    
+
     CPUInfo:
       type: object
       properties:
@@ -884,14 +884,14 @@ components:
         cores_per_socket:
           type: integer
           description: 每个插槽的核心数
-    
+
     MemoryInfo:
       type: object
       properties:
         size_MiB:
           type: integer
           description: 内存大小(MiB)
-    
+
     BootInfo:
       type: object
       properties:
@@ -901,7 +901,7 @@ components:
         delay:
           type: integer
           description: 启动延迟(毫秒)
-    
+
     HardwareInfo:
       type: object
       properties:
@@ -911,7 +911,7 @@ components:
         upgrade_policy:
           type: string
           enum: [NEVER, AFTER_CLEAN_SHUTDOWN, ALWAYS]
-    
+
     VMCreateSpec:
       type: object
       required:
@@ -930,7 +930,7 @@ components:
           $ref: '#/components/schemas/CPUSpec'
         memory:
           $ref: '#/components/schemas/MemorySpec'
-    
+
     PlacementSpec:
       type: object
       required:
@@ -949,7 +949,7 @@ components:
         cluster:
           type: string
           description: 集群ID
-    
+
     CPUSpec:
       type: object
       properties:
@@ -959,7 +959,7 @@ components:
         cores_per_socket:
           type: integer
           description: 每个插槽的核心数
-    
+
     MemorySpec:
       type: object
       properties:
@@ -983,20 +983,20 @@ libvirt_API:
     - Python API (libvirt-python)
     - Go API (libvirt-go)
     - Java API (libvirt-java)
-  
+
   支持的Hypervisor:
     - QEMU/KVM
     - Xen
     - VMware ESXi
     - VirtualBox
     - Hyper-V
-  
+
   连接URI格式:
     - qemu:///system (本地QEMU系统连接)
     - qemu+ssh://user@host/system (远程SSH连接)
     - qemu+tcp://host:16509/system (远程TCP连接)
     - qemu+tls://host:16514/system (远程TLS连接)
-  
+
   认证方式:
     - Unix Socket (本地)
     - SSH (远程)
@@ -1022,11 +1022,11 @@ class LibvirtAPITest:
     def __init__(self, uri='qemu:///system'):
         self.uri = uri
         self.conn = None
-    
+
     def connect(self) -> bool:
         """测试: 连接到libvirt"""
         print(f"测试: 连接到libvirt (URI: {self.uri})")
-        
+
         try:
             self.conn = libvirt.open(self.uri)
             print(f"✅ libvirt连接成功")
@@ -1037,11 +1037,11 @@ class LibvirtAPITest:
         except libvirt.libvirtError as e:
             print(f"❌ libvirt连接失败: {e}")
             return False
-    
+
     def get_node_info(self):
         """测试: 获取节点信息"""
         print("\n测试: 获取节点信息")
-        
+
         try:
             node_info = self.conn.getInfo()
             print("✅ 节点信息获取成功:")
@@ -1057,20 +1057,20 @@ class LibvirtAPITest:
         except libvirt.libvirtError as e:
             print(f"❌ 节点信息获取失败: {e}")
             return None
-    
+
     def list_domains(self):
         """测试: 列出所有虚拟机"""
         print("\n测试: 列出所有虚拟机")
-        
+
         try:
             # 列出所有虚拟机 (运行中和关闭的)
             domain_ids = self.conn.listDomainsID()
             inactive_names = self.conn.listDefinedDomains()
-            
+
             print(f"✅ 虚拟机列表获取成功")
             print(f"  - 运行中: {len(domain_ids)} 台")
             print(f"  - 已关闭: {len(inactive_names)} 台")
-            
+
             # 显示运行中的虚拟机
             print("\n运行中的虚拟机:")
             for domain_id in domain_ids:
@@ -1078,25 +1078,25 @@ class LibvirtAPITest:
                 state, max_mem, mem, num_cpu, cpu_time = domain.info()
                 print(f"  - {domain.name()} (ID: {domain_id}, 状态: {self.get_state_name(state)})")
                 print(f"    CPU: {num_cpu} 核, 内存: {mem // 1024} MB")
-            
+
             # 显示已关闭的虚拟机
             print("\n已关闭的虚拟机:")
             for name in inactive_names[:5]:  # 显示前5台
                 print(f"  - {name}")
-            
+
             return domain_ids, inactive_names
         except libvirt.libvirtError as e:
             print(f"❌ 虚拟机列表获取失败: {e}")
             return [], []
-    
+
     def get_domain_info(self, domain_name: str):
         """测试: 获取虚拟机详细信息"""
         print(f"\n测试: 获取虚拟机详情 (名称: {domain_name})")
-        
+
         try:
             domain = self.conn.lookupByName(domain_name)
             state, max_mem, mem, num_cpu, cpu_time = domain.info()
-            
+
             print("✅ 虚拟机详情获取成功:")
             print(f"  - 名称: {domain.name()}")
             print(f"  - UUID: {domain.UUIDString()}")
@@ -1105,74 +1105,74 @@ class LibvirtAPITest:
             print(f"  - 当前内存: {mem // 1024} MB")
             print(f"  - vCPU数: {num_cpu}")
             print(f"  - CPU时间: {cpu_time / 1000000000:.2f} 秒")
-            
+
             # 获取XML配置
             xml_desc = domain.XMLDesc(0)
             print(f"\n  XML配置: {len(xml_desc)} 字节")
-            
+
             return domain
         except libvirt.libvirtError as e:
             print(f"❌ 虚拟机详情获取失败: {e}")
             return None
-    
+
     def get_domain_xml(self, domain_name: str):
         """测试: 获取虚拟机XML配置"""
         print(f"\n测试: 获取虚拟机XML配置 (名称: {domain_name})")
-        
+
         try:
             domain = self.conn.lookupByName(domain_name)
             xml_desc = domain.XMLDesc(0)
-            
+
             # 格式化XML
             dom = minidom.parseString(xml_desc)
             pretty_xml = dom.toprettyxml(indent="  ")
-            
+
             print("✅ XML配置获取成功:")
             # 只显示前20行
             lines = pretty_xml.split('\n')
             for line in lines[:20]:
                 print(f"  {line}")
             print(f"  ... (共 {len(lines)} 行)")
-            
+
             return xml_desc
         except libvirt.libvirtError as e:
             print(f"❌ XML配置获取失败: {e}")
             return None
-    
+
     def list_networks(self):
         """测试: 列出所有网络"""
         print("\n测试: 列出所有网络")
-        
+
         try:
             active_nets = self.conn.listNetworks()
             inactive_nets = self.conn.listDefinedNetworks()
-            
+
             print(f"✅ 网络列表获取成功")
             print(f"  - 活动网络: {len(active_nets)} 个")
             print(f"  - 非活动网络: {len(inactive_nets)} 个")
-            
+
             print("\n活动网络:")
             for net_name in active_nets:
                 net = self.conn.networkLookupByName(net_name)
                 print(f"  - {net_name} (UUID: {net.UUIDString()})")
-            
+
             return active_nets, inactive_nets
         except libvirt.libvirtError as e:
             print(f"❌ 网络列表获取失败: {e}")
             return [], []
-    
+
     def list_storage_pools(self):
         """测试: 列出所有存储池"""
         print("\n测试: 列出所有存储池")
-        
+
         try:
             active_pools = self.conn.listStoragePools()
             inactive_pools = self.conn.listDefinedStoragePools()
-            
+
             print(f"✅ 存储池列表获取成功")
             print(f"  - 活动存储池: {len(active_pools)} 个")
             print(f"  - 非活动存储池: {len(inactive_pools)} 个")
-            
+
             print("\n活动存储池:")
             for pool_name in active_pools:
                 pool = self.conn.storagePoolLookupByName(pool_name)
@@ -1182,33 +1182,33 @@ class LibvirtAPITest:
                 print(f"    容量: {info[1] // (1024**3)} GB")
                 print(f"    已用: {info[2] // (1024**3)} GB")
                 print(f"    可用: {info[3] // (1024**3)} GB")
-            
+
             return active_pools, inactive_pools
         except libvirt.libvirtError as e:
             print(f"❌ 存储池列表获取失败: {e}")
             return [], []
-    
+
     def get_capabilities(self):
         """测试: 获取Hypervisor能力"""
         print("\n测试: 获取Hypervisor能力")
-        
+
         try:
             caps = self.conn.getCapabilities()
-            
+
             # 解析XML
             dom = minidom.parseString(caps)
-            
+
             print("✅ Hypervisor能力获取成功:")
-            
+
             # 提取主机信息
             host = dom.getElementsByTagName('host')[0]
             uuid = host.getElementsByTagName('uuid')[0].firstChild.data
             cpu = host.getElementsByTagName('cpu')[0]
             arch = cpu.getElementsByTagName('arch')[0].firstChild.data
-            
+
             print(f"  - 主机UUID: {uuid}")
             print(f"  - CPU架构: {arch}")
-            
+
             # 提取客户机支持
             guests = dom.getElementsByTagName('guest')
             print(f"  - 支持的客户机类型: {len(guests)} 种")
@@ -1217,12 +1217,12 @@ class LibvirtAPITest:
                 arch_elem = guest.getElementsByTagName('arch')[0]
                 guest_arch = arch_elem.getAttribute('name')
                 print(f"    - {os_type} ({guest_arch})")
-            
+
             return caps
         except libvirt.libvirtError as e:
             print(f"❌ Hypervisor能力获取失败: {e}")
             return None
-    
+
     def get_state_name(self, state: int) -> str:
         """将状态码转换为名称"""
         states = {
@@ -1236,7 +1236,7 @@ class LibvirtAPITest:
             libvirt.VIR_DOMAIN_PMSUSPENDED: 'PM Suspended'
         }
         return states.get(state, 'Unknown')
-    
+
     def get_pool_state_name(self, state: int) -> str:
         """将存储池状态码转换为名称"""
         states = {
@@ -1247,11 +1247,11 @@ class LibvirtAPITest:
             libvirt.VIR_STORAGE_POOL_INACCESSIBLE: 'Inaccessible'
         }
         return states.get(state, 'Unknown')
-    
+
     def disconnect(self):
         """测试: 断开libvirt连接"""
         print("\n测试: 断开libvirt连接")
-        
+
         if self.conn:
             try:
                 self.conn.close()
@@ -1260,21 +1260,21 @@ class LibvirtAPITest:
             except libvirt.libvirtError as e:
                 print(f"❌ 断开连接失败: {e}")
                 return False
-    
+
     def run_tests(self):
         """运行所有测试"""
         print("=" * 60)
         print("libvirt API 功能测试")
         print("=" * 60)
-        
+
         # 连接测试
         if not self.connect():
             return
-        
+
         # 运行各项测试
         self.get_node_info()
         domain_ids, inactive_names = self.list_domains()
-        
+
         # 如果有虚拟机,获取第一台的详细信息
         if domain_ids:
             domain = self.conn.lookupByID(domain_ids[0])
@@ -1283,14 +1283,14 @@ class LibvirtAPITest:
         elif inactive_names:
             self.get_domain_info(inactive_names[0])
             self.get_domain_xml(inactive_names[0])
-        
+
         self.list_networks()
         self.list_storage_pools()
         self.get_capabilities()
-        
+
         # 断开连接
         self.disconnect()
-        
+
         print("\n" + "=" * 60)
         print("所有测试完成")
         print("=" * 60)
@@ -1299,10 +1299,10 @@ class LibvirtAPITest:
 if __name__ == "__main__":
     # 本地QEMU/KVM连接
     tester = LibvirtAPITest('qemu:///system')
-    
+
     # 远程SSH连接示例:
     # tester = LibvirtAPITest('qemu+ssh://user@remotehost/system')
-    
+
     # 运行测试
     tester.run_tests()
 ```
@@ -1318,11 +1318,11 @@ QMP协议:
   类型: JSON-based协议
   传输: Unix Socket / TCP
   版本: QMP 2.5+
-  
+
   连接方式:
     - Unix Socket: /var/run/qemu/vm-name.sock
     - TCP: localhost:4444
-  
+
   消息格式:
     - 命令: {"execute": "command", "arguments": {...}}
     - 响应: {"return": {...}}
@@ -1344,42 +1344,42 @@ class QMPClient:
     def __init__(self, socket_path='/var/run/qemu/vm.sock'):
         self.socket_path = socket_path
         self.sock = None
-    
+
     def connect(self):
         """连接到QMP"""
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.connect(self.socket_path)
-        
+
         # 读取QMP greeting
         greeting = self._recv()
         print(f"QMP版本: {greeting['QMP']['version']}")
-        
+
         # 进入命令模式
         self._send({"execute": "qmp_capabilities"})
         response = self._recv()
         return response['return'] == {}
-    
+
     def _send(self, cmd):
         """发送命令"""
         self.sock.send((json.dumps(cmd) + '\n').encode())
-    
+
     def _recv(self):
         """接收响应"""
         data = b''
         while b'\n' not in data:
             data += self.sock.recv(1024)
         return json.loads(data.decode())
-    
+
     def query_status(self):
         """查询VM状态"""
         self._send({"execute": "query-status"})
         return self._recv()
-    
+
     def query_cpus(self):
         """查询CPU信息"""
         self._send({"execute": "query-cpus-fast"})
         return self._recv()
-    
+
     def query_block(self):
         """查询块设备"""
         self._send({"execute": "query-block"})
@@ -1407,7 +1407,7 @@ Docker Engine API已在 `scripts/docker_api_test.py` 中实现完整测试。
 Docker_Engine_API:
   版本: v1.43+
   Base_URL: http://localhost:2375 或 unix:///var/run/docker.sock
-  
+
   核心端点:
     容器管理:
       - GET /containers/json - 列出容器
@@ -1417,18 +1417,18 @@ Docker_Engine_API:
       - POST /containers/{id}/stop - 停止容器
       - DELETE /containers/{id} - 删除容器
       - GET /containers/{id}/stats - 容器统计
-    
+
     镜像管理:
       - GET /images/json - 列出镜像
       - POST /images/create - 拉取镜像
       - GET /images/{name}/json - 镜像详情
       - DELETE /images/{name} - 删除镜像
-    
+
     网络管理:
       - GET /networks - 列出网络
       - POST /networks/create - 创建网络
       - DELETE /networks/{id} - 删除网络
-    
+
     卷管理:
       - GET /volumes - 列出卷
       - POST /volumes/create - 创建卷
@@ -1504,15 +1504,15 @@ Podman_API:
     - Rootless容器
     - Pod管理
     - Systemd集成
-  
+
   Base_URL: http://localhost:8080 或 unix:///run/user/1000/podman/podman.sock
-  
+
   独有端点:
     Pod管理:
       - GET /libpod/pods/json - 列出Pod
       - POST /libpod/pods/create - 创建Pod
       - DELETE /libpod/pods/{name} - 删除Pod
-    
+
     Rootless相关:
       - GET /libpod/system/df - 磁盘使用
       - POST /libpod/system/prune - 清理资源
@@ -1532,31 +1532,31 @@ class PodmanAPITest:
     def __init__(self, base_url='http://localhost:8080'):
         self.base_url = base_url
         self.api_version = 'v4.0.0'
-    
+
     def test_ping(self):
         """测试连接"""
         url = f"{self.base_url}/_ping"
         response = requests.get(url)
         return response.status_code == 200
-    
+
     def test_list_pods(self):
         """列出Pod"""
         url = f"{self.base_url}/libpod/pods/json"
         response = requests.get(url)
-        
+
         if response.status_code == 200:
             pods = response.json()
             print(f"✅ Pod列表: {len(pods)} 个Pod")
             for pod in pods:
                 print(f"  - {pod['Name']}: {pod['Status']}")
         return response.json()
-    
+
     def test_create_pod(self, name='test-pod'):
         """创建Pod"""
         url = f"{self.base_url}/libpod/pods/create"
         data = {"name": name}
         response = requests.post(url, json=data)
-        
+
         if response.status_code == 201:
             pod = response.json()
             print(f"✅ Pod创建成功: {pod['Id']}")
@@ -1579,7 +1579,7 @@ containerd_API:
   类型: gRPC
   Socket: /run/containerd/containerd.sock
   版本: v1.7+
-  
+
   核心服务:
     - containers.v1.Containers - 容器管理
     - images.v1.Images - 镜像管理
@@ -1607,29 +1607,29 @@ func testContainerd() error {
         return err
     }
     defer client.Close()
-    
+
     ctx := namespaces.WithNamespace(context.Background(), "default")
-    
+
     // 列出容器
     containers, err := client.Containers(ctx)
     if err != nil {
         return err
     }
-    
+
     fmt.Printf("✅ 容器列表: %d 个容器\n", len(containers))
     for _, container := range containers {
         info, _ := container.Info(ctx)
         fmt.Printf("  - %s\n", info.ID)
     }
-    
+
     // 列出镜像
     images, err := client.ImageService().List(ctx)
     if err != nil {
         return err
     }
-    
+
     fmt.Printf("✅ 镜像列表: %d 个镜像\n", len(images))
-    
+
     return nil
 }
 ```
@@ -1655,25 +1655,25 @@ Kubernetes_API_Groups:
     - secrets
     - persistentvolumes
     - persistentvolumeclaims
-  
+
   Apps组 (apps/v1):
     - deployments
     - statefulsets
     - daemonsets
     - replicasets
-  
+
   Batch组 (batch/v1):
     - jobs
     - cronjobs
-  
+
   Networking组 (networking.k8s.io/v1):
     - networkpolicies
     - ingresses
-  
+
   Storage组 (storage.k8s.io/v1):
     - storageclasses
     - volumeattachments
-  
+
   RBAC组 (rbac.authorization.k8s.io/v1):
     - roles
     - rolebindings
@@ -1705,7 +1705,7 @@ OpenShift_API:
     - image.openshift.io/v1 - 镜像流
     - build.openshift.io/v1 - 构建
     - apps.openshift.io/v1 - DeploymentConfig
-  
+
   特色功能:
     - S2I (Source-to-Image)
     - 内置Registry
@@ -1747,22 +1747,22 @@ etcd_v3_API:
   协议: gRPC
   端点: localhost:2379
   认证: TLS证书 / Username+Password
-  
+
   核心服务:
     KV服务:
       - Put - 存储键值
       - Get - 获取键值
       - Delete - 删除键值
       - Txn - 事务操作
-    
+
     Watch服务:
       - Watch - 监听键变化
-    
+
     Lease服务:
       - LeaseGrant - 创建租约
       - LeaseRevoke - 撤销租约
       - LeaseKeepAlive - 续约
-    
+
     Cluster服务:
       - MemberList - 成员列表
       - MemberAdd - 添加成员
@@ -1781,59 +1781,59 @@ import etcd3
 class EtcdAPITest:
     def __init__(self, host='localhost', port=2379):
         self.client = etcd3.client(host=host, port=port)
-    
+
     def test_put_get(self):
         """测试Put和Get"""
         print("测试: Put/Get操作")
-        
+
         # Put
         self.client.put('test-key', 'test-value')
         print("✅ Put成功")
-        
+
         # Get
         value, metadata = self.client.get('test-key')
         print(f"✅ Get成功: {value.decode()}")
-        
+
         return value.decode() == 'test-value'
-    
+
     def test_watch(self):
         """测试Watch"""
         print("\n测试: Watch操作")
-        
+
         events_iter, cancel = self.client.watch('test-key')
-        
+
         # 在另一个线程中修改值
         self.client.put('test-key', 'new-value')
-        
+
         for event in events_iter:
             print(f"✅ Watch事件: {event.key} = {event.value}")
             break
-        
+
         cancel()
-    
+
     def test_lease(self):
         """测试Lease"""
         print("\n测试: Lease操作")
-        
+
         # 创建5秒租约
         lease = self.client.lease(5)
         print(f"✅ Lease创建: {lease.id}")
-        
+
         # 使用租约存储键值
         self.client.put('temp-key', 'temp-value', lease=lease)
         print("✅ 使用Lease存储成功")
-        
+
         # 查询TTL
         ttl = lease.ttl
         print(f"✅ Lease TTL: {ttl}秒")
-    
+
     def test_transaction(self):
         """测试Transaction"""
         print("\n测试: Transaction操作")
-        
+
         # 条件事务: 如果key1=value1,则设置key2=value2
         self.client.put('key1', 'value1')
-        
+
         success = self.client.transaction(
             compare=[
                 self.client.transactions.value('key1') == 'value1'
@@ -1843,20 +1843,20 @@ class EtcdAPITest:
             ],
             failure=[]
         )
-        
+
         print(f"✅ Transaction成功: {success}")
-    
+
     def run_tests(self):
         """运行所有测试"""
         print("=" * 60)
         print("etcd v3 API 测试")
         print("=" * 60)
-        
+
         self.test_put_get()
         self.test_watch()
         self.test_lease()
         self.test_transaction()
-        
+
         print("\n" + "=" * 60)
         print("所有测试完成")
         print("=" * 60)
@@ -1876,17 +1876,17 @@ Consul_API:
   协议: HTTP/HTTPS
   端点: localhost:8500
   认证: ACL Token
-  
+
   核心端点:
     KV存储:
       - GET /v1/kv/{key} - 获取键值
       - PUT /v1/kv/{key} - 存储键值
       - DELETE /v1/kv/{key} - 删除键值
-    
+
     服务发现:
       - GET /v1/catalog/services - 服务列表
       - GET /v1/health/service/{service} - 服务健康检查
-    
+
     Agent:
       - GET /v1/agent/members - 成员列表
       - GET /v1/agent/self - Agent信息
@@ -1905,58 +1905,58 @@ import consul
 class ConsulAPITest:
     def __init__(self, host='localhost', port=8500):
         self.client = consul.Consul(host=host, port=port)
-    
+
     def test_kv(self):
         """测试KV存储"""
         print("测试: KV存储")
-        
+
         # Put
         self.client.kv.put('test-key', 'test-value')
         print("✅ KV Put成功")
-        
+
         # Get
         index, data = self.client.kv.get('test-key')
         value = data['Value'].decode()
         print(f"✅ KV Get成功: {value}")
-        
+
         # Delete
         self.client.kv.delete('test-key')
         print("✅ KV Delete成功")
-    
+
     def test_services(self):
         """测试服务发现"""
         print("\n测试: 服务发现")
-        
+
         # 列出所有服务
         index, services = self.client.catalog.services()
         print(f"✅ 服务列表: {len(services)} 个服务")
-        
+
         for service_name in list(services.keys())[:5]:
             print(f"  - {service_name}")
-    
+
     def test_health(self):
         """测试健康检查"""
         print("\n测试: 健康检查")
-        
+
         # 查询consul服务的健康状态
         index, checks = self.client.health.service('consul')
         print(f"✅ 健康检查: {len(checks)} 个实例")
-        
+
         for check in checks:
             node = check['Node']['Node']
             status = check['Checks'][0]['Status']
             print(f"  - {node}: {status}")
-    
+
     def run_tests(self):
         """运行所有测试"""
         print("=" * 60)
         print("Consul HTTP API 测试")
         print("=" * 60)
-        
+
         self.test_kv()
         self.test_services()
         self.test_health()
-        
+
         print("\n" + "=" * 60)
         print("所有测试完成")
         print("=" * 60)
@@ -2159,12 +2159,12 @@ export let options = {
 export default function () {
   // 测试Docker API
   let res = http.get('http://localhost:2375/containers/json');
-  
+
   check(res, {
     'status is 200': (r) => r.status === 200,
     'response time < 200ms': (r) => r.timings.duration < 200,
   });
-  
+
   sleep(1);
 }
 ```
@@ -2181,17 +2181,17 @@ export default function () {
     - 每个测试用例独立运行
     - 不依赖其他测试的状态
     - 可以任意顺序执行
-  
+
   可重复性:
     - 相同输入产生相同输出
     - 清理测试数据
     - 重置测试环境
-  
+
   完整性:
     - 正常场景测试
     - 异常场景测试
     - 边界条件测试
-  
+
   可维护性:
     - 代码结构清晰
     - 注释完整
@@ -2206,12 +2206,12 @@ export default function () {
     - 测试单个函数
     - Mock外部依赖
     - 快速执行
-  
+
   集成测试 (20%):
     - 测试组件交互
     - 使用真实依赖
     - 中等速度
-  
+
   端到端测试 (10%):
     - 测试完整流程
     - 真实环境
@@ -2230,7 +2230,7 @@ class TestDataFactory:
             "Cmd": ["echo", "test"],
             "Labels": {"test": "true"}
         }
-    
+
     @staticmethod
     def create_vm_spec():
         return {
@@ -2262,21 +2262,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           cd tools/api_testing
           pip install -r requirements.txt
-      
+
       - name: Run Docker API Tests
         run: |
           python tools/api_testing/scripts/docker_api_test.py
-      
+
       - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v3
@@ -2331,26 +2331,26 @@ class APITestTemplate(unittest.TestCase):
         """测试类初始化"""
         cls.base_url = "http://api.example.com"
         cls.headers = {"Content-Type": "application/json"}
-    
+
     def setUp(self):
         """每个测试前执行"""
         self.test_data = {"key": "value"}
-    
+
     def tearDown(self):
         """每个测试后执行"""
         # 清理测试数据
         pass
-    
+
     def test_get_request(self):
         """测试GET请求"""
         response = requests.get(
             f"{self.base_url}/resource",
             headers=self.headers
         )
-        
+
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json(), list)
-    
+
     def test_post_request(self):
         """测试POST请求"""
         response = requests.post(
@@ -2358,17 +2358,17 @@ class APITestTemplate(unittest.TestCase):
             json=self.test_data,
             headers=self.headers
         )
-        
+
         self.assertEqual(response.status_code, 201)
         self.assertIn('id', response.json())
-    
+
     def test_error_handling(self):
         """测试错误处理"""
         response = requests.get(
             f"{self.base_url}/nonexistent",
             headers=self.headers
         )
-        
+
         self.assertEqual(response.status_code, 404)
 
 if __name__ == '__main__':
@@ -2437,7 +2437,7 @@ if __name__ == '__main__':
 
 ---
 
-**文档完成时间**: 2025年10月22日  
-**文档版本**: v1.0  
-**总行数**: 扩展至完整版本  
+**文档完成时间**: 2025年10月22日
+**文档版本**: v1.0
+**总行数**: 扩展至完整版本
 **维护团队**: 技术团队

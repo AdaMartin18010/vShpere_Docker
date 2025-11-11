@@ -1,8 +1,8 @@
 # 01 - Serverless概述与架构
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -31,6 +31,9 @@
     - [4.3 成本对比](#43-成本对比)
     - [4.4 选型建议](#44-选型建议)
   - [5. 总结](#5-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -53,7 +56,7 @@
     ❌ 扩缩容管理
     ❌ 高可用配置
     ❌ 安全补丁
-  
+
   关注点:
     - 基础设施 (70%)
     - 业务逻辑 (30%)
@@ -63,7 +66,7 @@ Serverless架构:
     ✅ 编写业务代码 (函数)
     ✅ 配置触发器 (事件源)
     ✅ 设置资源限制 (内存/超时)
-  
+
   云平台负责:
     ✅ 服务器管理
     ✅ 运行时环境
@@ -71,7 +74,7 @@ Serverless架构:
     ✅ 高可用
     ✅ 监控日志
     ✅ 安全补丁
-  
+
   关注点:
     - 基础设施 (0%)
     - 业务逻辑 (100%)
@@ -148,7 +151,7 @@ Serverless架构:
 def lambda_handler(event, context):
     """处理HTTP请求"""
     name = event.get('queryStringParameters', {}).get('name', 'World')
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({
@@ -175,17 +178,17 @@ def lambda_handler(event, context):
     - AWS DynamoDB
     - Firebase Firestore
     - Supabase
-  
+
   认证:
     - Auth0
     - Firebase Auth
     - AWS Cognito
-  
+
   存储:
     - AWS S3
     - Google Cloud Storage
     - Azure Blob
-  
+
   消息队列:
     - AWS SQS/SNS
     - Google Pub/Sub
@@ -241,7 +244,7 @@ Lambda函数 (FaaS)
    ✅ 自动扩缩容
    ✅ 高可用内置
    ✅ 安全补丁自动
-   
+
    节省:
      - 运维人力 (50-80%)
      - 基础设施管理时间
@@ -250,7 +253,7 @@ Lambda函数 (FaaS)
    ✅ 按使用付费
    ✅ 零流量零成本
    ✅ 无需预留资源
-   
+
    节省:
      - 闲置资源成本 (70-90%)
      - 示例: 日访问100次的API
@@ -261,7 +264,7 @@ Lambda函数 (FaaS)
    ✅ 专注业务逻辑
    ✅ 快速部署 (秒级)
    ✅ 灰度发布简单
-   
+
    提速:
      - 开发效率提升 (2-3倍)
      - 上线时间缩短 (天 → 小时)
@@ -270,7 +273,7 @@ Lambda函数 (FaaS)
    ✅ 0-N自动扩展
    ✅ 应对突发流量
    ✅ 无需容量规划
-   
+
    场景:
      - 营销活动 (10倍流量)
      - 新闻热点 (100倍流量)
@@ -280,7 +283,7 @@ Lambda函数 (FaaS)
    ✅ 用多少付多少
    ✅ 闲时零成本
    ✅ 峰时按需扩展
-   
+
    适用:
      - 流量不均匀应用
      - 定时任务
@@ -290,7 +293,7 @@ Lambda函数 (FaaS)
    ✅ 多AZ部署
    ✅ 自动故障转移
    ✅ 无单点故障
-   
+
    SLA:
      - AWS Lambda: 99.95%
      - Azure Functions: 99.95%
@@ -303,17 +306,17 @@ Lambda函数 (FaaS)
    问题:
      - 首次调用延迟高
      - 闲置后重新启动慢
-   
+
    延迟:
      - Node.js: 100-300ms
      - Python: 200-500ms
      - Java: 1-3s (JVM启动)
      - Go: 50-150ms
-   
+
    影响:
      - 用户体验 (首次请求慢)
      - 不适合低延迟场景
-   
+
    缓解:
      - 预热 (定时ping)
      - Provisioned Concurrency (AWS)
@@ -324,12 +327,12 @@ Lambda函数 (FaaS)
      - API差异大
      - 迁移成本高
      - 多云困难
-   
+
    示例:
      - AWS Lambda: handler(event, context)
      - Azure Functions: def main(req: func.HttpRequest)
      - 不兼容，需重写
-   
+
    缓解:
      - 使用开源平台 (Knative/OpenFaaS)
      - 抽象层 (Serverless Framework)
@@ -340,12 +343,12 @@ Lambda函数 (FaaS)
      - 本地环境难模拟
      - 日志分散
      - 分布式追踪复杂
-   
+
    挑战:
      - 无法SSH到"服务器"
      - 状态难复现
      - 依赖服务模拟
-   
+
    工具:
      - SAM Local (AWS)
      - Azure Functions Core Tools
@@ -356,12 +359,12 @@ Lambda函数 (FaaS)
      - AWS Lambda: 15分钟
      - Azure Functions: 10分钟 (消费计划)
      - Google Cloud Functions: 9分钟
-   
+
    不适用:
      - 长时间任务 (视频转码)
      - 批处理 (数据迁移)
      - 机器学习训练
-   
+
    解决:
      - 任务拆分
      - 使用容器 (ECS/AKS)
@@ -371,12 +374,12 @@ Lambda函数 (FaaS)
      - 函数无状态
      - 状态存外部
      - 网络开销
-   
+
    挑战:
      - 数据库连接池
      - 会话管理
      - 缓存策略
-   
+
    解决:
      - DynamoDB (低延迟)
      - Redis (缓存)
@@ -387,7 +390,7 @@ Lambda函数 (FaaS)
      - 分布式追踪
      - 成本监控
      - 性能分析
-   
+
    工具:
      - AWS X-Ray
      - Azure Application Insights
@@ -398,11 +401,11 @@ Lambda函数 (FaaS)
      - 流量暴涨
      - 成本爆炸
      - 难以预算
-   
+
    风险:
      - DDoS攻击 → 成本飙升
      - 无限循环 → 成本失控
-   
+
    缓解:
      - 设置预算告警
      - 限流 (Rate Limiting)
@@ -421,12 +424,12 @@ Lambda函数 (FaaS)
      - 请求-响应模式
      - 无状态
      - 不定时流量
-   
+
    优势:
      ✅ 自动扩展
      ✅ 按调用付费
      ✅ 快速部署
-   
+
    示例:
      - RESTful API
      - GraphQL API
@@ -437,12 +440,12 @@ Lambda函数 (FaaS)
      - 批量处理
      - 并行处理
      - 定时/事件触发
-   
+
    优势:
      ✅ 大规模并行
      ✅ 成本低
      ✅ 无需管理集群
-   
+
    示例:
      - 日志分析
      - 数据ETL
@@ -454,11 +457,11 @@ Lambda函数 (FaaS)
      - 流式数据
      - 实时处理
      - 高吞吐
-   
+
    优势:
      ✅ 事件驱动
      ✅ 自动扩展
-   
+
    示例:
      - Kafka消息处理
      - IoT数据处理
@@ -470,11 +473,11 @@ Lambda函数 (FaaS)
      - 定期执行
      - 短任务
      - 低频
-   
+
    优势:
      ✅ 零成本 (不执行时)
      ✅ 自动调度
-   
+
    示例:
      - 数据备份
      - 报告生成
@@ -486,11 +489,11 @@ Lambda函数 (FaaS)
      - 第三方触发
      - 不定时
      - 短处理
-   
+
    优势:
      ✅ 按需运行
      ✅ 成本低
-   
+
    示例:
      - GitHub Webhook
      - Stripe支付回调
@@ -502,11 +505,11 @@ Lambda函数 (FaaS)
      - 请求-响应
      - 不定时
      - 短交互
-   
+
    优势:
      ✅ 自动扩展
      ✅ 成本低
-   
+
    示例:
      - Slack Bot
      - Telegram Bot
@@ -517,11 +520,11 @@ Lambda函数 (FaaS)
      - 设备上报
      - 海量设备
      - 不定时
-   
+
    优势:
      ✅ 大规模并发
      ✅ 按设备数付费
-   
+
    示例:
      - 设备数据收集
      - 设备控制
@@ -532,11 +535,11 @@ Lambda函数 (FaaS)
      - CDN边缘
      - 低延迟
      - 全球分布
-   
+
    优势:
      ✅ 就近处理
      ✅ 低延迟
-   
+
    示例:
      - 图片缩放
      - A/B测试
@@ -551,7 +554,7 @@ Lambda函数 (FaaS)
    ❌ 视频编码 (>15分钟)
    ❌ 大数据分析 (小时级)
    ❌ 机器学习训练 (天级)
-   
+
    替代方案:
      - ECS/EKS (容器)
      - EC2 (虚拟机)
@@ -561,11 +564,11 @@ Lambda函数 (FaaS)
    ❌ 高频交易
    ❌ 游戏服务器
    ❌ 实时音视频
-   
+
    原因:
      - 冷启动延迟
      - 网络往返时间
-   
+
    替代方案:
      - 常驻服务 (Kubernetes)
      - 预热函数 (Provisioned Concurrency)
@@ -574,11 +577,11 @@ Lambda函数 (FaaS)
    ❌ WebSocket长连接
    ❌ 游戏服务器 (状态)
    ❌ 数据库 (持久化)
-   
+
    原因:
      - 函数无状态
      - 连接无法保持
-   
+
    替代方案:
      - WebSocket: API Gateway + ECS
      - 状态: 外部存储 (Redis/DynamoDB)
@@ -586,7 +589,7 @@ Lambda函数 (FaaS)
 4. 大文件处理:
    ❌ 内存限制 (AWS Lambda: 10GB)
    ❌ 磁盘限制 (/tmp: 512MB)
-   
+
    替代方案:
      - 流式处理
      - 分片处理
@@ -595,28 +598,28 @@ Lambda函数 (FaaS)
 5. 复杂依赖:
    ❌ 大型依赖 (TensorFlow: GB级)
    ❌ 系统级依赖 (需要apt-get)
-   
+
    限制:
      - 部署包大小限制
      - Lambda Layer: 250MB
-   
+
    替代方案:
      - 容器镜像 (Lambda Container Image)
      - 精简依赖
 
 6. 24x7高流量:
    ❌ 高并发持续流量
-   
+
    原因:
      - 成本可能高于常驻服务
-   
+
    分析:
      假设每秒100请求，每请求100ms:
        Serverless: $50-100/月
        EC2 (t3.medium): $30/月
-     
+
      结论: 持续高流量，EC2更便宜
-   
+
    方案:
      - 混合架构
      - 峰时Serverless，平时EC2
@@ -636,28 +639,28 @@ Lambda函数 (FaaS)
     - API Gateway
     - HTTP触发器
     - RESTful API
-  
+
   消息队列:
     - Kafka
     - RabbitMQ
     - AWS SQS/SNS
     - Azure Service Bus
-  
+
   存储:
     - S3对象创建/删除
     - Blob Storage上传
     - 文件变更
-  
+
   数据库:
     - DynamoDB Streams
     - Cosmos DB Change Feed
     - 数据变更
-  
+
   定时:
     - Cron表达式
     - CloudWatch Events
     - 定时触发
-  
+
   IoT:
     - 设备上报
     - MQTT消息
@@ -702,23 +705,23 @@ s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     """S3上传图片时自动生成缩略图"""
-    
+
     # 解析事件
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    
+
     # 下载图片
     obj = s3.get_object(Bucket=bucket, Key=key)
     img = Image.open(io.BytesIO(obj['Body'].read()))
-    
+
     # 生成缩略图
     img.thumbnail((200, 200))
-    
+
     # 上传缩略图
     buffer = io.BytesIO()
     img.save(buffer, 'JPEG')
     buffer.seek(0)
-    
+
     thumb_key = key.replace('uploads/', 'thumbnails/')
     s3.put_object(
         Bucket=bucket,
@@ -726,7 +729,7 @@ def lambda_handler(event, context):
         Body=buffer,
         ContentType='image/jpeg'
     )
-    
+
     return {
         'statusCode': 200,
         'body': f'Thumbnail created: {thumb_key}'
@@ -751,10 +754,10 @@ Serverless自动扩缩容:
   - 请求增加: 自动创建实例
   - 每实例处理1个请求 (并发=1)
   - 或配置并发数
-  
+
   公式:
     实例数 = ceil(请求数 / 并发数)
-  
+
   示例:
     100 请求/秒, 并发=10
     实例数 = 100 / 10 = 10实例
@@ -769,7 +772,7 @@ Serverless自动扩缩容:
     - AWS Lambda: 1000 (默认)
     - 可申请提升
     - 防止成本失控
-  
+
   预留并发 (Reserved Concurrency):
     - 保证可用性
     - 避免冷启动
@@ -797,10 +800,10 @@ spec:
         autoscaling.knative.dev/target: "100"    # 目标并发数
         autoscaling.knative.dev/metric: "concurrency"  # 指标
         autoscaling.knative.dev/window: "60s"    # 时间窗口
-        
+
         # 零扩展配置
         autoscaling.knative.dev/scale-to-zero-pod-retention-period: "10m"
-        
+
         # 初始规模
         autoscaling.knative.dev/initial-scale: "1"
     spec:
@@ -828,26 +831,26 @@ AWS Lambda计费:
   请求数:
     - 前100万请求/月: 免费
     - 之后: $0.20 / 100万请求
-  
+
   执行时间:
     - 按GB-秒计费
     - $0.0000166667 / GB-秒
     - 或 $0.01 / 60万GB-秒
-  
+
   示例计算:
     假设:
       - 300万请求/月
       - 每请求200ms
       - 512MB内存
-    
+
     请求费用:
       (3,000,000 - 1,000,000) * $0.20 / 1,000,000
       = $0.40
-    
+
     执行费用:
       3,000,000 * 0.2秒 * 0.512GB * $0.0000166667
       = $5.12
-    
+
     总费用: $5.52/月
 
 Azure Functions计费:
@@ -855,7 +858,7 @@ Azure Functions计费:
     - 前100万执行: 免费
     - 之后: $0.20 / 100万执行
     - 执行时间: $0.000016 / GB-秒
-  
+
   高级计划:
     - 按实例小时计费
     - $0.169/小时 (EP1)
@@ -864,23 +867,23 @@ Google Cloud Functions计费:
   请求数:
     - 前200万请求/月: 免费
     - 之后: $0.40 / 100万请求
-  
+
   执行时间:
     - $0.0000025 / GB-秒 (内存)
     - $0.0000100 / GHz-秒 (CPU)
 
 成本对比 (示例):
   场景: 低流量API (每天1000请求, 100ms/请求, 256MB)
-  
+
   传统 (EC2 t3.micro):
     - $0.0104/小时 * 24 * 30 = $7.49/月
     - 24x7运行
-  
+
   Serverless (Lambda):
     - 请求: 30,000 * $0.20 / 1,000,000 = $0.01
     - 执行: 30,000 * 0.1 * 0.256 * $0.0000166667 = $0.01
     - 总计: $0.02/月
-  
+
   节省: 99.7%
 ```
 
@@ -891,7 +894,7 @@ Google Cloud Functions计费:
    - 内存影响CPU
    - 512MB vs 1024MB
    - 性能提升 vs 成本增加
-   
+
    优化:
      - 测试不同内存配置
      - 找到性价比最优点
@@ -900,7 +903,7 @@ Google Cloud Functions计费:
    - 减少代码执行时间
    - 异步处理
    - 缓存
-   
+
    示例:
      100ms -> 50ms: 成本减半
 
@@ -908,7 +911,7 @@ Google Cloud Functions计费:
    - Provisioned Concurrency
    - 避免冷启动
    - 成本较高
-   
+
    权衡:
      - 用户体验 vs 成本
 
@@ -939,11 +942,11 @@ Google Cloud Functions计费:
     5. 依赖初始化
     6. 全局变量初始化
     7. 函数执行
-  
+
   首次调用 (冷启动):
     - 完整流程 1-7
     - 延迟高
-  
+
   后续调用 (热启动):
     - 跳过 1-6
     - 只执行 7
@@ -956,7 +959,7 @@ Google Cloud Functions计费:
     Python:     200-500ms   (解释型, 中等)
     Java:       1-3s        (JVM启动慢)
     .NET:       500-1500ms  (CLR启动)
-  
+
   影响因素:
     - 语言/运行时
     - 代码大小
@@ -980,7 +983,7 @@ Google Cloud Functions计费:
      - 定时ping函数 (每5分钟)
      - 保持实例活跃
      - 简单但有效
-     
+
      示例:
        CloudWatch Event每5分钟触发一次
 
@@ -988,7 +991,7 @@ Google Cloud Functions计费:
      - 预留N个实例
      - 始终热启动
      - 额外成本
-     
+
      成本:
        $0.015 / 小时 / GB
        512MB * $0.015 * 24 * 30 = $5.4/月
@@ -997,7 +1000,7 @@ Google Cloud Functions计费:
      - 内存越大, CPU越多
      - 启动更快
      - 成本增加
-     
+
      测试:
        512MB: 300ms
        1024MB: 150ms
@@ -1117,12 +1120,12 @@ def lambda_handler(event, context):
     - 按使用付费
     - 自动扩展
     - 类似Lambda
-  
+
   高级计划:
     - 预留实例
     - 无冷启动
     - VNet集成
-  
+
   专用计划:
     - App Service Plan
     - 可预测成本
@@ -1162,7 +1165,7 @@ def lambda_handler(event, context):
   Gen 1 (旧):
     - 超时: 9分钟
     - 内存: 最高8GB
-  
+
   Gen 2 (新, 基于Cloud Run):
     - 超时: 60分钟
     - 内存: 最高32GB
@@ -1203,7 +1206,7 @@ def lambda_handler(event, context):
     - 自动扩缩容 (0-N)
     - 流量分割
     - 灰度发布
-  
+
   Knative Eventing:
     - 事件源 (Source)
     - 事件代理 (Broker)
@@ -1245,12 +1248,12 @@ def lambda_handler(event, context):
     - API网关
     - 路由
     - 监控
-  
+
   Provider:
     - Kubernetes
     - Docker Swarm
     - faasd (单机)
-  
+
   Watchdog:
     - 函数运行时
     - HTTP/RPC
@@ -1283,11 +1286,11 @@ Fission:
     - Kubernetes原生
     - 快速冷启动 (100ms)
     - 多语言
-  
+
   优势:
     ✅ 冷启动快
     ✅ 开发体验好
-  
+
   劣势:
     ❌ 社区较小
 
@@ -1295,7 +1298,7 @@ Kubeless:
   特点:
     - Kubernetes原生
     - CRD实现
-  
+
   状态:
     ❌ 已停止维护
 
@@ -1303,7 +1306,7 @@ Apache OpenWhisk:
   特点:
     - IBM支持
     - 多云
-  
+
   劣势:
     ❌ 复杂
     ❌ 社区不活跃
@@ -1338,7 +1341,7 @@ Apache OpenWhisk:
   免费:
     - 100,000请求/天
     - 10ms CPU/请求
-  
+
   付费:
     - $5/月 (1000万请求)
     - $0.50 / 额外100万请求
@@ -1619,8 +1622,36 @@ Cloudflare Workers:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#Serverless` `#FaaS` `#BaaS` `#CloudNative` `#EventDriven`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [OpenFaaS实战](./03_OpenFaaS实战.md) - OpenFaaS实战
+- [边缘Serverless](./04_边缘Serverless.md) - 边缘Serverless
+- [Serverless安全](./05_Serverless安全.md) - Serverless安全
+- [Serverless性能优化](./06_Serverless性能优化.md) - Serverless性能优化
+- [Serverless CI/CD](./07_Serverless_CICD.md) - Serverless CI/CD
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [边缘计算技术详解](../17_边缘计算技术详解/README.md) - 边缘计算技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

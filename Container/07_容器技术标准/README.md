@@ -1,5 +1,27 @@
 # 容器技术标准
 
+> **文档定位**: 容器技术标准完整指南，涵盖OCI标准、CNCF标准、标准对比与实施
+> **技术版本**: OCI Runtime Spec v1.1, OCI Image Spec v1.1, CNCF Standards
+> **最后更新**: 2025-11-11
+> **标准对齐**: [OCI Standards][oci-standards], [CNCF Standards][cncf-standards], [Kubernetes API][k8s-api]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | OCI Runtime/Image/Distribution Spec, CNCF Standards |
+| **状态** | 生产就绪 |
+| **适用场景** | 容器标准实施、合规检查、标准认证 |
+
+> **版本锚点**: 本文档对齐2025年容器技术标准与OCI、CNCF标准规范。
+
+---
+
 ## 目录
 
 - [概述](#概述)
@@ -7,6 +29,7 @@
 - [技术文档](#技术文档)
 - [学习路径](#学习路径)
 - [标准实施](#标准实施)
+- [相关文档](#相关文档)
 
 ## 概述
 
@@ -142,11 +165,49 @@
 | Kubernetes | 编排 | 成熟 | 极高 |
 | Prometheus | 监控 | 成熟 | 高 |
 
-## 相关资源
+## 相关文档
 
-- [OCI官方标准](https://opencontainers.org/)
-- [CNCF官方标准](https://www.cncf.io/)
-- [容器标准规范](https://github.com/opencontainers)
+### 本模块相关
+
+- [OCI标准详解](./01_OCI标准详解.md) - OCI标准完整解析
+- [CNCF标准详解](./02_CNCF标准详解.md) - CNCF标准体系
+- [容器技术标准对比](./03_容器技术标准对比.md) - 标准对比分析
+- [容器技术规范实施](./04_容器技术规范实施.md) - 标准实施指南
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术规范
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes标准
+- [容器编排技术](../04_容器编排技术/README.md) - 编排标准
+- [容器安全技术](../05_容器安全技术/README.md) - 安全标准
+
+---
+
+## 参考资源
+
+[oci-standards]: https://opencontainers.org/ "OCI官方标准"
+[cncf-standards]: https://www.cncf.io/ "CNCF官方标准"
+[k8s-api]: https://kubernetes.io/docs/reference/ "Kubernetes API规范"
+
+### 官方标准
+
+- [OCI官方标准][oci-standards] - OCI标准规范
+- [OCI Runtime Spec](https://github.com/opencontainers/runtime-spec) - 运行时规范
+- [OCI Image Spec](https://github.com/opencontainers/image-spec) - 镜像规范
+- [OCI Distribution Spec](https://github.com/opencontainers/distribution-spec) - 分发规范
+- [CNCF官方标准][cncf-standards] - CNCF标准体系
+- [Kubernetes API][k8s-api] - Kubernetes API规范
+
+### 标准实施
+
+- [容器标准规范](https://github.com/opencontainers) - OCI标准实现
+- [CNCF项目](https://www.cncf.io/projects/) - CNCF标准项目
+- [标准合规检查](https://github.com/opencontainers/runtime-tools) - 标准合规工具
+
+### 学习资源
+
+- [OCI标准文档](https://github.com/opencontainers/runtime-spec/blob/main/spec.md) - 运行时规范文档
+- [CNCF标准文档](https://www.cncf.io/certification/software-conformance/) - 软件一致性认证
 
 ---
 

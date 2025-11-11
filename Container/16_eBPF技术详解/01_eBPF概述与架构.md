@@ -42,6 +42,9 @@
     - [官方文档](#官方文档)
     - [学习资源](#学习资源)
     - [社区](#社区)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -154,29 +157,29 @@ SEC("xdp")
 int xdp_drop_port(struct xdp_md *ctx) {
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
-    
+
     struct ethhdr *eth = data;
     if ((void *)(eth + 1) > data_end)
         return XDP_PASS;
-    
+
     if (eth->h_proto != htons(ETH_P_IP))
         return XDP_PASS;
-    
+
     struct iphdr *ip = (void *)(eth + 1);
     if ((void *)(ip + 1) > data_end)
         return XDP_PASS;
-    
+
     if (ip->protocol != IPPROTO_TCP)
         return XDP_PASS;
-    
+
     struct tcphdr *tcp = (void *)(ip + 1);
     if ((void *)(tcp + 1) > data_end)
         return XDP_PASS;
-    
+
     // 丢弃目标端口为22的包
     if (tcp->dest == htons(22))
         return XDP_DROP;
-    
+
     return XDP_PASS;
 }
 ```
@@ -219,14 +222,14 @@ SEC("xdp")
 int count_packets(struct xdp_md *ctx) {
     __u32 ip_src = ...;  // 提取源IP
     __u64 *count, initial = 1;
-    
+
     count = bpf_map_lookup_elem(&packet_count, &ip_src);
     if (count) {
         __sync_fetch_and_add(count, 1);
     } else {
         bpf_map_update_elem(&packet_count, &ip_src, &initial, BPF_ANY);
     }
-    
+
     return XDP_PASS;
 }
 
@@ -288,12 +291,12 @@ XDP_ABORTED // 异常终止
     - 单核: 24 Mpps
     - 多核: 95 Mpps
     - 延迟: < 10 μs
-  
+
   传统iptables DROP:
     - 单核: 1.5 Mpps
     - 多核: 6 Mpps
     - 延迟: 50-100 μs
-  
+
   性能提升: **16倍**
 ```
 
@@ -408,7 +411,7 @@ bpf:
   tproxy: true
   monitorAggregation: medium
   clockProbe: true
-  
+
 # XDP加速
 xdp:
   enabled: true
@@ -504,7 +507,7 @@ spec:
   endpointSelector:
     matchLabels:
       app: backend
-  
+
   ingress:
   - fromEndpoints:
     - matchLabels:
@@ -513,7 +516,7 @@ spec:
     - ports:
       - port: "8080"
         protocol: TCP
-  
+
   egress:
   - toEndpoints:
     - matchLabels:
@@ -522,7 +525,7 @@ spec:
     - ports:
       - port: "5432"
         protocol: TCP
-  
+
   - toFQDNs:
     - matchName: "api.example.com"
     toPorts:
@@ -542,7 +545,7 @@ spec:
   endpointSelector:
     matchLabels:
       app: api-gateway
-  
+
   ingress:
   - fromEndpoints:
     - matchLabels:
@@ -572,13 +575,13 @@ spec:
   endpointSelector:
     matchLabels:
       app: app
-  
+
   egress:
   # 允许访问特定域名
   - toFQDNs:
     - matchName: "*.example.com"
     - matchPattern: "*.cdn.cloudflare.net"
-  
+
   # 允许DNS查询
   - toEndpoints:
     - matchLabels:
@@ -639,7 +642,7 @@ socketLB:
 loadBalancer:
   algorithm: random  # random, maglev
   mode: dsr  # dsr, snat, hybrid
-  
+
 # mTLS (Cilium 1.16+)
 authentication:
   mode: required
@@ -773,32 +776,32 @@ hubble:
         - source_namespace
         - destination_namespace
         - verdict
-    
+
     # DNS查询
     - dns:
         - query
         - rcode
         - source_namespace
-    
+
     # HTTP请求
     - http:
         - method
         - status
         - source_namespace
         - destination_namespace
-    
+
     # TCP连接
     - tcp:
         - family
         - source_namespace
         - destination_namespace
-    
+
     # 丢包
     - drop:
         - reason
         - protocol
         - source_namespace
-    
+
     # ICMP
     - icmp:
         - family
@@ -819,16 +822,16 @@ hubble:
 queries:
   # 每秒请求数
   rate(hubble_http_requests_total[5m])
-  
+
   # HTTP错误率
-  rate(hubble_http_requests_total{status=~"5.."}[5m]) 
+  rate(hubble_http_requests_total{status=~"5.."}[5m])
   / rate(hubble_http_requests_total[5m])
-  
+
   # 丢包率
   rate(hubble_drop_total[5m])
-  
+
   # DNS查询延迟
-  histogram_quantile(0.99, 
+  histogram_quantile(0.99,
     rate(hubble_dns_query_duration_seconds_bucket[5m]))
 ```
 
@@ -918,41 +921,41 @@ falco:
     - /etc/falco/falco_rules.yaml
     - /etc/falco/k8s_audit_rules.yaml
     - /etc/falco/rules.d
-  
+
   json_output: true
   json_include_output_property: true
-  
+
   priority: debug
-  
+
   buffered_outputs: true
-  
+
   outputs:
     rate: 1
     max_burst: 1000
-  
+
   syslog_output:
     enabled: false
-  
+
   file_output:
     enabled: true
     keep_alive: false
     filename: /var/log/falco/events.log
-  
+
   stdout_output:
     enabled: true
-  
+
   grpc:
     enabled: true
     bind_address: "0.0.0.0:5060"
     threadiness: 8
-  
+
   grpc_output:
     enabled: true
 
 # eBPF配置
 ebpf:
   probe: ""  # 使用内置probe
-  
+
   # 性能调优
   buf_size_preset: 4
   drop_failed_exit: false
@@ -967,13 +970,13 @@ ebpf:
 - rule: Terminal shell in container
   desc: A shell was used in a container
   condition: >
-    spawned_process and 
+    spawned_process and
     container and
     proc.name in (bash, sh, zsh, csh, ksh, fish)
   output: >
     Shell spawned in container
-    (user=%user.name container_id=%container.id 
-    container_name=%container.name image=%container.image.repository 
+    (user=%user.name container_id=%container.id
+    container_name=%container.name image=%container.image.repository
     command=%proc.cmdline)
   priority: WARNING
   tags: [container, shell, mitre_execution]
@@ -982,13 +985,13 @@ ebpf:
 - rule: Read sensitive file untrusted
   desc: Detect读取敏感文件
   condition: >
-    open_read and 
-    sensitive_files and 
+    open_read and
+    sensitive_files and
     not trusted_containers
   output: >
     Sensitive file read
-    (user=%user.name command=%proc.cmdline 
-    file=%fd.name parent=%proc.pname 
+    (user=%user.name command=%proc.cmdline
+    file=%fd.name parent=%proc.pname
     container_id=%container.id image=%container.image.repository)
   priority: WARNING
   tags: [filesystem, mitre_credential_access]
@@ -997,13 +1000,13 @@ ebpf:
 - rule: Create files below /dev
   desc: Detect创建设备文件
   condition: >
-    open_write and 
-    container and 
-    fd.name startswith /dev/ and 
+    open_write and
+    container and
+    fd.name startswith /dev/ and
     not proc.name in (docker, dockerd, containerd)
   output: >
     File created below /dev in container
-    (user=%user.name command=%proc.cmdline 
+    (user=%user.name command=%proc.cmdline
     file=%fd.name container_id=%container.id)
   priority: ERROR
   tags: [filesystem, mitre_persistence]
@@ -1012,12 +1015,12 @@ ebpf:
 - rule: Outbound Connection to C2 Servers
   desc: Detect出站连接到C2服务器
   condition: >
-    outbound and 
-    container and 
+    outbound and
+    container and
     fd.sip in (known_c2_ips)
   output: >
     Outbound connection to known C2 server
-    (user=%user.name connection=%fd.name 
+    (user=%user.name connection=%fd.name
     container_id=%container.id image=%container.image.repository)
   priority: CRITICAL
   tags: [network, mitre_command_and_control]
@@ -1033,12 +1036,12 @@ ebpf:
 - rule: Unexpected Process in App Container
   desc: Detect意外进程
   condition: >
-    spawned_process and 
-    custom_app_container and 
+    spawned_process and
+    custom_app_container and
     not proc.name in (app, helper, monitor)
   output: >
     Unexpected process in application container
-    (user=%user.name process=%proc.name command=%proc.cmdline 
+    (user=%user.name process=%proc.name command=%proc.cmdline
     container_id=%container.id image=%container.image.repository)
   priority: WARNING
   tags: [container, process]
@@ -1046,13 +1049,13 @@ ebpf:
 - rule: Cryptocurrency Mining Activity
   desc: Detect加密货币挖矿
   condition: >
-    spawned_process and 
-    container and 
-    proc.name in (xmrig, minerd, cpuminer) or 
+    spawned_process and
+    container and
+    proc.name in (xmrig, minerd, cpuminer) or
     proc.cmdline contains "stratum+tcp"
   output: >
     Cryptocurrency mining detected
-    (user=%user.name process=%proc.name command=%proc.cmdline 
+    (user=%user.name process=%proc.name command=%proc.cmdline
     container_id=%container.id image=%container.image.repository)
   priority: CRITICAL
   tags: [container, malware, mitre_impact]
@@ -1071,23 +1074,23 @@ falcosidekick:
       webhookurl: "https://hooks.slack.com/services/XXX"
       minimumpriority: "warning"
       messageformat: "Alert: {{.Rule}} - {{.Output}}"
-    
+
     # Microsoft Teams
     teams:
       webhookurl: "https://outlook.office.com/webhook/XXX"
       minimumpriority: "error"
-    
+
     # Elasticsearch
     elasticsearch:
       hostport: "http://elasticsearch:9200"
       index: "falco"
       type: "_doc"
       minimumpriority: "debug"
-    
+
     # Prometheus
     prometheus:
       extralabels: "cluster:prod"
-    
+
     # Webhook
     webhook:
       address: "http://webhook-receiver:8080/falco"
@@ -1108,25 +1111,25 @@ SEC("xdp")
 int xdp_ddos_filter(struct xdp_md *ctx) {
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
-    
+
     // 解析以太网头
     struct ethhdr *eth = data;
     if ((void *)(eth + 1) > data_end)
         return XDP_PASS;
-    
+
     // 只处理IPv4
     if (eth->h_proto != htons(ETH_P_IP))
         return XDP_PASS;
-    
+
     // 解析IP头
     struct iphdr *ip = (void *)(eth + 1);
     if ((void *)(ip + 1) > data_end)
         return XDP_PASS;
-    
+
     // 获取源IP的包速率
     __u32 src_ip = ip->saddr;
     __u64 *rate = bpf_map_lookup_elem(&rate_limit_map, &src_ip);
-    
+
     __u64 now = bpf_ktime_get_ns();
     if (rate) {
         // 检查速率限制 (100 Mbps)
@@ -1140,7 +1143,7 @@ int xdp_ddos_filter(struct xdp_md *ctx) {
         __u64 initial = data_end - data;
         bpf_map_update_elem(&rate_limit_map, &src_ip, &initial, BPF_ANY);
     }
-    
+
     return XDP_PASS;
 }
 ```
@@ -1160,10 +1163,10 @@ spec:
   endpointSelector:
     matchLabels:
       tier: frontend
-  
+
   # 默认拒绝所有入站
   ingress: []
-  
+
   # 只允许特定出站
   egress:
   - toEndpoints:
@@ -1316,7 +1319,7 @@ falco:
     actions:
       - log
       - alert
-  
+
   # 限制事件速率
   outputs:
     rate: 5  # 每秒最多5个告警
@@ -1346,7 +1349,7 @@ Cilium:
   - cilium_policy_enforcement_duration: 策略执行延迟
   - cilium_datapath_conntrack_gc_duration: 连接跟踪GC时间
   - cilium_bpf_map_ops_total: BPF map操作数
-  
+
 Hubble:
   - hubble_drop_total: 丢包数
   - hubble_tcp_flags_total: TCP标志统计
@@ -1374,7 +1377,7 @@ groups:
       severity: critical
     annotations:
       summary: "Cilium agent is down"
-  
+
   - alert: HighPacketDrop
     expr: rate(cilium_drop_count_total[5m]) > 100
     for: 10m
@@ -1382,7 +1385,7 @@ groups:
       severity: warning
     annotations:
       summary: "High packet drop rate"
-  
+
   - alert: PolicyEnforcementSlow
     expr: histogram_quantile(0.99, rate(cilium_policy_enforcement_duration_seconds_bucket[5m])) > 1
     for: 15m
@@ -1399,7 +1402,7 @@ groups:
       severity: critical
     annotations:
       summary: "Falco critical security alert"
-  
+
   - alert: FalcoHighDropRate
     expr: rate(falco_drops_total[5m]) / rate(falco_events_total[5m]) > 0.05
     for: 10m
@@ -1471,8 +1474,8 @@ groups:
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **下一步阅读**:
@@ -1480,3 +1483,31 @@ groups:
 - [02_eBPF编程实践](./02_eBPF编程实践.md)
 - [03_Cilium高级特性](./03_Cilium高级特性.md)
 - [04_Falco规则定制](./04_Falco规则定制.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF网络技术](./02_eBPF网络技术.md) - eBPF网络技术详解
+- [eBPF与容器技术](./03_eBPF与容器技术.md) - eBPF与容器技术详解
+- [eBPF可观测性](./04_eBPF可观测性.md) - eBPF可观测性详解
+- [eBPF安全技术](./05_eBPF安全技术.md) - eBPF安全技术详解
+- [eBPF性能优化](./06_eBPF性能优化.md) - eBPF性能优化详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [eBPF总结与展望](./09_eBPF总结与展望.md) - eBPF总结与展望
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全技术
+- [服务网格技术详解](../18_服务网格技术详解/README.md) - 服务网格技术
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

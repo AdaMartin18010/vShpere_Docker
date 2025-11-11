@@ -75,6 +75,9 @@
     - [官方文档](#官方文档)
     - [技术文章](#技术文章)
     - [视频教程](#视频教程)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -156,11 +159,11 @@
 
 ```yaml
 离线能力:
-  - 断网期间: 
+  - 断网期间:
     - Pod继续运行
     - 本地数据缓存生效
     - 设备管理正常
-  
+
   - 重连后:
     - 自动同步状态
     - 增量更新
@@ -339,11 +342,11 @@
   Kubernetes:
     版本: 1.21+
     组件: API Server, Controller Manager
-  
+
   网络:
     云端IP: 可被边缘节点访问
     端口: 10000-10002需开放
-  
+
   资源:
     CPU: 2核+
     内存: 2GB+
@@ -431,17 +434,17 @@ modules:
     https:
       enable: true
       port: 10002
-  
+
   cloudStream:
     enable: true
     tlsTunnelCAFile: /etc/kubeedge/ca/rootCA.crt
     tlsTunnelCertFile: /etc/kubeedge/certs/server.crt
     tlsTunnelPrivateKeyFile: /etc/kubeedge/certs/server.key
     tunnelPort: 10004
-  
+
   dynamicController:
     enable: true
-  
+
   router:
     enable: false
     restTimeout: 60
@@ -695,7 +698,7 @@ modules:
     maximumDeadContainersPerContainer: 1
     hostnameOverride: edge-node-1
     registerSchedulable: true
-  
+
   edgeHub:
     enable: true
     heartbeat: 15
@@ -717,7 +720,7 @@ modules:
       writeDeadline: 15
     httpServer: https://<CLOUD_IP>:10002
     rotateCertificates: true
-  
+
   eventBus:
     enable: true
     mqttMode: internal  # external, internal, both
@@ -730,17 +733,17 @@ modules:
     mqttQOS: 0
     mqttRetain: false
     mqttSessionQueueSize: 100
-  
+
   deviceTwin:
     enable: true
-  
+
   metaManager:
     enable: true
     metaServer:
       enable: true
       server: 127.0.0.1:10550
     remoteQueryTimeout: 60
-  
+
   serviceBus:
     enable: false
     port: 9060
@@ -813,7 +816,7 @@ type ReconnectStrategy struct {
   断网期间:
     - 云端消息存储在EdgeHub内存队列
     - 边缘消息存储在MetaManager数据库
-  
+
   重连后:
     - 按时间戳顺序发送缓存消息
     - 支持增量同步
@@ -1223,7 +1226,7 @@ spec:
       # 或指定具体节点
       # nodeSelector:
       #   kubernetes.io/hostname: edge-node-1
-      
+
       containers:
       - name: nginx
         image: nginx:1.25-alpine
@@ -1467,14 +1470,14 @@ spec:
 **下行消息（云→边）**:
 
 ```text
-kubectl apply → K8s API Server → EdgeController → CloudHub → 
+kubectl apply → K8s API Server → EdgeController → CloudHub →
 WebSocket/QUIC → EdgeHub → MetaManager → Edged → Container Runtime
 ```
 
 **上行消息（边→云）**:
 
 ```text
-Container Runtime → Edged → MetaManager → EdgeHub → 
+Container Runtime → Edged → MetaManager → EdgeHub →
 WebSocket/QUIC → CloudHub → EdgeController → K8s API Server
 ```
 
@@ -1563,12 +1566,12 @@ EdgeCore离线模式:
     - 现有Pod继续运行
     - Pod重启后仍能启动（从本地缓存读取spec）
     - 可以kubectl exec进入Pod（EdgeStream功能）
-  
+
   设备管理:
     - 设备数据继续采集
     - DeviceTwin本地存储
     - 设备控制正常工作
-  
+
   限制:
     - 无法创建新Pod（需要镜像且镜像未缓存）
     - 无法删除Pod
@@ -1678,7 +1681,7 @@ spec:
 应用部署策略:
   # 1. 多副本部署
   replicas: 3
-  
+
   # 2. Pod反亲和（分散到不同边缘节点）
   affinity:
     podAntiAffinity:
@@ -1689,7 +1692,7 @@ spec:
             matchLabels:
               app: myapp
           topologyKey: kubernetes.io/hostname
-  
+
   # 3. PodDisruptionBudget
   apiVersion: policy/v1
   kind: PodDisruptionBudget
@@ -1783,7 +1786,7 @@ CloudCore优化:
       limits:
         cpu: "2000m"
         memory: "2Gi"
-  
+
   参数调优:
     nodeLimit: 10000  # 最大边缘节点数
     messageCacheSize: 10000  # 消息缓存大小
@@ -1792,7 +1795,7 @@ EdgeCore优化:
   资源:
     nodeStatusUpdateFrequency: 10  # 节点状态上报频率(秒)
     imagePullProgressDeadline: 60  # 镜像拉取超时(秒)
-  
+
   数据库:
     # 定期清理过期数据
     sqlite> DELETE FROM meta WHERE timestamp < datetime('now', '-7 days');
@@ -1843,7 +1846,7 @@ logLevel: "debug"  # debug, info, warn, error
 命令:
   # 预拉取镜像
   crictl pull nginx:1.25-alpine
-  
+
   # 配置私有仓库
   # /etc/containerd/config.toml
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
@@ -1858,12 +1861,12 @@ logLevel: "debug"  # debug, info, warn, error
     CPU: 2核
     内存: 2GB
     应用: 轻量级服务（<5个Pod）
-  
+
   小型节点:
     CPU: 4核
     内存: 8GB
     应用: 一般业务（<20个Pod）
-  
+
   中型节点:
     CPU: 8核+
     内存: 16GB+
@@ -1908,8 +1911,8 @@ logLevel: "debug"  # debug, info, warn, error
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **下一步阅读**:
@@ -1917,3 +1920,30 @@ logLevel: "debug"  # debug, info, warn, error
 - [03_K3s轻量级Kubernetes](./03_K3s轻量级Kubernetes.md)
 - [04_5G边缘计算(MEC)](./04_5G边缘计算MEC.md)
 - [05_边缘存储与数据管理](./05_边缘存储与数据管理.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [边缘计算概述与架构](./01_边缘计算概述与架构.md) - 边缘计算概述与架构
+- [K3s轻量级Kubernetes](./03_K3s轻量级Kubernetes.md) - K3s轻量级Kubernetes详解
+- [5G边缘计算MEC](./04_5G边缘计算MEC.md) - 5G边缘计算MEC详解
+- [边缘存储与数据管理](./05_边缘存储与数据管理.md) - 边缘存储与数据管理
+- [边缘AI与推理优化](./06_边缘AI与推理优化.md) - 边缘AI与推理优化
+- [边缘网络与通信](./07_边缘网络与通信.md) - 边缘网络与通信
+- [边缘安全与运维](./08_边缘安全与运维.md) - 边缘安全与运维
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器技术实践案例
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

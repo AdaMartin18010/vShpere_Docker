@@ -58,6 +58,9 @@
     - [9.1 参考文档](#91-参考文档)
     - [9.2 相关工具](#92-相关工具)
     - [9.3 更新记录](#93-更新记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 文档信息
 
@@ -82,19 +85,19 @@ GPU性能优化涉及硬件、驱动、运行时、应用等多个层面，需�
     - 提高利用率
     - 降低部署成本
     - 提高ROI
-  
+
   性能提升:
     - 提高吞吐量
     - 降低延迟
     - 提升用户体验
     - 竞争优势
-  
+
   资源高效:
     - 资源充分利用
     - 避免资源浪费
     - 提高效率
     - 降低成本
-  
+
   可扩展性:
     - 支持更大规模
     - 弹性伸缩
@@ -115,19 +118,19 @@ GPU型号:
     - 显存: 40GB/80GB
     - 适用: 训练、推理
     - 成本: 高
-  
+
   NVIDIA A30:
     - 算力: 165 TFLOPS (FP16)
     - 显存: 24GB
     - 适用: 推理
     - 成本: 中
-  
+
   NVIDIA V100:
     - 算力: 125 TFLOPS (FP16)
     - 显存: 16GB/32GB
     - 适用: 训练、推理
     - 成本: 中
-  
+
   NVIDIA T4:
     - 算力: 65 TFLOPS (FP16)
     - 显存: 16GB
@@ -144,13 +147,13 @@ GPU型号:
     - 原因: 高算力、大显存
     - 成本: 高
     - 性能: 最优
-  
+
   推理场景:
     - 推荐: A30/T4
     - 原因: 性价比高
     - 成本: 中低
     - 性能: 满足需求
-  
+
   混合场景:
     - 推荐: A100/A30
     - 原因: 灵活配置
@@ -169,13 +172,13 @@ GPU型号:
     - 性能: 最优
     - 适用: 训练
     - 配置: nvidia-smi -pm 1
-  
+
   平衡模式:
     - 功耗: 中等
     - 性能: 平衡
     - 适用: 推理
     - 配置: 默认
-  
+
   节能模式:
     - 功耗: 最低
     - 性能: 一般
@@ -192,13 +195,13 @@ GPU型号:
     - 设置: nvidia-smi -lgc <freq>
     - 范围: 500-2100 MHz
     - 默认: 自动
-  
+
   内存时钟:
     - 提高内存性能
     - 设置: nvidia-smi -lmc <freq>
     - 范围: 500-5000 MHz
     - 默认: 自动
-  
+
   注意事项:
     - 需要重启生效
     - 可能影响稳定性
@@ -219,13 +222,13 @@ CUDA版本:
     - 性能最优
     - 新特性支持
     - 推荐使用
-  
+
   CUDA 11.8:
     - 稳定版本
     - 性能良好
     - 兼容性好
     - 广泛使用
-  
+
   CUDA 11.0:
     - 旧版本
     - 性能一般
@@ -242,13 +245,13 @@ CUDA版本:
     - 原因: 性能最优
     - 兼容性: 检查
     - 性能: 最优
-  
+
   现有项目:
     - 推荐: CUDA 11.8
     - 原因: 稳定可靠
     - 兼容性: 良好
     - 性能: 良好
-  
+
   兼容性优先:
     - 推荐: CUDA 11.0
     - 原因: 兼容性最好
@@ -267,19 +270,19 @@ CUDA版本:
     - 减少显存使用
     - 性能损失: 5-10%
     - 适用: 内存受限
-  
+
   内存池:
     - 内存预分配
     - 减少分配开销
     - 性能提升: 10-20%
     - 适用: 频繁分配
-  
+
   内存对齐:
     - 内存对齐访问
     - 提高访问效率
     - 性能提升: 5-15%
     - 适用: 所有场景
-  
+
   内存合并:
     - 合并内存访问
     - 提高带宽利用率
@@ -296,19 +299,19 @@ CUDA版本:
     - 提高占用率
     - 性能提升: 10-30%
     - 适用: 所有场景
-  
+
   共享内存:
     - 使用共享内存
     - 减少全局内存访问
     - 性能提升: 20-50%
     - 适用: 数据重用
-  
+
   寄存器优化:
     - 减少寄存器使用
     - 提高占用率
     - 性能提升: 10-20%
     - 适用: 寄存器受限
-  
+
   分支优化:
     - 减少分支发散
     - 提高执行效率
@@ -329,19 +332,19 @@ CUDA版本:
     - 配置: allow_growth=True
     - 性能: 良好
     - 适用: 多任务
-  
+
   XLA优化:
     - 图优化编译
     - 配置: enable_xla=True
     - 性能提升: 10-30%
     - 适用: 推理场景
-  
+
   Mixed Precision:
     - 混合精度训练
     - 配置: FP16训练
     - 性能提升: 50-100%
     - 适用: 训练场景
-  
+
   多GPU训练:
     - 数据并行
     - 配置: MirroredStrategy
@@ -361,7 +364,7 @@ if gpus:
     # 动态内存分配
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
-    
+
     # 逻辑GPU配置
     tf.config.experimental.set_virtual_device_configuration(
         gpus[0],
@@ -387,19 +390,19 @@ tf.config.optimizer.set_jit(True)
     - 配置: torch.backends.cudnn.benchmark = True
     - 性能提升: 10-20%
     - 适用: 固定输入尺寸
-  
+
   Mixed Precision:
     - 混合精度训练
     - 配置: torch.cuda.amp
     - 性能提升: 50-100%
     - 适用: 训练场景
-  
+
   动态图优化:
     - 图优化
     - 配置: torch.jit.script
     - 性能提升: 10-30%
     - 适用: 推理场景
-  
+
   多GPU训练:
     - 数据并行
     - 配置: DataParallel/DistributedDataParallel
@@ -425,11 +428,11 @@ scaler = GradScaler()
 for epoch in range(num_epochs):
     for batch in dataloader:
         optimizer.zero_grad()
-        
+
         with autocast():
             output = model(batch)
             loss = criterion(output, target)
-        
+
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
@@ -452,13 +455,13 @@ TensorRT:
     - 高性能推理
     - 低延迟
     - 高吞吐量
-  
+
   特性:
     - 图优化
     - 内核融合
     - 精度优化
     - 动态形状
-  
+
   优势:
     - 性能提升: 2-10倍
     - 延迟降低: 50-90%
@@ -507,13 +510,13 @@ context = engine.create_execution_context()
     - CUDAExecutionProvider
     - TensorRTExecutionProvider
     - CPUExecutionProvider
-  
+
   优化选项:
     - graph_optimization_level
     - intra_op_num_threads
     - inter_op_num_threads
     - execution_mode
-  
+
   性能提升:
     - CPU: 10-30%
     - GPU: 50-200%
@@ -553,19 +556,19 @@ outputs = session.run(None, inputs)
     - CPU亲和性
     - CPU优先级
     - CPU限制
-  
+
   内存限制:
     - 内存配额设置
     - OOM处理
     - 内存回收
     - 内存限制
-  
+
   GPU限制:
     - GPU配额设置
     - GPU设备分配
     - GPU优先级
     - GPU限制
-  
+
   配置示例:
     resources:
       limits:
@@ -587,18 +590,18 @@ outputs = session.run(None, inputs)
     - CUDA_CACHE_PATH
     - CUDA_DEVICE_ORDER
     - CUDA_LAUNCH_BLOCKING
-  
+
   TensorFlow优化:
     - TF_FORCE_GPU_ALLOW_GROWTH
     - TF_GPU_THREAD_MODE
     - TF_GPU_THREAD_COUNT
     - TF_XLA_FLAGS
-  
+
   PyTorch优化:
     - TORCH_CUDA_ARCH_LIST
     - CUDA_HOME
     - LD_LIBRARY_PATH
-  
+
   配置示例:
     env:
     - name: CUDA_VISIBLE_DEVICES
@@ -618,19 +621,19 @@ outputs = session.run(None, inputs)
     - 只包含运行时
     - 减少层数
     - 优化缓存
-  
+
   基础镜像:
     - 使用官方镜像
     - 最小化镜像
     - 更新依赖
     - 安全补丁
-  
+
   依赖管理:
     - 只安装必需依赖
     - 版本固定
     - 清理缓存
     - 压缩镜像
-  
+
   示例:
     FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
     COPY requirements.txt .
@@ -648,19 +651,19 @@ outputs = session.run(None, inputs)
     - 缓存预热
     - 连接预热
     - 减少冷启动
-  
+
   延迟加载:
     - 按需加载
     - 减少启动时间
     - 降低内存使用
     - 提高灵活性
-  
+
   健康检查:
     - 启动探针
     - 就绪探针
     - 存活探针
     - 快速检测
-  
+
   配置示例:
     livenessProbe:
       httpGet:
@@ -683,13 +686,13 @@ outputs = session.run(None, inputs)
     - SM使用率
     - 内存使用率
     - 功耗
-  
+
   性能指标:
     - 吞吐量
     - 延迟
     - 批处理大小
     - 推理时间
-  
+
   资源指标:
     - GPU内存使用
     - CPU使用率
@@ -706,19 +709,19 @@ outputs = session.run(None, inputs)
     - 实时监控
     - 命令行工具
     - 基础监控
-  
+
   DCGM:
     - 详细监控
     - 性能分析
     - 告警通知
     - 专业监控
-  
+
   Prometheus:
     - 指标收集
     - 时间序列
     - 告警规则
     - 可视化
-  
+
   Grafana:
     - 可视化面板
     - 实时监控
@@ -737,19 +740,19 @@ outputs = session.run(None, inputs)
      - 性能分析
      - 问题定位
      - 数据收集
-  
+
   2. 优化方案:
      - 制定方案
      - 优先级排序
      - 风险评估
      - 实施计划
-  
+
   3. 实施优化:
      - 实施优化
      - 测试验证
      - 性能评估
      - 效果确认
-  
+
   4. 持续监控:
      - 持续监控
      - 效果评估
@@ -766,19 +769,19 @@ outputs = session.run(None, inputs)
     - 性能分析
     - 瓶颈识别
     - 优化建议
-  
+
   Nsight Compute:
     - 内核级分析
     - 性能分析
     - 优化建议
     - 详细报告
-  
+
   PyTorch Profiler:
     - PyTorch性能分析
     - 瓶颈识别
     - 优化建议
     - 可视化
-  
+
   TensorFlow Profiler:
     - TensorFlow性能分析
     - 瓶颈识别
@@ -801,13 +804,13 @@ GPU性能优化是一个系统工程，需要从硬件、驱动、运行时、�
     - CUDA版本选择
     - Mixed Precision
     - TensorRT优化
-  
+
   中优先级:
     - 内存优化
     - 计算优化
     - 容器优化
     - 调度优化
-  
+
   低优先级:
     - 频率设置
     - 环境变量
@@ -824,13 +827,13 @@ GPU性能优化是一个系统工程，需要从硬件、驱动、运行时、�
     - 新算法优化
     - 自动化优化
     - 智能调优
-  
+
   工具改进:
     - 更好的工具
     - 自动化分析
     - 智能建议
     - 可视化改进
-  
+
   应用扩展:
     - 更多应用场景
     - 更好的性能
@@ -862,5 +865,30 @@ GPU性能优化是一个系统工程，需要从硬件、驱动、运行时、�
 
 ---
 
-**文档状态**: 已完成  
+**文档状态**: 已完成
 **下一步行动**: 创建GPU安全隔离文档
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [GPU虚拟化概述](./01_GPU虚拟化概述.md) - GPU虚拟化概述
+- [NVIDIA MIG技术](./02_NVIDIA_MIG技术.md) - NVIDIA MIG技术详解
+- [Alibaba cGPU技术](./03_Alibaba_cGPU技术.md) - Alibaba cGPU技术详解
+- [GPU容器调度](./04_GPU容器调度.md) - GPU容器调度详解
+- [GPU安全隔离](./06_GPU安全隔离.md) - GPU安全隔离详解
+- [Kubernetes GPU集成](./07_Kubernetes_GPU集成.md) - Kubernetes GPU集成详解
+- [GPU虚拟化最佳实践](./08_GPU虚拟化最佳实践.md) - GPU虚拟化最佳实践
+
+### 其他模块相关
+
+- [容器性能调优](../06_容器监控与运维/03_容器性能调优.md) - 容器性能调优
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

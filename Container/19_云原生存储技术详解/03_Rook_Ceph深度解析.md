@@ -1,8 +1,8 @@
 # 03 - Rook/Ceph深度解析
 
-**作者**: 云原生存储专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生存储专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -33,6 +33,9 @@
     - [7.1 OSD调优](#71-osd调优)
   - [8. 总结](#8-总结)
     - [8.1 本章要点](#81-本章要点)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -82,13 +85,13 @@ Ceph分布式存储架构:
      - 管理认证 (cephx)
      - 提供集群信息
      - 仲裁服务 (Paxos)
-   
+
    部署要求:
      - 推荐奇数个 (3/5/7)
      - 最少3个保证高可用
      - 低延迟网络
      - 独立磁盘 (SSD推荐)
-   
+
    核心Map:
      - Monitor Map: MON拓扑
      - OSD Map: OSD状态
@@ -103,13 +106,13 @@ Ceph分布式存储架构:
      - 数据恢复
      - 数据再平衡
      - 心跳检查
-   
+
    部署要求:
      - 每块磁盘一个OSD
      - 最少3个OSD (3副本)
      - SSD/NVMe推荐
      - 10Gb+网络
-   
+
    存储引擎:
      - BlueStore (推荐): 直接管理裸设备
        - RocksDB元数据
@@ -126,12 +129,12 @@ Ceph分布式存储架构:
      - 管理面板 (Dashboard)
      - REST API
      - 插件框架
-   
+
    部署要求:
      - 至少1个 (推荐2个)
      - 自动failover
      - 低资源消耗
-   
+
    常用模块:
      - dashboard: Web UI
      - prometheus: 监控导出
@@ -145,13 +148,13 @@ Ceph分布式存储架构:
      - 目录树
      - 文件属性
      - 访问控制
-   
+
    部署要求:
      - 至少1个active
      - 可配置standby
      - 大内存需求 (64GB+)
      - 高性能CPU
-   
+
    工作模式:
      - Active: 服务元数据请求
      - Standby: 热备
@@ -163,12 +166,12 @@ Ceph分布式存储架构:
      - Swift API兼容
      - 多租户
      - Multi-site复制
-   
+
    部署要求:
      - 无状态，可水平扩展
      - 负载均衡 (HAProxy/Nginx)
      - SSL/TLS支持
-   
+
    特性:
      - Bucket管理
      - IAM权限
@@ -200,7 +203,7 @@ Ceph分布式存储架构:
     - Client访问
     - MON通信
     - 10Gb+推荐
-  
+
   集群网络 (cluster network):
     - OSD间复制
     - 数据恢复
@@ -306,11 +309,11 @@ rule erasure_rule {
   type:
     - replicated: 副本模式
     - erasure: 纠删码模式
-  
+
   chooseleaf:
     - firstn: 选择前N个 (副本)
     - indep: 独立选择 (纠删码)
-  
+
   type:
     - osd: 按OSD隔离
     - host: 按主机隔离
@@ -325,7 +328,7 @@ rule erasure_rule {
 
 1. Object -> PG映射:
    PG = hash(object_name + pool_id) % pg_num
-   
+
    示例:
      object: "image1.raw"
      pool_id: 1
@@ -336,15 +339,15 @@ rule erasure_rule {
 
 2. PG -> OSD映射 (CRUSH):
    CRUSH(PG, cluster_map, rule) -> [primary_osd, replica_osd...]
-   
+
    输入:
      - PG: 1.52
      - cluster_map: 当前集群状态
      - rule: replicated_rule
-   
+
    输出:
      - [osd.3, osd.7, osd.11] (3副本)
-   
+
    保证:
      ✅ 3个OSD在不同rack
      ✅ 确定性 (每次计算结果相同)
@@ -354,7 +357,7 @@ rule erasure_rule {
    Client -> osd.3 (primary)
      osd.3 -> osd.7 (replica)
      osd.3 -> osd.11 (replica)
-   
+
    优势:
      ✅ 无中心瓶颈
      ✅ 高性能
@@ -424,17 +427,17 @@ ceph osd pool set my-pool crush_rule my-rule
     - 每个对象完整复制N份
     - 典型: 3副本
     - 存储开销: 3x
-  
+
   优势:
     ✅ 高性能 (无需编解码)
     ✅ 低延迟
     ✅ 故障恢复快
     ✅ 支持部分写入
-  
+
   劣势:
     ❌ 存储效率低 (3x)
     ❌ 成本高
-  
+
   适用场景:
     ✅ 数据库 (高IOPS)
     ✅ 虚拟机磁盘
@@ -448,23 +451,23 @@ ceph osd pool set my-pool crush_rule my-rule
     - 总共K+M个块
     - 可容忍M个块丢失
     - 典型: 4+2 (可丢2块)
-  
+
   存储开销:
     4+2: 1.5x (vs 3x副本)
     8+3: 1.375x
     8+4: 1.5x
-  
+
   优势:
     ✅ 存储效率高 (1.5x vs 3x)
     ✅ 节省成本 (50%)
     ✅ 更高可靠性 (可丢更多块)
-  
+
   劣势:
     ❌ 性能较低 (编解码开销)
     ❌ 延迟较高
     ❌ 恢复慢
     ❌ 不支持部分写入
-  
+
   适用场景:
     ✅ 对象存储 (冷数据)
     ✅ 备份归档
@@ -493,7 +496,7 @@ PG概念:
     - CRUSH的最小单位
     - 一个Pool包含多个PG
     - 一个PG映射到多个OSD
-  
+
   作用:
     ✅ 简化数据管理
     ✅ 加速恢复
@@ -503,18 +506,18 @@ PG概念:
 PG数量计算:
   公式:
     Total PGs = (OSDs × 100) / replicas
-  
+
   示例:
     12 OSDs, 3副本:
       PGs = (12 × 100) / 3 = 400
       取最接近的2的幂: 512
-  
+
   推荐:
     < 5 OSDs: 128 PGs
     5-10 OSDs: 512 PGs
     10-50 OSDs: 1024 PGs
     > 50 OSDs: 2048+ PGs
-  
+
   注意:
     ⚠️ PG过少: 负载不均
     ⚠️ PG过多: 元数据开销大
@@ -652,7 +655,7 @@ Rook vs 传统Ceph:
     - 配置复杂
     - 难以扩展
     - 运维负担重
-  
+
   Rook:
     ✅ 一键部署
     ✅ CRD声明式
@@ -724,7 +727,7 @@ Rook-Ceph架构:
 ```yaml
 1. CephCluster:
    作用: 定义Ceph集群
-   
+
    示例:
      apiVersion: ceph.rook.io/v1
      kind: CephCluster
@@ -744,7 +747,7 @@ Rook-Ceph架构:
 
 2. CephBlockPool:
    作用: 定义RBD存储池
-   
+
    示例:
      apiVersion: ceph.rook.io/v1
      kind: CephBlockPool
@@ -758,7 +761,7 @@ Rook-Ceph架构:
 
 3. CephFilesystem:
    作用: 定义CephFS文件系统
-   
+
    示例:
      apiVersion: ceph.rook.io/v1
      kind: CephFilesystem
@@ -778,7 +781,7 @@ Rook-Ceph架构:
 
 4. CephObjectStore:
    作用: 定义RGW对象存储
-   
+
    示例:
      apiVersion: ceph.rook.io/v1
      kind: CephObjectStore
@@ -798,7 +801,7 @@ Rook-Ceph架构:
 
 5. CephNFS:
    作用: 定义NFS Gateway
-   
+
    示例:
      apiVersion: ceph.rook.io/v1
      kind: CephNFS
@@ -898,15 +901,15 @@ spec:
   cephVersion:
     image: quay.io/ceph/ceph:v17.2.6  # Ceph Quincy
     allowUnsupported: false
-  
+
   dataDirHostPath: /var/lib/rook
-  
+
   # 跳过OSD设备升级确认
   skipUpgradeChecks: false
-  
+
   # 持续健康检查
   continueUpgradeAfterChecksEvenIfNotHealthy: false
-  
+
   # MON配置
   mon:
     count: 3  # 奇数个
@@ -917,7 +920,7 @@ spec:
         resources:
           requests:
             storage: 10Gi
-  
+
   # MGR配置
   mgr:
     count: 2  # 高可用
@@ -927,18 +930,18 @@ spec:
       enabled: true
     - name: rook
       enabled: true
-  
+
   # Dashboard
   dashboard:
     enabled: true
     ssl: true
     port: 8443
-  
+
   # Prometheus监控
   monitoring:
     enabled: true
     createPrometheusRules: true
-  
+
   # 网络配置
   network:
     provider: host  # host或multus
@@ -947,24 +950,24 @@ spec:
         enabled: false
       compression:
         enabled: false
-    
+
     # 双网络配置 (可选)
     # hostNetwork: true
     # provider: multus
     # selectors:
     #   public: public-network
     #   cluster: cluster-network
-  
+
   # Crash收集器
   crashCollector:
     disable: false
-  
+
   # 日志收集器
   logCollector:
     enabled: true
     periodicity: daily
     maxLogSize: 500M
-  
+
   # 清理策略
   cleanupPolicy:
     confirmation: ""  # yes-really-destroy-data (删除集群时清理数据)
@@ -973,16 +976,16 @@ spec:
       dataSource: zero  # zero或random
       iteration: 1
     allowUninstallWithVolumes: false
-  
+
   # OSD存储配置
   storage:
     useAllNodes: true
     useAllDevices: false  # 不自动使用所有设备
-    
+
     # 设备选择
     deviceFilter: "^sd[b-z]"  # 正则匹配设备名
     devicePathFilter: "^/dev/disk/by-path/.*-ssd.*"  # 路径过滤
-    
+
     # 节点配置
     nodes:
     - name: "node1"
@@ -997,7 +1000,7 @@ spec:
       devices:
       - name: "/dev/sdb"
       - name: "/dev/sdc"
-    
+
     # OSD配置
     config:
       osdsPerDevice: "1"  # 每个设备1个OSD
@@ -1006,7 +1009,7 @@ spec:
       databaseSizeMB: "1024"  # RocksDB大小
       walSizeMB: "576"  # WAL大小
       journalSizeMB: "5120"  # Journal大小
-    
+
     # StorageClass设备分类
     storageClassDeviceSets:
     - name: set1
@@ -1045,7 +1048,7 @@ spec:
               storage: 100Gi
           storageClassName: local-storage
           volumeMode: Block
-  
+
   # 资源限制
   resources:
     mgr:
@@ -1083,13 +1086,13 @@ spec:
       requests:
         cpu: "50m"
         memory: "60Mi"
-  
+
   # 优先级
   priorityClassNames:
     mgr: system-cluster-critical
     mon: system-cluster-critical
     osd: system-node-critical
-  
+
   # 健康检查
   healthCheck:
     daemonHealth:
@@ -1262,8 +1265,37 @@ bluestore_cache_size_ssd: 3221225472  # 3GB
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生存储专家团队
 
 **Tags**: `#RookCeph` `#Ceph` `#DistributedStorage` `#CloudNativeStorage`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [云原生存储概述与架构](./01_云原生存储概述与架构.md) - 云原生存储概述与架构
+- [Kubernetes存储基础](./02_Kubernetes存储基础.md) - Kubernetes存储基础
+- [Velero备份恢复](./04_Velero备份恢复.md) - Velero备份恢复
+- [CSI驱动详解](./05_CSI驱动详解.md) - CSI驱动详解
+- [存储性能优化](./06_存储性能优化.md) - 存储性能优化
+- [多云存储](./07_多云存储.md) - 多云存储
+- [存储安全](./08_存储安全.md) - 存储安全
+- [实战案例](./09_实战案例.md) - 实战案例
+- [最佳实践](./10_最佳实践.md) - 最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器存储技术](../05_容器存储技术/README.md) - 容器存储技术
+- [高级存储技术](../05_容器存储技术/02_高级存储技术.md) - 高级存储技术
+- [Kubernetes存储管理](../03_Kubernetes技术详解/04_存储管理技术.md) - K8s存储管理
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

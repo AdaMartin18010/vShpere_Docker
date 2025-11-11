@@ -1,8 +1,31 @@
 # Kubernetes技术详解
 
+> **文档定位**: Kubernetes容器编排技术完整指南，涵盖架构原理、Pod管理、服务发现、存储网络、安全监控
+> **技术版本**: Kubernetes 1.31+, kubectl, Helm 3, kustomize
+> **最后更新**: 2025-11-11
+> **标准对齐**: [Kubernetes Docs][k8s-docs], [CNCF Standards][cncf], [K8s API][k8s-api]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | Kubernetes 1.31+, kubectl, Helm 3 |
+| **状态** | 生产就绪 |
+| **适用场景** | 容器编排、微服务架构、云原生应用 |
+
+> **版本锚点**: 本文档对齐Kubernetes 1.31+技术标准与CNCF最佳实践。
+
+---
+
 ## 目录
 
 - [Kubernetes技术详解](#kubernetes技术详解)
+  - [文档元信息](#文档元信息)
   - [目录](#目录)
   - [目录结构](#目录结构)
   - [技术覆盖范围](#技术覆盖范围)
@@ -33,7 +56,13 @@
     - [Kubernetes 1.31 重大更新 ⭐](#kubernetes-131-重大更新-)
     - [Kubernetes 1.30 新特性](#kubernetes-130-新特性)
     - [升级建议](#升级建议)
-  - [相关资源](#相关资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
+  - [参考资源](#参考资源)
+    - [官方文档](#官方文档)
+    - [CNCF资源](#cncf资源)
+    - [学习资源](#学习资源)
   - [相关更新报告](#相关更新报告)
   - [贡献指南](#贡献指南)
 
@@ -238,16 +267,16 @@ spec:
 // 控制器示例
 func (r *MyResourceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
     ctx := context.Background()
-    
+
     // 获取资源
     var myResource examplev1.MyResource
     if err := r.Get(ctx, req.NamespacedName, &myResource); err != nil {
         return ctrl.Result{}, client.IgnoreNotFound(err)
     }
-    
+
     // 实现业务逻辑
     // ...
-    
+
     return ctrl.Result{}, nil
 }
 ```
@@ -324,12 +353,53 @@ kubeadm upgrade plan
 kubeadm upgrade apply v1.31.0
 ```
 
-## 相关资源
+## 相关文档
 
-- [Kubernetes官方文档](https://kubernetes.io/docs/)
-- [Kubernetes API参考](https://kubernetes.io/docs/reference/)
-- [Kubernetes最佳实践](https://kubernetes.io/docs/concepts/configuration/overview/)
-- [CNCF Landscape](https://landscape.cncf.io/)
+### 本模块相关
+
+- [Kubernetes架构原理](./01_Kubernetes架构原理.md) - Kubernetes架构深度解析
+- [Pod管理技术](./02_Pod管理技术.md) - Pod管理技术详解
+- [服务发现与负载均衡](./03_服务发现与负载均衡.md) - 服务发现与负载均衡详解
+- [存储管理技术](./04_存储管理技术.md) - 存储管理技术详解
+- [网络策略与安全](./05_网络策略与安全.md) - 网络策略与安全详解
+- [监控与日志管理](./06_监控与日志管理.md) - 监控与日志管理详解
+- [Kubernetes 1.30新特性详解](./07_Kubernetes_1.30新特性详解.md) - K8s 1.30新特性
+- [Kubernetes 1.31新特性详解](./08_Kubernetes_1.31新特性详解.md) - K8s 1.31新特性
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Podman技术详解](../02_Podman技术详解/README.md) - Podman技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - Kubernetes编排技术
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全实践
+
+---
+
+## 参考资源
+
+[k8s-docs]: https://kubernetes.io/docs/ "Kubernetes官方文档"
+[cncf]: https://www.cncf.io/ "CNCF标准"
+[k8s-api]: https://kubernetes.io/docs/reference/ "Kubernetes API参考"
+
+### 官方文档
+
+- [Kubernetes官方文档][k8s-docs] - Kubernetes完整文档
+- [Kubernetes API参考][k8s-api] - K8s API规范
+- [Kubernetes最佳实践](https://kubernetes.io/docs/concepts/configuration/overview/) - K8s最佳实践
+- [CNCF Landscape](https://landscape.cncf.io/) - CNCF技术全景
+
+### CNCF资源
+
+- [CNCF官方标准][cncf] - CNCF标准体系
+- [Kubernetes社区](https://kubernetes.io/community/) - K8s社区
+- [CNCF项目](https://www.cncf.io/projects/) - CNCF项目列表
+
+### 学习资源
+
+- [Kubernetes教程](https://kubernetes.io/docs/tutorials/) - 官方教程
+- [Kubernetes认证](https://www.cncf.io/certification/cka/) - CKA认证
+- [Kubernetes案例](https://kubernetes.io/case-studies/) - 官方案例
 
 ## 相关更新报告
 
@@ -337,6 +407,8 @@ kubeadm upgrade apply v1.31.0
 - [Docker 25.0更新报告](../../2025年技术处理与分析/06_版本更新实施/Docker_25.0完整更新报告.md) - Docker 25.0完整更新内容
 - [vSphere 8.0.2更新报告](../../2025年技术处理与分析/06_版本更新实施/vSphere_8.0.2更新报告.md) - vSphere 8.0.2完整更新内容
 - [版本更新实施综合报告](../../2025年技术处理与分析/06_版本更新实施/版本更新实施综合报告_第3周.md) - 版本更新实施综合报告
+
+---
 
 ## 贡献指南
 
@@ -346,5 +418,8 @@ kubeadm upgrade apply v1.31.0
 4. 提交Pull Request
 
 ---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新
 
 _本目录提供Kubernetes技术的全面学习资源，从基础概念到高级应用，帮助开发者掌握容器编排技术。_

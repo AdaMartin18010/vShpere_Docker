@@ -1,9 +1,9 @@
 # Docker存储技术深度解析
 
-> **文档定位**: Docker存储技术完整指南，覆盖存储驱动、数据卷、性能调优、备份恢复  
-> **技术版本**: Docker Engine 25.0, OverlayFS 2.0, Device Mapper 1.02  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [Docker Storage Architecture][docker-storage], [OverlayFS Kernel][overlayfs-kernel], [CSI Spec v1.6][csi-spec]  
+> **文档定位**: Docker存储技术完整指南，覆盖存储驱动、数据卷、性能调优、备份恢复
+> **技术版本**: Docker Engine 25.0, OverlayFS 2.0, Device Mapper 1.02
+> **最后更新**: 2025-10-21
+> **标准对齐**: [Docker Storage Architecture][docker-storage], [OverlayFS Kernel][overlayfs-kernel], [CSI Spec v1.6][csi-spec]
 > **文档版本**: v2.0 (引用补充版)
 
 ---
@@ -537,15 +537,15 @@ cat > /etc/apparmor.d/docker-web << EOF
 
 profile docker-web flags=(attach_disconnected,mediate_deleted) {
   #include <abstractions/base>
-  
+
   # 允许访问挂载点
   /host/path/** rw,
   /container/path/** rw,
-  
+
   # 拒绝危险操作
   deny /etc/shadow r,
   deny /proc/sys/kernel/** w,
-  
+
   # 允许网络访问
   network inet stream,
   network inet6 stream,
@@ -1820,7 +1820,7 @@ Docker存储技术演进时间线[^docker-storage-history]：
 
 ---
 
-**维护承诺**: 本文档每季度更新，确保与Docker和Kubernetes最新版本保持一致。  
+**维护承诺**: 本文档每季度更新，确保与Docker和Kubernetes最新版本保持一致。
 **下次计划更新**: 2026-01-21（Docker Engine 26.0发布后）
 
 **反馈渠道**: 如有问题或建议，请通过GitHub Issues提交。

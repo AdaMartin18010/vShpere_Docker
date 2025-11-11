@@ -109,6 +109,9 @@
     - [11.3 适用场景](#113-适用场景)
     - [11.4 学习路径](#114-学习路径)
     - [11.5 未来展望](#115-未来展望)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -508,12 +511,12 @@ Linkerd:
     - 3个核心组件
     - 轻量级 (每个<100MB内存)
     - 职责单一
-  
+
   数据平面:
     - linkerd2-proxy (Rust)
     - 10-50MB内存
     - <0.5% CPU
-  
+
   特点:
     - 极简设计
     - 专为Kubernetes优化
@@ -524,12 +527,12 @@ Istio:
     - 单体Istiod (Pilot+Citadel+Galley)
     - 相对重 (>1GB内存)
     - 功能集中
-  
+
   数据平面:
     - Envoy (C++)
     - 100-200MB内存
     - 1-2% CPU
-  
+
   特点:
     - 功能丰富
     - 高度可配置
@@ -540,12 +543,12 @@ Istio:
     - 控制平面: 300MB
     - 数据平面: 100×40MB = 4GB
     - 总计: ~4.3GB
-  
+
   Istio (Sidecar):
     - 控制平面: 2GB
     - 数据平面: 100×150MB = 15GB
     - 总计: ~17GB
-  
+
   差异: Linkerd节省 ~75%资源
 ```
 
@@ -921,7 +924,7 @@ spec:
     backendRefs:
     - name: my-service-v2
       port: 8080
-  
+
   # 规则2: 其他所有用户路由到v1
   - backendRefs:
     - name: my-service-v1
@@ -1039,7 +1042,7 @@ spec:
         ttl: 60s
       limit: 3
     isRetryable: true
-  
+
   - name: POST /api/users
     condition:
       method: POST
@@ -1691,7 +1694,7 @@ sum(rate(response_total{classification="success"}[1m])) by (dst_deployment)
 sum(rate(response_total[1m])) by (dst_deployment)
 
 # 查询P99延迟
-histogram_quantile(0.99, 
+histogram_quantile(0.99,
   sum(rate(response_latency_ms_bucket[1m])) by (le, dst_deployment)
 )
 
@@ -1873,11 +1876,11 @@ Linkerd:
     - linkerd-identity: 30MB内存, 5m CPU
     - linkerd-proxy-injector: 20MB内存, 5m CPU
     - 总计: 100MB内存, 20m CPU
-  
+
   数据平面 (per Pod):
     - linkerd2-proxy: 40MB内存, 5m CPU
     - 100个Pod: 4GB内存, 500m CPU
-  
+
   总资源:
     - 内存: 4.1GB
     - CPU: 520m (0.52核)
@@ -1885,11 +1888,11 @@ Linkerd:
 Istio (Sidecar):
   控制平面:
     - istiod: 2GB内存, 1000m CPU
-  
+
   数据平面 (per Pod):
     - envoy: 150MB内存, 20m CPU
     - 100个Pod: 15GB内存, 2000m CPU
-  
+
   总资源:
     - 内存: 17GB
     - CPU: 3000m (3核)
@@ -1913,14 +1916,14 @@ Linkerd:
   - P50: 1.2ms (+20%, +0.2ms)
   - P95: 2.8ms (+12%, +0.3ms)
   - P99: 4.5ms (+13%, +0.5ms)
-  
+
   延迟增加: <1ms (P50-P99)
 
 Istio (Sidecar):
   - P50: 2.0ms (+100%, +1.0ms)
   - P95: 4.5ms (+80%, +2.0ms)
   - P99: 7.5ms (+88%, +3.5ms)
-  
+
   延迟增加: 1-3.5ms (P50-P99)
 
 结论:
@@ -2130,7 +2133,7 @@ Transfer/sec:    126.89MB
    开发环境:
      - 控制平面: 默认配置即可
      - 数据平面: 默认配置即可
-   
+
    生产环境:
      - 控制平面: 适当提高资源限制
      - 数据平面: 根据流量调整
@@ -2375,8 +2378,35 @@ Linkerd发展趋势 (2025+):
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
-**作者**: vSphere & Container Technology Team  
-**字数**: 约14,000字  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
+**作者**: vSphere & Container Technology Team
+**字数**: 约14,000字
 **代码示例**: 35+个
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [服务网格概述与架构](./01_服务网格概述与架构.md) - 服务网格概述与架构
+- [Istio深度解析](./02_Istio深度解析.md) - Istio深度解析
+- [服务网格安全](./04_服务网格安全.md) - 服务网格安全
+- [流量管理与灰度发布](./05_流量管理与灰度发布.md) - 流量管理与灰度发布
+- [可观测性与监控](./06_可观测性与监控.md) - 可观测性与监控
+- [多集群服务网格](./07_多集群服务网格.md) - 多集群服务网格
+- [服务网格性能优化与故障排查](./08_服务网格性能优化与故障排查.md) - 性能优化与故障排查
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [eBPF网络技术](../16_eBPF技术详解/02_eBPF网络技术.md) - eBPF网络技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

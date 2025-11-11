@@ -348,17 +348,17 @@ CPU开销:
   最佳: Linux 6.0+ (完整特性)
 
 工具安装:
-  bpftrace: 
+  bpftrace:
     Ubuntu: apt install bpftrace
     CentOS: yum install bpftrace
-  
+
   BCC:
     Ubuntu: apt install bpfcc-tools
     CentOS: yum install bcc-tools
-  
+
   Cilium:
     Kubernetes: helm install cilium
-  
+
   Falco:
     Kubernetes: helm install falco
 ```
@@ -410,8 +410,8 @@ CPU开销:
 
 ---
 
-**最后更新**: 2025-10-19  
-**维护者**: 虚拟化容器化技术知识库项目组  
+**最后更新**: 2025-10-19
+**维护者**: 虚拟化容器化技术知识库项目组
 **版本**: v1.0
 
 **立即开始学习**: [01_eBPF概述与架构](./01_eBPF概述与架构.md) 🚀

@@ -708,14 +708,14 @@ http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Database unavailable: %v", err)
         return
     }
-    
+
     // 检查Redis连接
     if err := redis.Ping(); err != nil {
         w.WriteHeader(http.StatusServiceUnavailable)
         fmt.Fprintf(w, "Redis unavailable: %v", err)
         return
     }
-    
+
     w.WriteHeader(http.StatusOK)
     fmt.Fprint(w, "OK")
 })
@@ -859,7 +859,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-  
+
   db:
     image: postgres:15
     healthcheck:
@@ -867,7 +867,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   redis:
     image: redis:7
 ```
@@ -953,12 +953,12 @@ services:
       - NODE_ENV=production
       - DEBUG=false
       - DATABASE_URL=postgresql://user:pass@db:5432/mydb
-    
+
     # 方式2: 从文件加载
     env_file:
       - .env
       - .env.production
-    
+
     # 方式3: 使用变量替换
     environment:
       - DATABASE_HOST=${DB_HOST:-localhost}
@@ -1066,12 +1066,12 @@ THRESHOLD_MEM=90
 docker stats --no-stream --format "{{.Name}},{{.CPUPerc}},{{.MemPerc}}" | tail -n +2 | while IFS=',' read name cpu mem; do
     cpu_num=$(echo $cpu | sed 's/%//')
     mem_num=$(echo $mem | sed 's/%//')
-    
+
     if (( $(echo "$cpu_num > $THRESHOLD_CPU" | bc -l) )); then
         echo "ALERT: $name CPU usage ${cpu}% exceeds threshold ${THRESHOLD_CPU}%"
         # 发送告警（邮件/Slack/PagerDuty）
     fi
-    
+
     if (( $(echo "$mem_num > $THRESHOLD_MEM" | bc -l) )); then
         echo "ALERT: $name Memory usage ${mem}% exceeds threshold ${THRESHOLD_MEM}%"
     fi
@@ -1737,10 +1737,10 @@ CMD service nginx start && service mysql start && service redis-server start && 
 services:
   web:
     image: nginx:latest
-  
+
   database:
     image: mysql:8.0
-  
+
   cache:
     image: redis:7
 ```
@@ -1792,7 +1792,7 @@ process.on('SIGTERM', () => {
     db.close();
     process.exit(0);
   });
-  
+
   // 强制退出（15秒超时）
   setTimeout(() => {
     console.error('Forcefully shutting down');
@@ -1875,10 +1875,10 @@ services:
       timeout: 3s
       start_period: 30s  # 启动宽限期
       retries: 3
-    
+
     # 资源预热
     command: sh -c "sleep 5 && node server.js"  # 等待依赖服务
-    
+
     # 并行启动
     depends_on:
       db:
@@ -1909,18 +1909,18 @@ services:
       timeout: 3s
       retries: 3
     restart: unless-stopped
-    
+
   monitor:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
-    
+
   alert:
     image: prom/alertmanager:latest
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    
+
 volumes:
   prometheus-data:
 ```

@@ -62,6 +62,9 @@
     - [9.1 参考文档](#91-参考文档)
     - [9.2 相关工具](#92-相关工具)
     - [9.3 更新记录](#93-更新记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 文档信息
 
@@ -86,19 +89,19 @@ GPU容器调度需要考虑GPU资源的稀缺性、异构性、以及应用的�
     - 资源数量有限
     - 需要高效利用
     - 避免资源浪费
-  
+
   性能需求:
     - AI/ML应用性能敏感
     - 需要GPU加速
     - 性能影响大
     - 需要合理调度
-  
+
   多租户:
     - 多租户共享资源
     - 公平性要求
     - 隔离性要求
     - 优先级管理
-  
+
   成本优化:
     - 提高资源利用率
     - 降低部署成本
@@ -119,13 +122,13 @@ Device Plugin:
     - 资源上报
     - 设备分配
     - 健康检查
-  
+
   配置方式:
     - DaemonSet部署
     - 设备发现
     - 资源上报
     - 调度支持
-  
+
   使用示例:
     - NVIDIA Device Plugin
     - GPU Operator
@@ -140,7 +143,7 @@ Device Plugin:
     nvidia.com/gpu: 1
     nvidia.com/gpu: 2
     nvidia.com/gpu: 4
-  
+
   使用示例:
     apiVersion: v1
     kind: Pod
@@ -168,13 +171,13 @@ Scheduler Extender:
     - GPU资源过滤
     - GPU资源评分
     - GPU资源绑定
-  
+
   配置方式:
     - Scheduler配置
     - Extender配置
     - Webhook配置
     - 调度策略
-  
+
   使用示例:
     - cGPU Scheduler Extender
     - Volcano GPU Scheduler
@@ -190,13 +193,13 @@ Scheduler Extender:
     - GPU资源管理
     - 调度策略
     - 资源分配
-  
+
   配置方式:
     - 调度器部署
     - 调度策略配置
     - 资源管理
     - 监控告警
-  
+
   使用示例:
     - Volcano Scheduler
     - Kube-batch
@@ -216,19 +219,19 @@ Scheduler Extender:
     - 先请求先分配
     - 适合简单场景
     - 公平性好
-  
+
   优先级调度:
     - 优先级高先分配
     - 适合多租户
     - 灵活配置
     - 公平性一般
-  
+
   最短作业优先 (SJF):
     - 短作业先调度
     - 提高吞吐量
     - 适合批处理
     - 公平性一般
-  
+
   轮询调度 (Round Robin):
     - 轮流分配
     - 公平性好
@@ -245,13 +248,13 @@ Scheduler Extender:
     - GPU内存使用
     - GPU温度
     - GPU功耗
-  
+
   负载均衡:
     - 均匀分布
     - 避免热点
     - 提高利用率
     - 性能优化
-  
+
   策略配置:
     - 节点评分
     - 负载权重
@@ -270,19 +273,19 @@ Scheduler Extender:
     - 同GPU实例
     - 性能优化
     - 资源共享
-  
+
   Pod反亲和性:
     - 不同GPU节点
     - 不同GPU实例
     - 故障隔离
     - 负载分散
-  
+
   节点亲和性:
     - GPU型号选择
     - GPU配置选择
     - 性能要求
     - 成本优化
-  
+
   使用示例:
     affinity:
       nodeAffinity:
@@ -304,13 +307,13 @@ Scheduler Extender:
     - 资源不足抢占
     - 公平性保证
     - 优先级管理
-  
+
   驱逐策略:
     - 资源超限驱逐
     - 节点维护驱逐
     - 故障驱逐
     - 优雅驱逐
-  
+
   配置示例:
     - PriorityClass配置
     - PreemptionPolicy
@@ -331,13 +334,13 @@ Volcano简介:
     - GPU资源调度
     - 大数据调度
     - AI/ML调度
-  
+
   特性:
     - 批处理调度
     - GPU调度
     - Gang调度
     - 优先级管理
-  
+
   优势:
     - 高性能
     - 公平性
@@ -354,13 +357,13 @@ Volcano简介:
     - 调度策略
     - 资源管理
     - 调度决策
-  
+
   Volcano Controller:
     - Job管理
     - Pod管理
     - 状态管理
     - 事件处理
-  
+
   Volcano Admitter:
     - 准入控制
     - 资源验证
@@ -448,13 +451,13 @@ Gang调度:
     - 全部或全不
     - 避免死锁
     - 提高效率
-  
+
   配置:
     minAvailable: 4
     schedulerName: volcano
     plugins:
       svc: ["--"]
-  
+
   优势:
     - 避免死锁
     - 提高效率
@@ -471,13 +474,13 @@ DRF调度:
     - 主导资源公平
     - 多资源公平
     - 公平性保证
-  
+
   配置:
     actions: "enqueue, allocate, backfill"
     tiers:
     - plugins:
       - name: drf
-  
+
   优势:
     - 多资源公平
     - 公平性保证
@@ -498,13 +501,13 @@ DRF调度:
     - 缓存优化
     - 算法优化
     - 减少延迟
-  
+
   资源发现:
     - 快速发现
     - 缓存机制
     - 减少查询
     - 提高效率
-  
+
   绑定优化:
     - 快速绑定
     - 减少重试
@@ -521,13 +524,13 @@ DRF调度:
     - 避免热点
     - 提高利用率
     - 性能优化
-  
+
   资源分配:
     - 合理分配
     - 避免碎片
     - 提高利用率
     - 成本优化
-  
+
   动态调整:
     - 动态分配
     - 弹性伸缩
@@ -546,13 +549,13 @@ DRF调度:
     - GPU配额限制
     - 公平分配
     - 优先级管理
-  
+
   调度公平:
     - 公平调度
     - 避免饥饿
     - 公平性保证
     - 优先级管理
-  
+
   监控告警:
     - 配额监控
     - 使用监控
@@ -569,7 +572,7 @@ DRF调度:
     - 优先级范围
     - 优先级使用
     - 优先级管理
-  
+
   配置示例:
     apiVersion: scheduling.k8s.io/v1
     kind: PriorityClass
@@ -578,7 +581,7 @@ DRF调度:
     value: 1000
     globalDefault: false
     description: "High priority for GPU jobs"
-  
+
   使用示例:
     spec:
       priorityClassName: gpu-high-priority
@@ -597,13 +600,13 @@ DRF调度:
     - 资源分配时间
     - 绑定时间
     - 总调度时间
-  
+
   调度成功率:
     - 调度成功率
     - 调度失败率
     - 重试次数
     - 失败原因
-  
+
   资源利用率:
     - GPU利用率
     - GPU内存使用
@@ -620,7 +623,7 @@ DRF调度:
     - 配额使用率
     - 优先级影响
     - 公平性评分
-  
+
   等待时间:
     - 平均等待时间
     - 最长等待时间
@@ -639,13 +642,13 @@ Prometheus:
     - GPU指标
     - 调度器指标
     - 自定义指标
-  
+
   配置示例:
     - ServiceMonitor
     - PrometheusRule
     - Alertmanager
     - Grafana Dashboard
-  
+
   监控面板:
     - GPU利用率
     - 调度性能
@@ -662,13 +665,13 @@ Prometheus:
     - GPU分配时间
     - GPU利用率
     - GPU等待队列
-  
+
   监控工具:
     - 自定义Exporter
     - 日志分析
     - 事件监控
     - 告警通知
-  
+
   监控面板:
     - Grafana Dashboard
     - 自定义面板
@@ -689,13 +692,13 @@ Prometheus:
     - 批处理: Volcano
     - 多租户: 自定义调度器
     - 高性能: GPU Scheduler
-  
+
   策略配置:
     - 调度策略
     - 优先级策略
     - 亲和性策略
     - 抢占策略
-  
+
   性能配置:
     - 并发调度数
     - 调度超时时间
@@ -712,13 +715,13 @@ Prometheus:
     - CPU配额限制
     - 内存配额限制
     - 存储配额限制
-  
+
   优先级配置:
     - PriorityClass定义
     - 优先级范围
     - 优先级使用
     - 优先级管理
-  
+
   亲和性配置:
     - 节点亲和性
     - Pod亲和性
@@ -737,13 +740,13 @@ Prometheus:
     - 调度成功率
     - 资源利用率
     - 公平性指标
-  
+
   告警配置:
     - 调度失败告警
     - 资源不足告警
     - 性能下降告警
     - 公平性告警
-  
+
   日志管理:
     - 调度器日志
     - Pod日志
@@ -760,13 +763,13 @@ Prometheus:
     - 节点不可用
     - 调度器故障
     - 配置错误
-  
+
   处理策略:
     - 自动重试
     - 手动干预
     - 资源扩容
     - 故障恢复
-  
+
   预防措施:
     - 资源预留
     - 健康检查
@@ -789,13 +792,13 @@ GPU容器调度是Kubernetes等容器编排平台上的重要技术，通过智�
     - 少量GPU
     - 单租户
     - 简单需求
-  
+
   Volcano调度器:
     - 批处理场景
     - 多GPU任务
     - Gang调度
     - 高性能
-  
+
   自定义调度器:
     - 复杂场景
     - 多租户
@@ -812,13 +815,13 @@ GPU容器调度是Kubernetes等容器编排平台上的重要技术，通过智�
     - 性能提升
     - 延迟降低
     - 公平性提升
-  
+
   云原生:
     - 更好的K8s集成
     - 自动化运维
     - 监控和告警
     - 弹性伸缩
-  
+
   应用扩展:
     - 更多应用场景
     - 更好的性能
@@ -849,5 +852,30 @@ GPU容器调度是Kubernetes等容器编排平台上的重要技术，通过智�
 
 ---
 
-**文档状态**: 已完成  
+**文档状态**: 已完成
 **下一步行动**: 创建GPU性能优化文档
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [GPU虚拟化概述](./01_GPU虚拟化概述.md) - GPU虚拟化概述
+- [NVIDIA MIG技术](./02_NVIDIA_MIG技术.md) - NVIDIA MIG技术详解
+- [Alibaba cGPU技术](./03_Alibaba_cGPU技术.md) - Alibaba cGPU技术详解
+- [GPU性能优化](./05_GPU性能优化.md) - GPU性能优化详解
+- [GPU安全隔离](./06_GPU安全隔离.md) - GPU安全隔离详解
+- [Kubernetes GPU集成](./07_Kubernetes_GPU集成.md) - Kubernetes GPU集成详解
+- [GPU虚拟化最佳实践](./08_GPU虚拟化最佳实践.md) - GPU虚拟化最佳实践
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

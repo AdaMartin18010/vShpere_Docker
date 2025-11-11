@@ -1,8 +1,8 @@
 # 05 - Serverless安全
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -43,6 +43,12 @@
     - [7.2 异常检测](#72-异常检测)
     - [7.3 安全事件响应](#73-安全事件响应)
   - [8. 总结](#8-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
+  - [相关文档](#相关文档-1)
+    - [本模块相关](#本模块相关-1)
+    - [其他模块相关](#其他模块相关-1)
 
 ---
 
@@ -114,7 +120,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - NoSQL注入
      - Command注入
      - LDAP注入
-   
+
    防护:
      ✅ 参数化查询
      ✅ 输入验证
@@ -127,7 +133,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 弱JWT密钥
      - 缺少令牌验证
      - 会话固定
-   
+
    防护:
      ✅ 强认证机制
      ✅ JWT最佳实践
@@ -140,7 +146,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 日志中的密码
      - 未加密传输
      - 明文存储
-   
+
    防护:
      ✅ 数据加密
      ✅ 安全日志
@@ -153,7 +159,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - XML解析漏洞
      - 文件读取
      - SSRF
-   
+
    防护:
      ✅ 禁用外部实体
      ✅ 使用安全解析器
@@ -165,7 +171,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 越权访问
      - 水平/垂直越权
      - IDOR漏洞
-   
+
    防护:
      ✅ 严格权限检查
      ✅ 细粒度IAM
@@ -178,7 +184,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 默认凭证
      - 调试模式开启
      - 错误信息泄露
-   
+
    防护:
      ✅ 安全基线配置
      ✅ 自动化配置检查
@@ -190,7 +196,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 反射型XSS
      - 存储型XSS
      - DOM型XSS
-   
+
    防护:
      ✅ 输出编码
      ✅ CSP策略
@@ -202,7 +208,7 @@ OWASP Serverless应用安全Top 10 (2023):
      - 远程代码执行
      - 权限提升
      - DoS攻击
-   
+
    防护:
      ✅ 避免反序列化不可信数据
      ✅ 使用安全序列化格式
@@ -213,7 +219,7 @@ OWASP Serverless应用安全Top 10 (2023):
    示例:
      - 过期npm包
      - 已知CVE漏洞
-   
+
    防护:
      ✅ 依赖扫描
      ✅ 定期更新
@@ -224,7 +230,7 @@ OWASP Serverless应用安全Top 10 (2023):
     示例:
       - 无审计日志
       - 攻击检测延迟
-    
+
     防护:
       ✅ 全面日志记录
       ✅ 实时监控
@@ -262,7 +268,7 @@ AWS Lambda示例:
     - Lambda运行时安全
     - 底层基础设施
     - 网络隔离
-  
+
   客户负责:
     - 函数代码
     - IAM策略
@@ -275,7 +281,7 @@ Cloudflare Workers示例:
     - V8隔离安全
     - 边缘节点安全
     - DDoS防护
-  
+
   客户负责:
     - Worker代码
     - KV数据
@@ -302,29 +308,29 @@ export default {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response('Unauthorized', { status: 401 })
     }
-    
+
     const token = authHeader.substring(7)
-    
+
     try {
       // 验证JWT
       const isValid = await jwt.verify(token, env.JWT_SECRET)
       if (!isValid) {
         return new Response('Invalid token', { status: 401 })
       }
-      
+
       // 解码JWT
       const { payload } = jwt.decode(token)
-      
+
       // 检查过期时间
       if (payload.exp && payload.exp < Date.now() / 1000) {
         return new Response('Token expired', { status: 401 })
       }
-      
+
       // 检查权限
       if (!payload.scopes || !payload.scopes.includes('read')) {
         return new Response('Forbidden', { status: 403 })
       }
-      
+
       // 业务逻辑
       return new Response(JSON.stringify({
         message: 'Success',
@@ -348,15 +354,15 @@ const jwt = require('jsonwebtoken')
 
 exports.handler = async (event) => {
     const token = event.authorizationToken
-    
+
     if (!token) {
         throw new Error('Unauthorized')
     }
-    
+
     try {
         // 验证JWT
         const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET)
-        
+
         // 生成IAM策略
         return generatePolicy(decoded.sub, 'Allow', event.methodArn, decoded)
     } catch (error) {
@@ -434,14 +440,14 @@ const axios = require('axios')
 
 exports.handler = async (event) => {
     const token = event.headers.Authorization?.replace('Bearer ', '')
-    
+
     if (!token) {
         return {
             statusCode: 401,
             body: JSON.stringify({ error: 'No token provided' })
         }
     }
-    
+
     try {
         // 验证access token (调用OAuth服务器)
         const response = await axios.get(`${process.env.OAUTH_INTROSPECT_URL}`, {
@@ -452,14 +458,14 @@ exports.handler = async (event) => {
                 token: token
             }
         })
-        
+
         if (!response.data.active) {
             return {
                 statusCode: 401,
                 body: JSON.stringify({ error: 'Token is not active' })
             }
         }
-        
+
         // 检查scopes
         const scopes = response.data.scope.split(' ')
         if (!scopes.includes('read:data')) {
@@ -468,7 +474,7 @@ exports.handler = async (event) => {
                 body: JSON.stringify({ error: 'Insufficient permissions' })
             }
         }
-        
+
         // 业务逻辑
         return {
             statusCode: 200,
@@ -497,40 +503,40 @@ import { verify } from '@tsndr/cloudflare-worker-jwt'
 export default {
   async fetch(request, env) {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '')
-    
+
     if (!token) {
       return new Response('Unauthorized', { status: 401 })
     }
-    
+
     try {
       // 获取OIDC配置
       const discoveryUrl = `${env.OIDC_ISSUER}/.well-known/openid-configuration`
       const discoveryResponse = await fetch(discoveryUrl)
       const discovery = await discoveryResponse.json()
-      
+
       // 获取JWKS
       const jwksResponse = await fetch(discovery.jwks_uri)
       const jwks = await jwksResponse.json()
-      
+
       // 验证ID Token
       // (这里简化了，实际需要验证签名)
       const { header, payload } = jwt.decode(token)
-      
+
       // 验证issuer
       if (payload.iss !== env.OIDC_ISSUER) {
         return new Response('Invalid issuer', { status: 401 })
       }
-      
+
       // 验证audience
       if (payload.aud !== env.CLIENT_ID) {
         return new Response('Invalid audience', { status: 401 })
       }
-      
+
       // 验证过期
       if (payload.exp < Date.now() / 1000) {
         return new Response('Token expired', { status: 401 })
       }
-      
+
       // 返回用户信息
       return new Response(JSON.stringify({
         sub: payload.sub,
@@ -555,35 +561,35 @@ export default {
 export default {
   async fetch(request, env) {
     const apiKey = request.headers.get('X-API-Key')
-    
+
     if (!apiKey) {
       return new Response('API key required', { status: 401 })
     }
-    
+
     // 从KV存储查询API密钥
     const keyData = await env.API_KEYS.get(apiKey, { type: 'json' })
-    
+
     if (!keyData) {
       return new Response('Invalid API key', { status: 401 })
     }
-    
+
     // 检查密钥状态
     if (keyData.status !== 'active') {
       return new Response('API key is disabled', { status: 401 })
     }
-    
+
     // 检查过期时间
     if (keyData.expiresAt && new Date(keyData.expiresAt) < new Date()) {
       return new Response('API key expired', { status: 401 })
     }
-    
+
     // 检查速率限制
     const rateLimitKey = `ratelimit:${apiKey}`
     const count = await env.API_KEYS.get(rateLimitKey)
     const currentCount = parseInt(count || '0')
-    
+
     if (currentCount >= keyData.rateLimit) {
-      return new Response('Rate limit exceeded', { 
+      return new Response('Rate limit exceeded', {
         status: 429,
         headers: {
           'X-RateLimit-Limit': keyData.rateLimit.toString(),
@@ -591,22 +597,22 @@ export default {
         }
       })
     }
-    
+
     // 增加计数
     await env.API_KEYS.put(rateLimitKey, (currentCount + 1).toString(), {
       expirationTtl: 60  // 1分钟窗口
     })
-    
+
     // 记录使用
     await logApiKeyUsage(apiKey, keyData.userId, request)
-    
+
     // 继续处理请求
     return new Response(JSON.stringify({
       message: 'Success',
       userId: keyData.userId,
       remaining: keyData.rateLimit - currentCount - 1
     }), {
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'X-RateLimit-Remaining': (keyData.rateLimit - currentCount - 1).toString()
       }
@@ -638,7 +644,7 @@ function generateApiKey() {
 // 存储API密钥
 async function createApiKey(env, userId, options = {}) {
   const apiKey = generateApiKey()
-  
+
   const keyData = {
     userId: userId,
     status: 'active',
@@ -647,9 +653,9 @@ async function createApiKey(env, userId, options = {}) {
     rateLimit: options.rateLimit || 1000,
     scopes: options.scopes || ['read']
   }
-  
+
   await env.API_KEYS.put(apiKey, JSON.stringify(keyData))
-  
+
   return {
     apiKey: apiKey,
     ...keyData
@@ -675,7 +681,7 @@ exports.handler = async (event) => {
     // 从JWT或context获取用户角色
     const userRole = event.requestContext.authorizer.role || 'viewer'
     const requiredPermission = getRequiredPermission(event.httpMethod, event.path)
-    
+
     // 检查权限
     if (!hasPermission(userRole, requiredPermission)) {
         return {
@@ -683,7 +689,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({ error: 'Forbidden' })
         }
     }
-    
+
     // 继续处理
     return handleRequest(event, userRole)
 }
@@ -720,7 +726,7 @@ export default {
   async fetch(request, env, ctx) {
     const user = await getUserFromToken(request, env)
     const resource = getResource(request)
-    
+
     // ABAC策略评估
     const decision = evaluatePolicy({
       user: {
@@ -739,11 +745,11 @@ export default {
         location: request.cf.country
       }
     })
-    
+
     if (decision === 'deny') {
       return new Response('Forbidden', { status: 403 })
     }
-    
+
     return handleRequest(request, user, resource)
   }
 }
@@ -753,27 +759,27 @@ function evaluatePolicy(context) {
   if (context.user.level === 'admin') {
     return 'allow'
   }
-  
+
   // 规则2: 用户可以访问自己部门的资源
   if (context.resource.owner === context.user.department) {
     return 'allow'
   }
-  
+
   // 规则3: 公开资源任何人都可以读取
   if (context.resource.classification === 'public' && context.action === 'GET') {
     return 'allow'
   }
-  
+
   // 规则4: 工作时间限制 (9-18点)
   if (context.environment.time < 9 || context.environment.time >= 18) {
     return 'deny'
   }
-  
+
   // 规则5: 地理位置限制
   if (!['US', 'CA', 'GB'].includes(context.environment.location)) {
     return 'deny'
   }
-  
+
   return 'deny'
 }
 ```
@@ -812,20 +818,20 @@ HTTPS/TLS最佳实践:
 export default {
   async fetch(request) {
     const url = new URL(request.url)
-    
+
     // 重定向HTTP到HTTPS
     if (url.protocol === 'http:') {
       url.protocol = 'https:'
       return Response.redirect(url.toString(), 301)
     }
-    
+
     // 添加安全头
     const response = await fetch(request)
     const newResponse = new Response(response.body, response)
-    
+
     // HSTS
     newResponse.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
-    
+
     return newResponse
   }
 }
@@ -845,7 +851,7 @@ async function encryptAndStore(data, bucket, key) {
         KeyId: process.env.KMS_KEY_ID,
         Plaintext: JSON.stringify(data)
     }).promise()
-    
+
     // 存储加密数据到S3
     await s3.putObject({
         Bucket: bucket,
@@ -862,12 +868,12 @@ async function retrieveAndDecrypt(bucket, key) {
         Bucket: bucket,
         Key: key
     }).promise()
-    
+
     // 使用KMS解密
     const decrypted = await kms.decrypt({
         CiphertextBlob: s3Object.Body
     }).promise()
-    
+
     return JSON.parse(decrypted.Plaintext.toString())
 }
 ```
@@ -889,7 +895,7 @@ async function encryptConfig(plaintext) {
         KeyId: process.env.KMS_KEY_ID,
         Plaintext: plaintext
     }).promise()
-    
+
     return result.CiphertextBlob.toString('base64')
 }
 
@@ -898,7 +904,7 @@ async function decryptConfig(ciphertext) {
     const result = await kms.decrypt({
         CiphertextBlob: Buffer.from(ciphertext, 'base64')
     }).promise()
-    
+
     return result.Plaintext.toString()
 }
 
@@ -908,7 +914,7 @@ exports.handler = async (event) => {
     if (!global.dbPassword) {
         global.dbPassword = await decryptConfig(process.env.ENCRYPTED_DB_PASSWORD)
     }
-    
+
     // 使用解密后的密码
     const connection = await connectDatabase(global.dbPassword)
     // ...
@@ -935,17 +941,17 @@ export default {
   async fetch(request, env) {
     // env.DB_PASSWORD 和 env.API_KEY 已自动注入
     // 绝不会出现在代码或日志中
-    
+
     const db = await connectToDatabase({
       host: env.DB_HOST,
       user: env.DB_USER,
       password: env.DB_PASSWORD  // Secret
     })
-    
+
     const api = await callExternalAPI({
       key: env.API_KEY  // Secret
     })
-    
+
     return new Response('Success')
   }
 }
@@ -993,10 +999,10 @@ function maskPhone(phone) {
 // 使用
 exports.handler = async (event) => {
     const user = await getUser(event.userId)
-    
+
     // 记录日志前脱敏
     console.log('User data:', maskSensitiveData(user))
-    
+
     // 返回响应前脱敏
     return {
         statusCode: 200,
@@ -1018,11 +1024,11 @@ const piiPatterns = {
 
 function removePII(text) {
   let cleaned = text
-  
+
   for (const [type, pattern] of Object.entries(piiPatterns)) {
     cleaned = cleaned.replace(pattern, `[${type.toUpperCase()}_REDACTED]`)
   }
-  
+
   return cleaned
 }
 
@@ -1034,7 +1040,7 @@ function secureLog(level, message, data = {}) {
     data: maskSensitiveData(data),
     timestamp: new Date().toISOString()
   }
-  
+
   console.log(JSON.stringify(logEntry))
 }
 ```
@@ -1053,34 +1059,34 @@ export default {
   async fetch(request, env, ctx) {
     const clientIP = request.headers.get('CF-Connecting-IP')
     const country = request.cf.country
-    
+
     // 1. 地理位置过滤
     const blockedCountries = ['XX', 'YY']
     if (blockedCountries.includes(country)) {
       return new Response('Forbidden', { status: 403 })
     }
-    
+
     // 2. 速率限制 (IP级别)
     const rateLimitKey = `ratelimit:ip:${clientIP}`
     const count = await env.KV.get(rateLimitKey)
     const currentCount = parseInt(count || '0')
-    
+
     if (currentCount >= 100) {  // 每分钟100请求
-      return new Response('Too Many Requests', { 
+      return new Response('Too Many Requests', {
         status: 429,
         headers: {
           'Retry-After': '60'
         }
       })
     }
-    
+
     // 增加计数
     ctx.waitUntil(
       env.KV.put(rateLimitKey, (currentCount + 1).toString(), {
         expirationTtl: 60
       })
     )
-    
+
     // 3. Challenge可疑请求
     const threatScore = request.cf.clientTrustScore || 0
     if (threatScore < 30) {
@@ -1092,13 +1098,13 @@ export default {
         }
       })
     }
-    
+
     // 4. 检测异常User-Agent
     const userAgent = request.headers.get('User-Agent') || ''
     if (isSuspiciousUserAgent(userAgent)) {
       return new Response('Forbidden', { status: 403 })
     }
-    
+
     return handleRequest(request)
   }
 }
@@ -1110,7 +1116,7 @@ function isSuspiciousUserAgent(ua) {
     /spider/i,
     /scraper/i
   ]
-  
+
   return suspiciousPatterns.some(pattern => pattern.test(ua))
 }
 ```
@@ -1131,42 +1137,42 @@ class TokenBucket {
     this.capacity = capacity
     this.refillRate = refillRate  // tokens per second
   }
-  
+
   async tryConsume(key, tokens = 1) {
     const now = Date.now()
-    
+
     // 获取当前状态
     const result = await dynamodb.get({
       TableName: 'RateLimits',
       Key: { key }
     }).promise()
-    
+
     let bucket = result.Item || {
       key,
       tokens: this.capacity,
       lastRefill: now
     }
-    
+
     // 计算应补充的令牌
     const elapsed = (now - bucket.lastRefill) / 1000
     const refill = Math.floor(elapsed * this.refillRate)
     bucket.tokens = Math.min(this.capacity, bucket.tokens + refill)
     bucket.lastRefill = now
-    
+
     // 尝试消费
     if (bucket.tokens >= tokens) {
       bucket.tokens -= tokens
-      
+
       // 更新状态
       await dynamodb.put({
         TableName: 'RateLimits',
         Item: bucket,
         ExpirationTtl: Math.floor(now / 1000) + 3600  // 1小时过期
       }).promise()
-      
+
       return { allowed: true, remaining: bucket.tokens }
     }
-    
+
     return { allowed: false, remaining: bucket.tokens }
   }
 }
@@ -1174,9 +1180,9 @@ class TokenBucket {
 exports.handler = async (event) => {
     const userId = event.requestContext.authorizer.userId
     const bucket = new TokenBucket(100, 10)  // 100容量, 每秒10个令牌
-    
+
     const result = await bucket.tryConsume(`user:${userId}`, 1)
-    
+
     if (!result.allowed) {
         return {
             statusCode: 429,
@@ -1187,7 +1193,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({ error: 'Rate limit exceeded' })
         }
     }
-    
+
     return {
         statusCode: 200,
         headers: {
@@ -1207,21 +1213,21 @@ export default {
     const userId = getUserId(request)
     const windowSize = 60  // 60秒窗口
     const maxRequests = 100
-    
+
     const key = `ratelimit:${userId}`
     const now = Date.now()
     const windowStart = now - (windowSize * 1000)
-    
+
     // 获取时间戳列表
     const timestamps = await env.KV.get(key, { type: 'json' }) || []
-    
+
     // 过滤窗口外的请求
     const validTimestamps = timestamps.filter(ts => ts > windowStart)
-    
+
     if (validTimestamps.length >= maxRequests) {
       const oldestTimestamp = Math.min(...validTimestamps)
       const retryAfter = Math.ceil((oldestTimestamp + windowSize * 1000 - now) / 1000)
-      
+
       return new Response('Rate limit exceeded', {
         status: 429,
         headers: {
@@ -1232,15 +1238,15 @@ export default {
         }
       })
     }
-    
+
     // 添加当前时间戳
     validTimestamps.push(now)
-    
+
     // 存储更新后的列表
     await env.KV.put(key, JSON.stringify(validTimestamps), {
       expirationTtl: windowSize
     })
-    
+
     return new Response('Success', {
       headers: {
         'X-RateLimit-Limit': maxRequests.toString(),
@@ -1326,7 +1332,7 @@ export default {
   async fetch(request) {
     const url = new URL(request.url)
     const body = await request.text()
-    
+
     // 1. SQL注入检测
     const sqlPatterns = [
       /(\bunion\b.*\bselect\b)/i,
@@ -1334,11 +1340,11 @@ export default {
       /(;.*drop\s+table)/i,
       /(exec\s*\()/i
     ]
-    
+
     if (sqlPatterns.some(pattern => pattern.test(url.search + body))) {
       return new Response('SQL injection detected', { status: 403 })
     }
-    
+
     // 2. XSS检测
     const xssPatterns = [
       /<script[^>]*>.*<\/script>/gi,
@@ -1346,21 +1352,21 @@ export default {
       /onerror\s*=/gi,
       /onclick\s*=/gi
     ]
-    
+
     if (xssPatterns.some(pattern => pattern.test(body))) {
       return new Response('XSS detected', { status: 403 })
     }
-    
+
     // 3. Path traversal检测
     if (/\.\.\//.test(url.pathname)) {
       return new Response('Path traversal detected', { status: 403 })
     }
-    
+
     // 4. 请求大小限制
     if (body.length > 1024 * 1024) {  // 1MB
       return new Response('Request too large', { status: 413 })
     }
-    
+
     return fetch(request)
   }
 }
@@ -1385,17 +1391,17 @@ const BLACKLIST = new Set([
 export default {
   async fetch(request) {
     const clientIP = request.headers.get('CF-Connecting-IP')
-    
+
     // 检查黑名单
     if (BLACKLIST.has(clientIP)) {
       return new Response('Forbidden', { status: 403 })
     }
-    
+
     // 检查白名单 (如果启用)
     if (WHITELIST.size > 0 && !isInWhitelist(clientIP, WHITELIST)) {
       return new Response('Forbidden', { status: 403 })
     }
-    
+
     return handleRequest(request)
   }
 }
@@ -1454,20 +1460,20 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Run Snyk
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
-    
+
     - name: Run npm audit
       run: npm audit --audit-level=high
-    
+
     - name: Run OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
       with:
@@ -1486,33 +1492,33 @@ jobs:
 // 输入验证示例
 function validateInput(data) {
   const errors = []
-  
+
   // 1. 类型检查
   if (typeof data.email !== 'string') {
     errors.push('Email must be a string')
   }
-  
+
   // 2. 格式验证
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.push('Invalid email format')
   }
-  
+
   // 3. 长度限制
   if (data.name && data.name.length > 100) {
     errors.push('Name too long')
   }
-  
+
   // 4. 白名单验证
   const allowedRoles = ['user', 'admin', 'editor']
   if (data.role && !allowedRoles.includes(data.role)) {
     errors.push('Invalid role')
   }
-  
+
   // 5. 数值范围
   if (data.age && (data.age < 0 || data.age > 150)) {
     errors.push('Invalid age')
   }
-  
+
   return {
     valid: errors.length === 0,
     errors: errors
@@ -1522,14 +1528,14 @@ function validateInput(data) {
 exports.handler = async (event) => {
     const data = JSON.parse(event.body)
     const validation = validateInput(data)
-    
+
     if (!validation.valid) {
         return {
             statusCode: 400,
             body: JSON.stringify({ errors: validation.errors })
         }
     }
-    
+
     // 继续处理
 }
 ```
@@ -1547,18 +1553,18 @@ async function getUserByEmail(email) {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
   })
-  
+
   // ✅ 安全：参数化查询
   const [rows] = await connection.execute(
     'SELECT * FROM users WHERE email = ?',
     [email]
   )
-  
+
   // ❌ 危险：字符串拼接
   // const [rows] = await connection.execute(
   //   `SELECT * FROM users WHERE email = '${email}'`
   // )
-  
+
   await connection.end()
   return rows[0]
 }
@@ -1581,30 +1587,30 @@ let cacheExpiry = null
 
 async function getSecrets() {
   const now = Date.now()
-  
+
   // 检查缓存
   if (cachedSecrets && cacheExpiry && now < cacheExpiry) {
     return cachedSecrets
   }
-  
+
   // 从Secrets Manager获取
   const result = await secretsManager.getSecretValue({
     SecretId: process.env.SECRET_NAME
   }).promise()
-  
+
   cachedSecrets = JSON.parse(result.SecretString)
   cacheExpiry = now + (5 * 60 * 1000)  // 缓存5分钟
-  
+
   return cachedSecrets
 }
 
 exports.handler = async (event) => {
     const secrets = await getSecrets()
-    
+
     // 使用secrets
     const apiKey = secrets.API_KEY
     const dbPassword = secrets.DB_PASSWORD
-    
+
     // ...
 }
 ```
@@ -1624,21 +1630,21 @@ on: [push, pull_request]
 jobs:
   sast:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    
+
     - name: ESLint Security
       run: |
         npm install
         npm run lint:security
-    
+
     - name: Semgrep
       uses: returntocorp/semgrep-action@v1
       with:
@@ -1697,7 +1703,7 @@ GDPR要求:
 exports.handler = async (event) => {
     const action = event.path
     const userId = event.userId
-    
+
     switch (action) {
         // 1. 数据访问请求
         case '/gdpr/access':
@@ -1709,7 +1715,7 @@ exports.handler = async (event) => {
                     exportDate: new Date().toISOString()
                 })
             }
-        
+
         // 2. 数据导出请求
         case '/gdpr/export':
             const exportData = await exportUserData(userId)
@@ -1719,7 +1725,7 @@ exports.handler = async (event) => {
                 statusCode: 200,
                 body: JSON.stringify({ downloadUrl })
             }
-        
+
         // 3. 数据删除请求
         case '/gdpr/delete':
             await deleteUserData(userId)
@@ -1728,7 +1734,7 @@ exports.handler = async (event) => {
                 statusCode: 200,
                 body: JSON.stringify({ message: 'Data deleted' })
             }
-        
+
         // 4. 同意管理
         case '/gdpr/consent':
             const consent = await getConsent(userId)
@@ -1794,10 +1800,10 @@ function logPHIAccess(userId, resourceId, action) {
     userAgent: getUserAgent(),
     accessGranted: true
   }
-  
+
   // 发送到SIEM
   sendToSIEM(logEntry)
-  
+
   // 存储到审计日志 (不可变存储)
   storeAuditLog(logEntry)
 }
@@ -1903,7 +1909,7 @@ function auditLog(event) {
 exports.handler = async (event) => {
     const requestId = event.requestContext.requestId
     const userId = event.requestContext.authorizer.userId
-    
+
     // 记录访问
     auditLog({
         type: 'API_ACCESS',
@@ -1915,7 +1921,7 @@ exports.handler = async (event) => {
         userAgent: event.requestContext.identity.userAgent,
         requestId: requestId
     })
-    
+
     // 处理请求
     // ...
 }
@@ -1931,7 +1937,7 @@ export default {
   async fetch(request, env, ctx) {
     const userId = getUserId(request)
     const behavior = await analyzeBehavior(userId, request, env)
-    
+
     if (behavior.anomalyScore > 0.8) {
       // 发送告警
       ctx.waitUntil(sendAlert({
@@ -1945,7 +1951,7 @@ export default {
           ip: request.headers.get('CF-Connecting-IP')
         }
       }))
-      
+
       // 要求额外验证
       return new Response('Additional verification required', {
         status: 403,
@@ -1954,7 +1960,7 @@ export default {
         }
       })
     }
-    
+
     return handleRequest(request)
   }
 }
@@ -1962,21 +1968,21 @@ export default {
 async function analyzeBehavior(userId, request, env) {
   const indicators = []
   let anomalyScore = 0
-  
+
   // 1. 访问频率异常
   const recentRequests = await getRecentRequests(userId, env)
   if (recentRequests.length > 100) {  // 1分钟内超过100请求
     indicators.push('HIGH_FREQUENCY')
     anomalyScore += 0.3
   }
-  
+
   // 2. 异常时间访问
   const hour = new Date().getHours()
   if (hour >= 2 && hour <= 5) {  // 凌晨2-5点
     indicators.push('UNUSUAL_TIME')
     anomalyScore += 0.2
   }
-  
+
   // 3. 地理位置变化
   const lastLocation = await getLastLocation(userId, env)
   const currentLocation = request.cf.country
@@ -1984,7 +1990,7 @@ async function analyzeBehavior(userId, request, env) {
     indicators.push('LOCATION_CHANGE')
     anomalyScore += 0.3
   }
-  
+
   // 4. 新设备/浏览器
   const userAgent = request.headers.get('User-Agent')
   const knownDevices = await getKnownDevices(userId, env)
@@ -1992,7 +1998,7 @@ async function analyzeBehavior(userId, request, env) {
     indicators.push('NEW_DEVICE')
     anomalyScore += 0.2
   }
-  
+
   return {
     anomalyScore: Math.min(1, anomalyScore),
     indicators: indicators
@@ -2010,50 +2016,50 @@ class SecurityIncidentResponder {
   async handleIncident(incident) {
     // 1. 分类
     const severity = this.classifyIncident(incident)
-    
+
     // 2. 遏制
     if (severity >= 'HIGH') {
       await this.containIncident(incident)
     }
-    
+
     // 3. 通知
     await this.notifyStakeholders(incident, severity)
-    
+
     // 4. 记录
     await this.logIncident(incident, severity)
-    
+
     // 5. 分析
     await this.analyzeIncident(incident)
-    
+
     // 6. 恢复
     await this.recoverFromIncident(incident)
   }
-  
+
   classifyIncident(incident) {
     if (incident.type === 'DATA_BREACH') return 'CRITICAL'
     if (incident.type === 'UNAUTHORIZED_ACCESS') return 'HIGH'
     if (incident.type === 'SUSPICIOUS_ACTIVITY') return 'MEDIUM'
     return 'LOW'
   }
-  
+
   async containIncident(incident) {
     // 立即行动
     if (incident.userId) {
       await this.suspendUser(incident.userId)
     }
-    
+
     if (incident.ipAddress) {
       await this.blockIP(incident.ipAddress)
     }
-    
+
     if (incident.apiKey) {
       await this.revokeAPIKey(incident.apiKey)
     }
   }
-  
+
   async notifyStakeholders(incident, severity) {
     const notifications = []
-    
+
     // 安全团队
     notifications.push(
       this.sendEmail({
@@ -2062,7 +2068,7 @@ class SecurityIncidentResponder {
         body: JSON.stringify(incident, null, 2)
       })
     )
-    
+
     // 如果是CRITICAL，通知管理层
     if (severity === 'CRITICAL') {
       notifications.push(
@@ -2072,13 +2078,13 @@ class SecurityIncidentResponder {
           body: `Critical security incident detected. Details: ${incident.type}`
         })
       )
-      
+
       // PagerDuty告警
       notifications.push(
         this.sendPagerDutyAlert(incident)
       )
     }
-    
+
     await Promise.all(notifications)
   }
 }
@@ -2140,8 +2146,37 @@ Serverless安全最佳实践:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#ServerlessSecurity` `#JWT` `#OAuth` `#GDPR` `#DDoS` `#WAF` `#Compliance`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Serverless概述与架构](./01_Serverless概述与架构.md) - Serverless概述与架构
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [OpenFaaS实战](./03_OpenFaaS实战.md) - OpenFaaS实战
+- [边缘Serverless](./04_边缘Serverless.md) - 边缘Serverless
+- [Serverless性能优化](./06_Serverless性能优化.md) - Serverless性能优化
+- [Serverless CI/CD](./07_Serverless_CICD.md) - Serverless CI/CD
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器安全技术](../05_容器安全技术/README.md) - 容器安全技术
+- [容器安全威胁分析](../05_容器安全技术/01_容器安全威胁分析.md) - 安全威胁分析
+- [服务网格安全](../18_服务网格技术详解/04_服务网格安全.md) - 服务网格安全
+- [边缘安全与运维](../17_边缘计算技术详解/08_边缘安全与运维.md) - 边缘安全与运维
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新
+

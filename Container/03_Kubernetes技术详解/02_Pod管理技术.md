@@ -113,6 +113,9 @@
     - [14.3 安全加固](#143-安全加固)
   - [版本差异说明](#版本差异说明)
   - [参考资源](#参考资源)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. Pod基础概念
 
@@ -1122,25 +1125,25 @@ spec:
 check_pod_health() {
     local pod_name=$1
     local namespace=${2:-default}
-    
+
     # 检查Pod状态
     local status=$(kubectl get pod $pod_name -n $namespace -o jsonpath='{.status.phase}')
-    
+
     if [ "$status" != "Running" ]; then
         echo "Pod $pod_name is not running: $status"
         kubectl describe pod $pod_name -n $namespace
         return 1
     fi
-    
+
     # 检查健康探针
     local ready=$(kubectl get pod $pod_name -n $namespace -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    
+
     if [ "$ready" != "True" ]; then
         echo "Pod $pod_name is not ready"
         kubectl logs $pod_name -n $namespace --tail=50
         return 1
     fi
-    
+
     echo "Pod $pod_name is healthy"
     return 0
 }
@@ -1306,3 +1309,28 @@ A:
 - [Pod安全标准](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 - [资源管理](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
 - [网络策略](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Kubernetes架构原理](./01_Kubernetes架构原理.md) - Kubernetes架构深度解析
+- [服务发现与负载均衡](./03_服务发现与负载均衡.md) - 服务发现与负载均衡详解
+- [存储管理技术](./04_存储管理技术.md) - 存储管理技术详解
+- [网络策略与安全](./05_网络策略与安全.md) - 网络策略与安全详解
+- [监控与日志管理](./06_监控与日志管理.md) - 监控与日志管理详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [Podman技术详解](../02_Podman技术详解/README.md) - Podman技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - Kubernetes编排技术
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

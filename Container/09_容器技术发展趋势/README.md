@@ -1,5 +1,27 @@
 # 容器技术发展趋势
 
+> **文档定位**: 容器技术发展趋势完整指南，涵盖2025年趋势、新兴技术、投资建议、未来展望
+> **技术版本**: 2025年最新技术趋势
+> **最后更新**: 2025-11-11
+> **标准对齐**: [CNCF Trends][cncf-trends], [Gartner Reports][gartner], [Industry Reports][industry]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | 2025年容器技术趋势 |
+| **状态** | 生产就绪 |
+| **适用场景** | 技术趋势分析、投资决策、战略规划 |
+
+> **版本锚点**: 本文档基于2025年容器技术发展趋势与市场分析。
+
+---
+
 ## 目录
 
 - [概述](#概述)
@@ -7,6 +29,7 @@
 - [技术文档](#技术文档)
 - [学习路径](#学习路径)
 - [投资建议](#投资建议)
+- [相关文档](#相关文档)
 
 ## 概述
 
@@ -161,11 +184,42 @@
 - 模型部署容器化
 - 训练环境容器化
 
-## 相关资源
+## 相关文档
 
-- [CNCF技术趋势](https://www.cncf.io/blog/)
-- [容器技术报告](https://www.docker.com/resources/)
-- [Kubernetes社区](https://kubernetes.io/community/)
+### 本模块相关
+
+- [2025年容器技术趋势](./01_2025年容器技术趋势.md) - 2025年技术趋势分析
+- [新兴容器技术分析](./02_新兴容器技术分析.md) - 新兴技术分析
+- [容器技术投资建议](./03_容器技术投资建议.md) - 投资建议与风险评估
+- [容器技术未来展望](./04_容器技术未来展望.md) - 未来技术展望
+
+### 其他模块相关
+
+- [容器编排技术](../04_容器编排技术/README.md) - 编排技术趋势
+- [容器安全技术](../05_容器安全技术/README.md) - 安全技术趋势
+- [容器监控与运维](../06_容器监控与运维/README.md) - 监控运维趋势
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 实践案例趋势
+
+---
+
+## 参考资源
+
+[cncf-trends]: https://www.cncf.io/blog/ "CNCF技术趋势"
+[gartner]: https://www.gartner.com/en/documents "Gartner报告"
+[industry]: https://www.docker.com/resources/ "行业报告"
+
+### 趋势分析
+
+- [CNCF技术趋势][cncf-trends] - CNCF技术博客
+- [容器技术报告][industry] - Docker技术报告
+- [Gartner报告][gartner] - Gartner市场分析
+- [Kubernetes社区](https://kubernetes.io/community/) - K8s社区动态
+
+### 市场研究
+
+- [容器市场分析](https://www.cncf.io/reports/) - CNCF市场报告
+- [云原生趋势](https://www.cncf.io/blog/) - 云原生技术趋势
+- [技术投资分析](https://www.gartner.com/en/documents) - 技术投资报告
 
 ---
 

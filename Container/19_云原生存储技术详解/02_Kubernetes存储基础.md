@@ -1,8 +1,8 @@
 # 02 - Kubernetes存储基础
 
-**作者**: 云原生存储专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生存储专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -46,6 +46,9 @@
     - [6.1 本章要点](#61-本章要点)
     - [6.2 下一步学习](#62-下一步学习)
     - [6.3 最佳实践总结](#63-最佳实践总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -94,7 +97,7 @@ spec:
     volumeMounts:
     - name: cache
       mountPath: /data
-  
+
   - name: reader
     image: busybox
     command: ["/bin/sh"]
@@ -111,7 +114,7 @@ spec:
     - name: cache
       mountPath: /data
       readOnly: true
-  
+
   volumes:
   - name: cache
     emptyDir: {}
@@ -159,7 +162,7 @@ spec:
         memory: "256Mi"
       requests:
         memory: "128Mi"
-  
+
   volumes:
   - name: cache
     emptyDir:
@@ -237,14 +240,14 @@ metadata:
 spec:
   nodeSelector:
     kubernetes.io/hostname: worker-node-1  # 指定节点
-  
+
   containers:
   - name: app
     image: nginx:latest
     volumeMounts:
     - name: logs
       mountPath: /var/log/nginx
-  
+
   - name: log-processor
     image: busybox
     command: ["/bin/sh"]
@@ -257,7 +260,7 @@ spec:
     - name: logs
       mountPath: /logs
       readOnly: true
-  
+
   volumes:
   - name: logs
     hostPath:
@@ -283,7 +286,7 @@ spec:
       mountPath: /var/run/docker.sock
     securityContext:
       privileged: true  # 需要特权模式
-  
+
   volumes:
   - name: docker-sock
     hostPath:
@@ -348,20 +351,20 @@ data:
     http {
         include /etc/nginx/mime.types;
         default_type application/octet-stream;
-        
+
         log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                         '$status $body_bytes_sent "$http_referer" '
                         '"$http_user_agent" "$http_x_forwarded_for"';
-        
+
         access_log /var/log/nginx/access.log main;
-        
+
         sendfile on;
         keepalive_timeout 65;
-        
+
         server {
             listen 80;
             server_name localhost;
-            
+
             location / {
                 root /usr/share/nginx/html;
                 index index.html;
@@ -396,7 +399,7 @@ spec:
     - name: config
       mountPath: /usr/share/nginx/html/index.html
       subPath: index.html
-  
+
   volumes:
   - name: config
     configMap:
@@ -532,7 +535,7 @@ spec:
     - name: tls
       mountPath: /etc/nginx/ssl
       readOnly: true
-  
+
   volumes:
   - name: tls
     secret:
@@ -647,7 +650,7 @@ spec:
     - name: all-in-one
       mountPath: /projected
       readOnly: true
-  
+
   volumes:
   - name: all-in-one
     projected:
@@ -658,14 +661,14 @@ spec:
           items:
           - key: config.yaml
             path: config.yaml
-      
+
       # 2. Secret
       - secret:
           name: app-secret
           items:
           - key: api-key
             path: secret/api-key
-      
+
       # 3. DownwardAPI (Pod元数据)
       - downwardAPI:
           items:
@@ -681,7 +684,7 @@ spec:
           - path: "name"
             fieldRef:
               fieldPath: metadata.name
-      
+
       # 4. ServiceAccount Token
       - serviceAccountToken:
           path: token
@@ -753,7 +756,7 @@ spec:
       limits:
         memory: "128Mi"
         cpu: "500m"
-    
+
     # 方式1: 环境变量
     env:
     - name: MY_POD_NAME
@@ -782,13 +785,13 @@ spec:
         resourceFieldRef:
           containerName: app
           resource: limits.memory
-    
+
     # 方式2: Volume文件
     volumeMounts:
     - name: podinfo
       mountPath: /etc/podinfo
       readOnly: true
-  
+
   volumes:
   - name: podinfo
     downwardAPI:
@@ -836,7 +839,7 @@ resourceFieldRef支持的字段:
   requests.memory: 内存请求
   limits.cpu: CPU限制
   limits.memory: 内存限制
-  
+
   divisor选项:
     CPU: 1 (核心), 1m (毫核)
     Memory: 1 (字节), 1Ki, 1Mi, 1Gi
@@ -1198,7 +1201,7 @@ Phase 2: Node Expansion (节点侧扩容)
     ✅ 云块存储 (EBS, Azure Disk)
     ✅ Ceph RBD
     - 无需重启Pod
-  
+
   离线扩容 (需要):
     ⚠️ hostPath, local
     ⚠️ 部分CSI驱动
@@ -1641,12 +1644,12 @@ volumeBindingMode:
    - PVC创建时立即供应PV
    - 不考虑Pod调度
    - 可能导致调度失败
-   
+
    问题场景:
      - PV在zone-a创建
      - Pod只能调度到zone-b
      - Pod无法启动
-   
+
    适用:
      - 拓扑无关的存储 (NFS, CephFS)
      - 单可用区集群
@@ -1655,12 +1658,12 @@ volumeBindingMode:
    - 等待第一个使用PVC的Pod
    - 根据Pod的调度约束供应PV
    - 确保PV在Pod可达的拓扑位置
-   
+
    优势:
      ✅ 拓扑感知
      ✅ 避免调度失败
      ✅ 资源利用最优
-   
+
    适用:
      - 有拓扑约束的存储 (EBS, Azure Disk)
      - 多可用区集群
@@ -2729,7 +2732,7 @@ StorageClass配置:
     - 每日快照
     - 保留7天
     - 异地备份
-  
+
   非关键数据:
     - 每周快照
     - 保留30天
@@ -2745,8 +2748,37 @@ StorageClass配置:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生存储专家团队
 
 **Tags**: `#Kubernetes` `#Volume` `#PV` `#PVC` `#StorageClass` `#VolumeSnapshot` `#Storage`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [云原生存储概述与架构](./01_云原生存储概述与架构.md) - 云原生存储概述与架构
+- [Rook Ceph深度解析](./03_Rook_Ceph深度解析.md) - Rook Ceph深度解析
+- [Velero备份恢复](./04_Velero备份恢复.md) - Velero备份恢复
+- [CSI驱动详解](./05_CSI驱动详解.md) - CSI驱动详解
+- [存储性能优化](./06_存储性能优化.md) - 存储性能优化
+- [多云存储](./07_多云存储.md) - 多云存储
+- [存储安全](./08_存储安全.md) - 存储安全
+- [实战案例](./09_实战案例.md) - 实战案例
+- [最佳实践](./10_最佳实践.md) - 最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器存储技术](../05_容器存储技术/README.md) - 容器存储技术
+- [容器存储基础](../05_容器存储技术/01_容器存储基础.md) - 容器存储基础
+- [Kubernetes存储管理](../03_Kubernetes技术详解/04_存储管理技术.md) - K8s存储管理
+- [边缘存储与数据管理](../17_边缘计算技术详解/05_边缘存储与数据管理.md) - 边缘存储
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

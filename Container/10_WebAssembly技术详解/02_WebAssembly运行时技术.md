@@ -34,6 +34,9 @@
     - [10.1 性能优化最佳实践](#101-性能优化最佳实践)
     - [10.2 安全最佳实践](#102-安全最佳实践)
     - [10.3 开发最佳实践](#103-开发最佳实践)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. WebAssembly运行时概述
 
@@ -101,7 +104,7 @@ impl WasmStack {
             max_depth,
         }
     }
-    
+
     pub fn push(&mut self, value: WasmValue) -> Result<(), Error> {
         if self.values.len() >= self.max_depth {
             return Err(Error::StackOverflow);
@@ -109,11 +112,11 @@ impl WasmStack {
         self.values.push(value);
         Ok(())
     }
-    
+
     pub fn pop(&mut self) -> Result<WasmValue, Error> {
         self.values.pop().ok_or(Error::StackUnderflow)
     }
-    
+
     pub fn peek(&self, depth: usize) -> Result<&WasmValue, Error> {
         let index = self.values.len().checked_sub(depth + 1)
             .ok_or(Error::StackUnderflow)?;
@@ -151,7 +154,7 @@ impl WasmVirtualMachine {
                     return Err(Error::TypeMismatch);
                 }
             }
-            
+
             // 局部变量指令
             Instruction::LocalGet(index) => {
                 let value = self.locals.get(*index as usize)
@@ -165,7 +168,7 @@ impl WasmVirtualMachine {
                 }
                 self.locals[*index as usize] = value;
             }
-            
+
             // 内存指令
             Instruction::I32Load(offset) => {
                 let address = self.stack.pop()?;
@@ -185,7 +188,7 @@ impl WasmVirtualMachine {
                     return Err(Error::TypeMismatch);
                 }
             }
-            
+
             // 控制指令
             Instruction::Call(func_index) => {
                 let func = self.functions.get(*func_index as usize)
@@ -195,7 +198,7 @@ impl WasmVirtualMachine {
             Instruction::Return => {
                 return Ok(()); // 返回调用者
             }
-            
+
             _ => return Err(Error::UnsupportedInstruction),
         }
         Ok(())
@@ -231,11 +234,11 @@ impl WasmInterpreter {
             call_stack: Vec::new(),
         }
     }
-    
+
     pub fn execute_function(&mut self, func_index: usize) -> Result<Vec<WasmValue>, Error> {
         let function = self.vm.functions.get(func_index)
             .ok_or(Error::InvalidFunctionIndex)?;
-        
+
         // 创建调用帧
         let frame = CallFrame {
             function: function.clone(),
@@ -243,10 +246,10 @@ impl WasmInterpreter {
             return_pc: self.pc,
         };
         self.call_stack.push(frame);
-        
+
         // 执行函数体
         self.execute_function_body(&function.body)?;
-        
+
         // 收集返回值
         let return_count = function.return_type.len();
         let mut return_values = Vec::new();
@@ -254,19 +257,19 @@ impl WasmInterpreter {
             return_values.push(self.vm.stack.pop()?);
         }
         return_values.reverse();
-        
+
         Ok(return_values)
     }
-    
+
     fn execute_function_body(&mut self, body: &[Instruction]) -> Result<(), Error> {
         self.pc = 0;
-        
+
         while self.pc < body.len() {
             let instruction = &body[self.pc];
             self.execute_instruction(instruction)?;
             self.pc += 1;
         }
-        
+
         Ok(())
     }
 }
@@ -296,26 +299,26 @@ impl OptimizedWasmInterpreter {
             jump_table: Vec::new(),
         }
     }
-    
+
     pub fn optimize_function(&mut self, func: &WasmFunction) -> Result<(), Error> {
         for (i, instruction) in func.body.iter().enumerate() {
             let optimized = self.optimize_instruction(instruction)?;
             self.instruction_cache.insert(i, optimized);
         }
-        
+
         // 构建跳转表
         self.build_jump_table(&func.body)?;
-        
+
         Ok(())
     }
-    
+
     fn optimize_instruction(&self, instruction: &Instruction) -> Result<OptimizedInstruction, Error> {
         match instruction {
             // 常量折叠
             Instruction::I32Const(a) => {
-                if let Some(OptimizedInstruction::Direct(Instruction::I32Const(b))) = 
+                if let Some(OptimizedInstruction::Direct(Instruction::I32Const(b))) =
                     self.instruction_cache.get(&(self.pc + 1)) {
-                    if let Some(OptimizedInstruction::Direct(Instruction::I32Add)) = 
+                    if let Some(OptimizedInstruction::Direct(Instruction::I32Add)) =
                         self.instruction_cache.get(&(self.pc + 2)) {
                         return Ok(OptimizedInstruction::Direct(
                             Instruction::I32Const(a + b)
@@ -324,7 +327,7 @@ impl OptimizedWasmInterpreter {
                 }
                 Ok(OptimizedInstruction::Direct(instruction.clone()))
             }
-            
+
             // 函数内联
             Instruction::Call(func_index) => {
                 if self.should_inline(*func_index) {
@@ -335,7 +338,7 @@ impl OptimizedWasmInterpreter {
                     Ok(OptimizedInstruction::Direct(instruction.clone()))
                 }
             }
-            
+
             _ => Ok(OptimizedInstruction::Direct(instruction.clone())),
         }
     }
@@ -376,50 +379,50 @@ impl WasmJITCompiler {
             target_arch,
         }
     }
-    
+
     pub fn compile_function(&mut self, func: &WasmFunction) -> Result<CompiledFunction, Error> {
         let func_hash = self.hash_function(func);
-        
+
         // 检查缓存
         if let Some(cached) = self.code_cache.get(&func_hash) {
             return Ok(cached.clone());
         }
-        
+
         // 编译函数
         let compiled = self.compile_to_machine_code(func)?;
-        
+
         // 缓存结果
         self.code_cache.insert(func_hash, compiled.clone());
-        
+
         Ok(compiled)
     }
-    
+
     fn compile_to_machine_code(&self, func: &WasmFunction) -> Result<CompiledFunction, Error> {
         let mut codegen = MachineCodeGenerator::new(self.target_arch);
-        
+
         // 生成函数序言
         codegen.emit_function_prologue(func)?;
-        
+
         // 编译指令
         for instruction in &func.body {
             self.compile_instruction(&mut codegen, instruction)?;
         }
-        
+
         // 生成函数尾声
         codegen.emit_function_epilogue(func)?;
-        
+
         let machine_code = codegen.finish()?;
         let entry_point = machine_code.as_ptr();
         let size = machine_code.len();
-        
+
         Ok(CompiledFunction {
             machine_code,
             entry_point,
             size,
         })
     }
-    
-    fn compile_instruction(&self, codegen: &mut MachineCodeGenerator, 
+
+    fn compile_instruction(&self, codegen: &mut MachineCodeGenerator,
                           instruction: &Instruction) -> Result<(), Error> {
         match instruction {
             Instruction::I32Const(value) => {
@@ -473,14 +476,14 @@ impl MachineCodeGenerator {
             relocations: Vec::new(),
         }
     }
-    
+
     pub fn emit_function_prologue(&mut self, func: &WasmFunction) -> Result<(), Error> {
         match self.target_arch {
             TargetArchitecture::X86_64 => {
                 // 保存寄存器
                 self.emit_bytes(&[0x55])?; // push rbp
                 self.emit_bytes(&[0x48, 0x89, 0xe5])?; // mov rbp, rsp
-                
+
                 // 分配局部变量空间
                 if func.local_count > 0 {
                     let stack_size = func.local_count * 4; // 假设每个局部变量4字节
@@ -496,7 +499,7 @@ impl MachineCodeGenerator {
         }
         Ok(())
     }
-    
+
     pub fn emit_add(&mut self) -> Result<(), Error> {
         match self.target_arch {
             TargetArchitecture::X86_64 => {
@@ -514,13 +517,13 @@ impl MachineCodeGenerator {
         }
         Ok(())
     }
-    
+
     pub fn finish(mut self) -> Result<Vec<u8>, Error> {
         // 处理重定位
         for relocation in self.relocations {
             self.apply_relocation(relocation)?;
         }
-        
+
         Ok(self.code)
     }
 }
@@ -559,50 +562,50 @@ impl WasmAOTCompiler {
             target_arch,
             output_format: OutputFormat::ELF,
         };
-        
+
         // 添加优化通道
         compiler.add_optimization_pass(Box::new(ConstantFoldingPass::new()));
         compiler.add_optimization_pass(Box::new(DeadCodeEliminationPass::new()));
         compiler.add_optimization_pass(Box::new(InliningPass::new()));
         compiler.add_optimization_pass(Box::new(LoopOptimizationPass::new()));
-        
+
         compiler
     }
-    
+
     pub fn add_optimization_pass(&mut self, pass: Box<dyn OptimizationPass>) {
         self.optimization_passes.push(pass);
     }
-    
+
     pub fn compile_module(&self, module: &WasmModule) -> Result<Vec<u8>, Error> {
         let mut optimized_module = module.clone();
-        
+
         // 应用优化通道
         for pass in &self.optimization_passes {
             pass.optimize(&mut optimized_module)?;
         }
-        
+
         // 生成机器码
         let machine_code = self.generate_machine_code(&optimized_module)?;
-        
+
         // 生成可执行文件
         let executable = self.create_executable(machine_code)?;
-        
+
         Ok(executable)
     }
-    
+
     fn generate_machine_code(&self, module: &WasmModule) -> Result<Vec<u8>, Error> {
         let mut codegen = MachineCodeGenerator::new(self.target_arch);
-        
+
         // 生成代码段
         for func in &module.functions {
             self.compile_function(&mut codegen, func)?;
         }
-        
+
         // 生成数据段
         for data in &module.data {
             self.compile_data(&mut codegen, data)?;
         }
-        
+
         codegen.finish()
     }
 }
@@ -624,7 +627,7 @@ impl OptimizationPass for ConstantFoldingPass {
     fn name(&self) -> &str {
         "constant_folding"
     }
-    
+
     fn optimize(&self, module: &mut WasmModule) -> Result<(), Error> {
         for func in &mut module.functions {
             self.optimize_function(func)?;
@@ -637,10 +640,10 @@ impl ConstantFoldingPass {
     fn optimize_function(&self, func: &mut WasmFunction) -> Result<(), Error> {
         let mut optimized_body = Vec::new();
         let mut i = 0;
-        
+
         while i < func.body.len() {
             let instruction = &func.body[i];
-            
+
             match instruction {
                 Instruction::I32Const(a) => {
                     if i + 2 < func.body.len() {
@@ -668,11 +671,11 @@ impl ConstantFoldingPass {
                 }
                 _ => {}
             }
-            
+
             optimized_body.push(instruction.clone());
             i += 1;
         }
-        
+
         func.body = optimized_body;
         Ok(())
     }
@@ -691,7 +694,7 @@ impl OptimizationPass for DeadCodeEliminationPass {
     fn name(&self) -> &str {
         "dead_code_elimination"
     }
-    
+
     fn optimize(&self, module: &mut WasmModule) -> Result<(), Error> {
         for func in &mut module.functions {
             self.eliminate_dead_code(func)?;
@@ -704,7 +707,7 @@ impl DeadCodeEliminationPass {
     fn eliminate_dead_code(&self, func: &mut WasmFunction) -> Result<(), Error> {
         let mut used_locals = HashSet::new();
         let mut used_globals = HashSet::new();
-        
+
         // 分析使用的局部变量和全局变量
         for instruction in &func.body {
             match instruction {
@@ -717,7 +720,7 @@ impl DeadCodeEliminationPass {
                 _ => {}
             }
         }
-        
+
         // 移除未使用的指令
         func.body.retain(|instruction| {
             match instruction {
@@ -726,7 +729,7 @@ impl DeadCodeEliminationPass {
                 _ => true,
             }
         });
-        
+
         Ok(())
     }
 }
@@ -751,7 +754,7 @@ impl WasmMemoryManager {
     pub fn new(initial_pages: u32, max_pages: u32) -> Self {
         let page_size = 65536; // 64KB per page
         let initial_size = initial_pages as usize * page_size;
-        
+
         Self {
             memory: vec![0; initial_size],
             max_pages,
@@ -759,52 +762,52 @@ impl WasmMemoryManager {
             page_size,
         }
     }
-    
+
     pub fn grow(&mut self, pages: u32) -> Result<i32, Error> {
         let new_pages = self.current_pages + pages;
         if new_pages > self.max_pages {
             return Err(Error::MemoryGrowFailed);
         }
-        
+
         let additional_size = pages as usize * self.page_size;
         self.memory.resize(self.memory.len() + additional_size, 0);
         self.current_pages = new_pages;
-        
+
         Ok(self.current_pages as i32)
     }
-    
+
     pub fn read_i32(&self, offset: usize) -> Result<i32, Error> {
         if offset + 4 > self.memory.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         let bytes = &self.memory[offset..offset + 4];
         Ok(i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
     }
-    
+
     pub fn write_i32(&mut self, offset: usize, value: i32) -> Result<(), Error> {
         if offset + 4 > self.memory.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         let bytes = value.to_le_bytes();
         self.memory[offset..offset + 4].copy_from_slice(&bytes);
         Ok(())
     }
-    
+
     pub fn read_bytes(&self, offset: usize, len: usize) -> Result<&[u8], Error> {
         if offset + len > self.memory.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         Ok(&self.memory[offset..offset + len])
     }
-    
+
     pub fn write_bytes(&mut self, offset: usize, data: &[u8]) -> Result<(), Error> {
         if offset + data.len() > self.memory.len() {
             return Err(Error::MemoryAccessOutOfBounds);
         }
-        
+
         self.memory[offset..offset + data.len()].copy_from_slice(data);
         Ok(())
     }
@@ -851,23 +854,23 @@ impl WasmMemoryProtection {
             },
         }
     }
-    
-    pub fn protect_region(&mut self, start: usize, end: usize, 
+
+    pub fn protect_region(&mut self, start: usize, end: usize,
                          permissions: RegionPermissions) -> Result<(), Error> {
         if end <= start || end > self.memory.memory.len() {
             return Err(Error::InvalidRegion);
         }
-        
+
         self.protected_regions.push(ProtectedRegion {
             start,
             end,
             permissions,
         });
-        
+
         Ok(())
     }
-    
-    pub fn check_access(&self, offset: usize, len: usize, 
+
+    pub fn check_access(&self, offset: usize, len: usize,
                        access_type: AccessType) -> Result<(), Error> {
         for region in &self.protected_regions {
             if offset >= region.start && offset + len <= region.end {
@@ -890,7 +893,7 @@ impl WasmMemoryProtection {
                 }
             }
         }
-        
+
         Ok(())
     }
 }
@@ -946,31 +949,31 @@ impl WasmGarbageCollector {
             roots: HashSet::new(),
         }
     }
-    
+
     pub fn allocate_reference(&mut self, reference: WasmReference) -> u64 {
         let id = self.next_id;
         self.next_id += 1;
         self.references.insert(id, reference);
         id
     }
-    
+
     pub fn add_root(&mut self, id: u64) {
         self.roots.insert(id);
     }
-    
+
     pub fn remove_root(&mut self, id: u64) {
         self.roots.remove(&id);
     }
-    
+
     pub fn collect_garbage(&mut self) {
         let mut visited = HashSet::new();
         let mut to_visit = Vec::new();
-        
+
         // 从根开始标记
         for &root_id in &self.roots {
             to_visit.push(root_id);
         }
-        
+
         while let Some(id) = to_visit.pop() {
             if visited.insert(id) {
                 if let Some(reference) = self.references.get(&id) {
@@ -978,11 +981,11 @@ impl WasmGarbageCollector {
                 }
             }
         }
-        
+
         // 清理未访问的引用
         self.references.retain(|&id, _| visited.contains(&id));
     }
-    
+
     fn collect_references(&self, reference: &WasmReference, to_visit: &mut Vec<u64>) {
         match reference {
             WasmReference::FuncRef(func_ref) => {
@@ -1038,22 +1041,22 @@ impl WasmCacheOptimizer {
             memory_cache: LruCache::new(10000),
         }
     }
-    
-    pub fn optimize_instruction(&mut self, instruction: &Instruction, 
+
+    pub fn optimize_instruction(&mut self, instruction: &Instruction,
                                context: &ExecutionContext) -> Result<OptimizedInstruction, Error> {
         let key = self.hash_instruction(instruction, context);
-        
+
         if let Some(cached) = self.instruction_cache.get(&key) {
             return Ok(cached.clone());
         }
-        
+
         let optimized = self.perform_optimization(instruction, context)?;
         self.instruction_cache.put(key, optimized.clone());
-        
+
         Ok(optimized)
     }
-    
-    fn perform_optimization(&self, instruction: &Instruction, 
+
+    fn perform_optimization(&self, instruction: &Instruction,
                            context: &ExecutionContext) -> Result<OptimizedInstruction, Error> {
         match instruction {
             Instruction::I32Load(offset) => {
@@ -1113,7 +1116,7 @@ impl WasmBranchPredictor {
             history_buffer: VecDeque::new(),
         }
     }
-    
+
     pub fn predict_branch(&self, pc: usize) -> bool {
         if let Some(prediction) = self.prediction_table.get(&pc) {
             prediction.taken_count > prediction.not_taken_count
@@ -1121,24 +1124,24 @@ impl WasmBranchPredictor {
             false // 默认预测不跳转
         }
     }
-    
+
     pub fn update_prediction(&mut self, pc: usize, target: usize, taken: bool) {
         let prediction = self.prediction_table.entry(pc).or_insert(BranchPrediction {
             taken_count: 0,
             not_taken_count: 0,
             confidence: 0.0,
         });
-        
+
         if taken {
             prediction.taken_count += 1;
         } else {
             prediction.not_taken_count += 1;
         }
-        
+
         // 更新置信度
         let total = prediction.taken_count + prediction.not_taken_count;
         prediction.confidence = (prediction.taken_count as f64 - prediction.not_taken_count as f64).abs() / total as f64;
-        
+
         // 记录历史
         self.history_buffer.push_back(BranchHistory {
             pc,
@@ -1146,7 +1149,7 @@ impl WasmBranchPredictor {
             taken,
             timestamp: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64,
         });
-        
+
         // 保持历史缓冲区大小
         if self.history_buffer.len() > 1000 {
             self.history_buffer.pop_front();
@@ -1185,13 +1188,13 @@ impl EdgeWasmRuntime {
             performance_monitor: PerformanceMonitor::new(),
         }
     }
-    
+
     pub fn execute_function(&mut self, func_name: &str, args: &[WasmValue]) -> Result<Vec<WasmValue>, Error> {
         let start_time = std::time::Instant::now();
-        
+
         // 选择执行策略
         let execution_strategy = self.select_execution_strategy(func_name);
-        
+
         let result = match execution_strategy {
             ExecutionStrategy::Interpreter => {
                 self.interpreter.execute_function_by_name(func_name, args)?
@@ -1203,16 +1206,16 @@ impl EdgeWasmRuntime {
                 self.execute_with_aot(func_name, args)?
             }
         };
-        
+
         let execution_time = start_time.elapsed().as_nanos() as u64;
         self.performance_monitor.record_execution_time(func_name, execution_time);
-        
+
         Ok(result)
     }
-    
+
     fn select_execution_strategy(&self, func_name: &str) -> ExecutionStrategy {
         let execution_count = self.performance_monitor.get_execution_count(func_name);
-        
+
         if execution_count < 10 {
             ExecutionStrategy::Interpreter
         } else if execution_count < 100 {
@@ -1269,41 +1272,41 @@ impl HPCWasmRuntime {
             cache_optimizer: WasmCacheOptimizer::new(),
         }
     }
-    
-    pub fn execute_parallel_function(&mut self, func: &WasmFunction, 
+
+    pub fn execute_parallel_function(&mut self, func: &WasmFunction,
                                    data: &[WasmValue], num_threads: usize) -> Result<Vec<WasmValue>, Error> {
         // 编译函数
         let compiled_func = self.aot_compiler.compile_function(func)?;
-        
+
         // 并行执行
         let results = self.parallel_executor.execute_parallel(
             compiled_func,
             data,
             num_threads
         )?;
-        
+
         Ok(results)
     }
-    
-    pub fn execute_vectorized_function(&mut self, func: &WasmFunction, 
+
+    pub fn execute_vectorized_function(&mut self, func: &WasmFunction,
                                      vector_data: &[VectorValue]) -> Result<Vec<VectorValue>, Error> {
         // 检查是否支持向量化
         if !self.can_vectorize(func) {
             return Err(Error::VectorizationNotSupported);
         }
-        
+
         // 向量化执行
         let results = self.vector_processor.execute_vectorized(func, vector_data)?;
-        
+
         Ok(results)
     }
-    
+
     fn can_vectorize(&self, func: &WasmFunction) -> bool {
         // 检查函数是否包含可向量化的操作
         for instruction in &func.body {
             match instruction {
-                Instruction::I32Add | Instruction::I32Sub | 
-                Instruction::I32Mul | Instruction::F32Add | 
+                Instruction::I32Add | Instruction::I32Sub |
+                Instruction::I32Mul | Instruction::F32Add |
                 Instruction::F32Sub | Instruction::F32Mul => {
                     continue;
                 }
@@ -1372,3 +1375,25 @@ impl HPCWasmRuntime {
 ---
 
 _本文档基于WebAssembly 2.0最新标准，提供完整的运行时技术解析和实践指导。_
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [WebAssembly架构原理](./01_WebAssembly架构原理.md) - WebAssembly架构深度解析
+- [WebAssembly安全机制](./03_WebAssembly安全机制.md) - WebAssembly安全机制详解
+- [WebAssembly 2.0新特性详解](./04_WebAssembly_2.0新特性详解.md) - WebAssembly 2.0新特性
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [容器监控与运维](../06_容器监控与运维/README.md) - 容器监控运维
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

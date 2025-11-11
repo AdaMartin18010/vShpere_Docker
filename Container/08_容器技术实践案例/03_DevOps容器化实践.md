@@ -1,9 +1,9 @@
 # DevOps容器化实践
 
-> **文档定位**: DevOps容器化完整案例，CI/CD流水线、GitOps、自动化部署、运维体系  
-> **技术版本**: GitLab CI, Jenkins, ArgoCD, Helm, Terraform  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [DevOps][devops], [GitOps][gitops], [CI/CD Best Practices][cicd]  
+> **文档定位**: DevOps容器化完整案例，CI/CD流水线、GitOps、自动化部署、运维体系
+> **技术版本**: GitLab CI, Jenkins, ArgoCD, Helm, Terraform
+> **最后更新**: 2025-10-21
+> **标准对齐**: [DevOps][devops], [GitOps][gitops], [CI/CD Best Practices][cicd]
 > **文档版本**: v2.0 (Phase 1+2 标准化版)
 
 ---
@@ -67,6 +67,9 @@
     - [最佳实践](#最佳实践)
   - [质量指标](#质量指标)
   - [变更记录](#变更记录)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. DevOps概述
 
@@ -128,26 +131,26 @@
 ```groovy
 pipeline {
     agent any
-    
+
     environment {
         DOCKER_REGISTRY = 'registry.example.com'
         IMAGE_NAME = 'myapp'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
-        
+
         stage('Test') {
             steps {
                 sh 'mvn test'
@@ -158,7 +161,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Docker Build') {
             steps {
                 script {
@@ -170,7 +173,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 sh "kubectl set image deployment/myapp myapp=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
@@ -178,7 +181,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo 'Pipeline succeeded!'
@@ -260,30 +263,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'temurin'
-    
+
     - name: Build with Maven
       run: mvn clean package -DskipTests
-    
+
     - name: Run tests
       run: mvn test
-    
+
     - name: Build Docker image
       run: docker build -t myapp:${{ github.sha }} .
-    
+
     - name: Push to registry
       run: |
         echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
         docker push myapp:${{ github.sha }}
-    
+
     - name: Deploy to Kubernetes
       run: |
         kubectl set image deployment/myapp myapp=myapp:${{ github.sha }}
@@ -298,22 +301,22 @@ jobs:
 // 单元测试示例
 @SpringBootTest
 class UserServiceTest {
-    
+
     @MockBean
     private UserRepository userRepository;
-    
+
     @Autowired
     private UserService userService;
-    
+
     @Test
     void testCreateUser() {
         // Given
         User user = new User("john", "john@example.com");
         when(userRepository.save(any(User.class))).thenReturn(user);
-        
+
         // When
         User result = userService.createUser(user);
-        
+
         // Then
         assertThat(result.getName()).isEqualTo("john");
         assertThat(result.getEmail()).isEqualTo("john@example.com");
@@ -328,24 +331,24 @@ class UserServiceTest {
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class UserControllerIntegrationTest {
-    
+
     @Container
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
-    
+
     @Autowired
     private TestRestTemplate restTemplate;
-    
+
     @Test
     void testCreateUser() {
         // Given
         User user = new User("john", "john@example.com");
-        
+
         // When
         ResponseEntity<User> response = restTemplate.postForEntity("/users", user, User.class);
-        
+
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().getName()).isEqualTo("john");
@@ -361,21 +364,21 @@ describe('User Management', () => {
   beforeEach(() => {
     cy.visit('/users');
   });
-  
+
   it('should create a new user', () => {
     cy.get('[data-testid="create-user-button"]').click();
     cy.get('[data-testid="user-name-input"]').type('John Doe');
     cy.get('[data-testid="user-email-input"]').type('john@example.com');
     cy.get('[data-testid="save-button"]').click();
-    
+
     cy.get('[data-testid="user-list"]').should('contain', 'John Doe');
   });
-  
+
   it('should edit an existing user', () => {
     cy.get('[data-testid="edit-user-button"]').first().click();
     cy.get('[data-testid="user-name-input"]').clear().type('Jane Doe');
     cy.get('[data-testid="save-button"]').click();
-    
+
     cy.get('[data-testid="user-list"]').should('contain', 'Jane Doe');
   });
 });
@@ -474,7 +477,7 @@ data:
       echo "Deployment failed, rolling back..."
       kubectl rollout undo deployment/myapp
       kubectl rollout status deployment/myapp --timeout=300s
-      
+
       if [ $? -eq 0 ]; then
         echo "Rollback successful"
       else
@@ -503,22 +506,22 @@ data:
     monitor_deployment() {
       local deployment=$1
       local namespace=$2
-      
+
       echo "Monitoring deployment $deployment in namespace $namespace"
-      
+
       # 检查Pod状态
       kubectl get pods -n $namespace -l app=$deployment
-      
+
       # 检查服务状态
       kubectl get svc -n $namespace -l app=$deployment
-      
+
       # 检查Ingress状态
       kubectl get ingress -n $namespace -l app=$deployment
-      
+
       # 检查资源使用情况
       kubectl top pods -n $namespace -l app=$deployment
     }
-    
+
     monitor_deployment "myapp" "default"
 ```
 
@@ -537,24 +540,24 @@ data:
     monitor_performance() {
       local service=$1
       local endpoint=$2
-      
+
       echo "Monitoring performance of $service"
-      
+
       # 检查响应时间
       response_time=$(curl -o /dev/null -s -w '%{time_total}' $endpoint)
       echo "Response time: ${response_time}s"
-      
+
       # 检查错误率
       error_count=$(curl -s $endpoint/metrics | grep 'http_requests_total{status="5.."}' | awk '{print $2}')
       total_count=$(curl -s $endpoint/metrics | grep 'http_requests_total' | awk '{sum+=$2} END {print sum}')
       error_rate=$(echo "scale=2; $error_count * 100 / $total_count" | bc)
       echo "Error rate: ${error_rate}%"
-      
+
       # 检查吞吐量
       throughput=$(curl -s $endpoint/metrics | grep 'http_requests_total' | awk '{sum+=$2} END {print sum}')
       echo "Throughput: $throughput requests"
     }
-    
+
     monitor_performance "myapp" "http://myapp:8080"
 ```
 
@@ -573,21 +576,21 @@ data:
     send_feedback() {
       local status=$1
       local message=$2
-      
+
       # 发送到Slack
       curl -X POST -H 'Content-type: application/json' \
         --data "{\"text\":\"Deployment $status: $message\"}" \
         $SLACK_WEBHOOK_URL
-      
+
       # 发送到邮件
       echo "$message" | mail -s "Deployment $status" $EMAIL_RECIPIENTS
-      
+
       # 发送到钉钉
       curl -X POST -H 'Content-type: application/json' \
         --data "{\"msgtype\":\"text\",\"text\":{\"content\":\"Deployment $status: $message\"}}" \
         $DINGTALK_WEBHOOK_URL
     }
-    
+
     send_feedback "SUCCESS" "Deployment completed successfully"
 ```
 
@@ -607,23 +610,23 @@ data:
     # 代码扫描脚本
     scan_code() {
       local project_path=$1
-      
+
       echo "Scanning code in $project_path"
-      
+
       # SonarQube扫描
       sonar-scanner \
         -Dsonar.projectKey=myapp \
         -Dsonar.sources=$project_path \
         -Dsonar.host.url=$SONARQUBE_URL \
         -Dsonar.login=$SONARQUBE_TOKEN
-      
+
       # 安全漏洞扫描
       npm audit --audit-level moderate
-      
+
       # 依赖扫描
       snyk test
     }
-    
+
     scan_code "/app"
 ```
 
@@ -641,23 +644,23 @@ data:
     # 镜像扫描脚本
     scan_image() {
       local image=$1
-      
+
       echo "Scanning image $image"
-      
+
       # Trivy扫描
       trivy image --format json --output scan-results.json $image
-      
+
       # 检查高危漏洞
       high_vulns=$(jq '.Results[].Vulnerabilities[] | select(.Severity == "HIGH")' scan-results.json | jq -s 'length')
-      
+
       if [ $high_vulns -gt 0 ]; then
         echo "Found $high_vulns high severity vulnerabilities"
         exit 1
       fi
-      
+
       echo "No high severity vulnerabilities found"
     }
-    
+
     scan_image "myapp:latest"
 ```
 
@@ -713,32 +716,32 @@ data:
       - security-scan
       - docker-build
       - deploy
-    
+
     variables:
       DOCKER_REGISTRY: registry.example.com
       SERVICES: "user-service product-service order-service"
-    
+
     build:
       stage: build
       script:
         - for service in $SERVICES; do
             mvn -f $service/pom.xml clean package -DskipTests;
           done
-    
+
     test:
       stage: test
       script:
         - for service in $SERVICES; do
             mvn -f $service/pom.xml test;
           done
-    
+
     security-scan:
       stage: security-scan
       script:
         - for service in $SERVICES; do
             sonar-scanner -Dsonar.projectKey=$service;
           done
-    
+
     docker-build:
       stage: docker-build
       script:
@@ -746,7 +749,7 @@ data:
             docker build -t $DOCKER_REGISTRY/$service:$CI_COMMIT_SHA $service/;
             docker push $DOCKER_REGISTRY/$service:$CI_COMMIT_SHA;
           done
-    
+
     deploy:
       stage: deploy
       script:
@@ -771,22 +774,22 @@ data:
     deploy_to_env() {
       local env=$1
       local image_tag=$2
-      
+
       echo "Deploying to $env environment"
-      
+
       # 更新环境配置
       kubectl set env deployment/myapp ENVIRONMENT=$env -n $env
-      
+
       # 更新镜像
       kubectl set image deployment/myapp myapp=myapp:$image_tag -n $env
-      
+
       # 等待部署完成
       kubectl rollout status deployment/myapp -n $env --timeout=300s
-      
+
       # 验证部署
       kubectl get pods -n $env -l app=myapp
     }
-    
+
     # 部署到各个环境
     deploy_to_env "dev" "latest"
     deploy_to_env "staging" "v1.0.0"
@@ -881,5 +884,28 @@ data:
 
 ---
 
-**文档完成度**: 100% ✅  
+**文档完成度**: 100% ✅
 **推荐使用场景**: DevOps实践、CI/CD、GitOps、自动化部署、持续集成
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [企业级容器化实践](./01_企业级容器化实践.md) - 企业级容器化实践
+- [微服务容器化案例](./02_微服务容器化案例.md) - 微服务容器化实践
+- [容器技术最佳实践](./04_容器技术最佳实践.md) - 最佳实践汇总
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes DevOps
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器监控与运维](../06_容器监控与运维/README.md) - DevOps监控
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 实践案例总览
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

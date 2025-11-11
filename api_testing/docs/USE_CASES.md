@@ -1,7 +1,7 @@
 # 实战使用案例集
 
-> **真实场景下的API测试实践**  
-> **创建日期**: 2025年10月23日  
+> **真实场景下的API测试实践**
+> **创建日期**: 2025年10月23日
 > **文档版本**: v1.0
 
 ---
@@ -157,12 +157,12 @@ Pipeline阶段:
      - 编译代码
      - 运行单元测试
      - 构建Docker镜像
-  
+
   2. Test:
      - 运行API测试
      - 集成测试
      - 安全扫描
-  
+
   3. Deploy:
      - 部署到K8s
      - 健康检查
@@ -215,7 +215,7 @@ deploy_staging:
   stage: deploy
   script:
     - kubectl config use-context staging
-    - kubectl set image deployment/${CI_PROJECT_NAME} 
+    - kubectl set image deployment/${CI_PROJECT_NAME}
         ${CI_PROJECT_NAME}=${DOCKER_REGISTRY}/${IMAGE_NAME}
     - kubectl rollout status deployment/${CI_PROJECT_NAME}
   environment:
@@ -363,12 +363,12 @@ type Provider interface {
  CreateVM(ctx context.Context, spec VMSpec) (*VM, error)
  DeleteVM(ctx context.Context, vmID string) error
  ListVMs(ctx context.Context) ([]*VM, error)
- 
+
  // 容器管理
  CreateContainer(ctx context.Context, spec ContainerSpec) (*Container, error)
  DeleteContainer(ctx context.Context, containerID string) error
  ListContainers(ctx context.Context) ([]*Container, error)
- 
+
  // 资源监控
  GetMetrics(ctx context.Context, resourceID string) (*Metrics, error)
 }
@@ -414,15 +414,15 @@ func (s *Scheduler) ScheduleWorkload(ctx context.Context, workload *Workload) (*
   if err != nil {
    continue
   }
-  
+
   // 计算得分: 考虑成本、性能、可用性
   score := calculateScore(metrics, workload)
   scores[name] = score
  }
- 
+
  // 2. 选择最佳提供商
  bestProvider := selectBestProvider(scores)
- 
+
  // 3. 执行部署
  if workload.Type == "VM" {
   return s.deployVM(ctx, bestProvider, workload)
@@ -446,7 +446,7 @@ class TestHybridCloud(unittest.TestCase):
     def setUp(self):
         self.manager = HybridCloudManager()
         self.auth = AuthManager()
-    
+
     def test_vsphere_to_k8s_migration(self):
         """测试从vSphere VM迁移到Kubernetes"""
         # 1. 在vSphere创建测试VM
@@ -458,24 +458,24 @@ class TestHybridCloud(unittest.TestCase):
         }
         vm = self.manager.vsphere.create_vm(vm_spec)
         self.assertIsNotNone(vm.id)
-        
+
         # 2. 获取VM应用信息
         app_info = self.manager.analyze_vm(vm.id)
-        
+
         # 3. 生成K8s部署配置
         k8s_spec = self.manager.generate_k8s_spec(app_info)
-        
+
         # 4. 部署到Kubernetes
         deployment = self.manager.k8s.create_deployment(k8s_spec)
         self.assertEqual(deployment.status.available_replicas, 1)
-        
+
         # 5. 验证应用正常
         self.assertTrue(self.manager.health_check(deployment.id))
-        
+
         # 6. 清理
         self.manager.k8s.delete_deployment(deployment.id)
         self.manager.vsphere.delete_vm(vm.id)
-    
+
     def test_cost_optimization(self):
         """测试成本优化调度"""
         workload = {
@@ -484,13 +484,13 @@ class TestHybridCloud(unittest.TestCase):
             "memory_requirement": "4GB",
             "traffic": "low"
         }
-        
+
         # 获取调度建议
         placement = self.manager.scheduler.recommend(workload)
-        
+
         # 验证选择了成本最优的平台
         self.assertIn(placement.provider, ["vsphere", "aws", "aliyun"])
-        
+
         # 验证成本计算
         cost = self.manager.calculate_monthly_cost(placement)
         self.assertLess(cost, 500)  # 月成本应低于500元
@@ -571,19 +571,19 @@ class TestHybridCloud(unittest.TestCase):
      - 填写VM规格
      - 选择操作系统
      - 设置网络配置
-  
+
   2. 审批流程:
      - 资源配额检查
      - 部门经理审批
      - IT管理员审批
-  
+
   3. 自动创建:
      - 调用vSphere API
      - 创建VM
      - 配置网络
      - 安装OS
      - 通知用户
-  
+
   4. 生命周期管理:
      - 自动快照
      - 定期备份
@@ -610,19 +610,19 @@ class VMProvisioning:
         self.api.vcenter_user = username
         self.api.vcenter_password = password
         self.api.create_session()
-        
+
         self.logger = logging.getLogger(__name__)
-    
+
     def create_vm_from_template(self, request):
         """从模板创建VM"""
         try:
             # 1. 验证配额
             if not self.check_quota(request['department']):
                 raise Exception("配额不足")
-            
+
             # 2. 选择最优主机
             host = self.select_best_host(request['cpu'], request['memory'])
-            
+
             # 3. 克隆模板
             vm_spec = {
                 "name": request['vm_name'],
@@ -635,30 +635,30 @@ class VMProvisioning:
                 "memory_mb": request['memory'] * 1024,
                 "network": request['network']
             }
-            
+
             self.logger.info(f"开始创建VM: {vm_spec['name']}")
             vm_id = self.api.clone_vm_from_template(vm_spec)
-            
+
             # 4. 等待克隆完成
             self.wait_for_clone(vm_id, timeout=300)
-            
+
             # 5. 自定义配置
             self.customize_vm(vm_id, request['custom_script'])
-            
+
             # 6. 启动VM
             self.api.power_on_vm(vm_id)
-            
+
             # 7. 创建初始快照
             snapshot_id = self.api.create_snapshot(
                 vm_id,
                 f"Initial-{datetime.now().strftime('%Y%m%d')}"
             )
-            
+
             # 8. 记录资产
             self.register_asset(vm_id, request)
-            
+
             self.logger.info(f"✅ VM创建成功: {vm_spec['name']} ({vm_id})")
-            
+
             return {
                 "status": "success",
                 "vm_id": vm_id,
@@ -666,46 +666,46 @@ class VMProvisioning:
                 "ip_address": self.get_vm_ip(vm_id),
                 "snapshot_id": snapshot_id
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ VM创建失败: {str(e)}")
             # 清理失败的VM
             if 'vm_id' in locals():
                 self.cleanup_failed_vm(vm_id)
             raise
-    
+
     def select_best_host(self, required_cpu, required_memory):
         """选择最优ESXi主机"""
         hosts = self.api.list_hosts()
-        
+
         # 评分算法
         best_host = None
         best_score = -1
-        
+
         for host in hosts:
             # 检查资源可用性
             if host['available_cpu'] < required_cpu:
                 continue
             if host['available_memory'] < required_memory:
                 continue
-            
+
             # 计算得分（CPU利用率、内存利用率、VM数量）
             cpu_score = 1 - (host['cpu_usage'] / 100)
             mem_score = 1 - (host['memory_usage'] / 100)
             vm_score = 1 - (host['vm_count'] / host['max_vms'])
-            
+
             score = cpu_score * 0.4 + mem_score * 0.4 + vm_score * 0.2
-            
+
             if score > best_score:
                 best_score = score
                 best_host = host
-        
+
         return best_host['id']
-    
+
     def schedule_backup(self, vm_id, schedule='daily'):
         """设置自动备份计划"""
         from celery import current_app as app
-        
+
         if schedule == 'daily':
             # 每天凌晨2点备份
             app.send_task(
@@ -716,7 +716,7 @@ class VMProvisioning:
         elif schedule == 'weekly':
             # 每周日凌晨3点备份
             # ...
-        
+
         self.logger.info(f"📅 已设置{schedule}备份: VM {vm_id}")
 ```
 
@@ -737,13 +737,13 @@ def backup_vm(vm_id):
         username=app.conf.VCENTER_USER,
         password=app.conf.VCENTER_PASSWORD
     )
-    
+
     snapshot_name = f"Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     snapshot_id = provisioning.api.create_snapshot(vm_id, snapshot_name)
-    
+
     # 清理旧快照（保留最近7天）
     provisioning.cleanup_old_snapshots(vm_id, keep_days=7)
-    
+
     return f"Snapshot created: {snapshot_id}"
 
 @app.task
@@ -751,26 +751,26 @@ def compliance_check():
     """合规性检查"""
     provisioning = VMProvisioning(...)
     vms = provisioning.api.list_vms()
-    
+
     issues = []
     for vm in vms:
         # 检查1: VM Tools是否最新
         if not vm['tools_running_status'] == 'guestToolsRunning':
             issues.append(f"VM {vm['name']}: VMware Tools未运行")
-        
+
         # 检查2: 是否有过多快照
         snapshots = provisioning.api.list_snapshots(vm['id'])
         if len(snapshots) > 5:
             issues.append(f"VM {vm['name']}: 快照过多({len(snapshots)}个)")
-        
+
         # 检查3: 是否有未使用的VM
         if vm['power_state'] == 'off' and vm['days_powered_off'] > 30:
             issues.append(f"VM {vm['name']}: 超过30天未使用")
-    
+
     # 生成报告
     if issues:
         send_compliance_report(issues)
-    
+
     return len(issues)
 ```
 
@@ -886,17 +886,17 @@ class ImageScanner:
     def __init__(self):
         self.docker_api = DockerAPITest()
         self.docker_client = docker.from_env()
-    
+
     def scan_image(self, image_name):
         """扫描镜像漏洞"""
         print(f"🔍 开始扫描镜像: {image_name}")
-        
+
         # 1. 拉取镜像
         try:
             image = self.docker_client.images.pull(image_name)
         except docker.errors.ImageNotFound:
             return {"error": "镜像不存在"}
-        
+
         # 2. 使用Trivy扫描
         result = subprocess.run(
             [
@@ -908,20 +908,20 @@ class ImageScanner:
             capture_output=True,
             text=True
         )
-        
+
         vulnerabilities = json.loads(result.stdout)
-        
+
         # 3. 分析结果
         critical = len([v for v in vulnerabilities if v['Severity'] == 'CRITICAL'])
         high = len([v for v in vulnerabilities if v['Severity'] == 'HIGH'])
-        
+
         # 4. 评估风险
         risk_score = critical * 10 + high * 5
         risk_level = self.calculate_risk_level(risk_score)
-        
+
         # 5. 策略检查
         policy_result = self.check_policy(image, vulnerabilities)
-        
+
         report = {
             "image": image_name,
             "scan_time": datetime.now().isoformat(),
@@ -936,17 +936,17 @@ class ImageScanner:
             "policy_violations": policy_result['violations'],
             "action": self.decide_action(risk_level, policy_result)
         }
-        
+
         # 6. 记录到数据库
         self.save_scan_result(report)
-        
+
         print(f"✅ 扫描完成: {risk_level} 风险")
         return report
-    
+
     def check_policy(self, image, vulnerabilities):
         """检查镜像策略"""
         violations = []
-        
+
         # 策略1: 不允许Critical漏洞
         critical_vulns = [v for v in vulnerabilities if v['Severity'] == 'CRITICAL']
         if critical_vulns:
@@ -955,7 +955,7 @@ class ImageScanner:
                 "violated": True,
                 "details": f"发现{len(critical_vulns)}个CRITICAL漏洞"
             })
-        
+
         # 策略2: 必须有健康检查
         inspect = self.docker_client.api.inspect_image(image.id)
         if not inspect['Config'].get('Healthcheck'):
@@ -964,7 +964,7 @@ class ImageScanner:
                 "violated": True,
                 "details": "镜像缺少健康检查配置"
             })
-        
+
         # 策略3: 不能以root运行
         if inspect['Config'].get('User') in [None, '', 'root', '0']:
             violations.append({
@@ -972,7 +972,7 @@ class ImageScanner:
                 "violated": True,
                 "details": "容器以root用户运行"
             })
-        
+
         # 策略4: 必须有标签
         required_labels = ['version', 'maintainer', 'description']
         labels = inspect['Config'].get('Labels', {})
@@ -983,12 +983,12 @@ class ImageScanner:
                 "violated": True,
                 "details": f"缺少标签: {', '.join(missing_labels)}"
             })
-        
+
         return {
             "compliant": len(violations) == 0,
             "violations": violations
         }
-    
+
     def decide_action(self, risk_level, policy_result):
         """决定处理动作"""
         if risk_level == "CRITICAL" or not policy_result['compliant']:
@@ -997,11 +997,11 @@ class ImageScanner:
             return "WARN"   # 警告但允许
         else:
             return "ALLOW"  # 允许部署
-    
+
     def scan_all_running_containers(self):
         """扫描所有运行中的容器"""
         containers = self.docker_client.containers.list()
-        
+
         results = []
         for container in containers:
             image_name = container.image.tags[0] if container.image.tags else container.image.id
@@ -1009,10 +1009,10 @@ class ImageScanner:
             result['container_id'] = container.id
             result['container_name'] = container.name
             results.append(result)
-        
+
         # 生成汇总报告
         self.generate_summary_report(results)
-        
+
         return results
 ```
 
@@ -1025,7 +1025,7 @@ package main
 import (
  "encoding/json"
  "net/http"
- 
+
  admissionv1 "k8s.io/api/admission/v1"
  corev1 "k8s.io/api/core/v1"
  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -1039,35 +1039,35 @@ func (ac *AdmissionController) ServePods(w http.ResponseWriter, r *http.Request)
  // 1. 解析准入请求
  var admissionReview admissionv1.AdmissionReview
  json.NewDecoder(r.Body).Decode(&admissionReview)
- 
+
  // 2. 提取Pod规格
  pod := &corev1.Pod{}
  json.Unmarshal(admissionReview.Request.Object.Raw, pod)
- 
+
  // 3. 扫描所有容器镜像
  var violations []string
  for _, container := range pod.Spec.Containers {
   result := ac.scanner.ScanImage(container.Image)
-  
+
   // 如果有CRITICAL漏洞或策略违反，拒绝部署
   if result.Action == "BLOCK" {
-   violations = append(violations, 
-    fmt.Sprintf("容器%s的镜像%s: %s", 
+   violations = append(violations,
+    fmt.Sprintf("容器%s的镜像%s: %s",
      container.Name, container.Image, result.Reason))
   }
  }
- 
+
  // 4. 构造响应
  response := &admissionv1.AdmissionResponse{
   UID: admissionReview.Request.UID,
  }
- 
+
  if len(violations) > 0 {
   // 拒绝部署
   response.Allowed = false
   response.Result = &metav1.Status{
    Status: "Failure",
-   Message: fmt.Sprintf("镜像安全检查失败:\n%s", 
+   Message: fmt.Sprintf("镜像安全检查失败:\n%s",
     strings.Join(violations, "\n")),
    Reason: "ImagePolicyViolation",
   }
@@ -1075,7 +1075,7 @@ func (ac *AdmissionController) ServePods(w http.ResponseWriter, r *http.Request)
   // 允许部署
   response.Allowed = true
  }
- 
+
  // 5. 返回响应
  admissionReview.Response = response
  json.NewEncoder(w).Encode(admissionReview)
@@ -1175,7 +1175,7 @@ import (
  "context"
  "fmt"
  "sync"
- 
+
  "k8s.io/client-go/kubernetes"
  "k8s.io/client-go/tools/clientcmd"
 )
@@ -1199,22 +1199,22 @@ func (m *MultiClusterManager) AddCluster(name, kubeconfig string) error {
  if err != nil {
   return fmt.Errorf("加载kubeconfig失败: %w", err)
  }
- 
+
  clientset, err := kubernetes.NewForConfig(config)
  if err != nil {
   return fmt.Errorf("创建客户端失败: %w", err)
  }
- 
+
  // 测试连接
  _, err = clientset.ServerVersion()
  if err != nil {
   return fmt.Errorf("连接集群失败: %w", err)
  }
- 
+
  m.mu.Lock()
  m.clusters[name] = clientset
  m.mu.Unlock()
- 
+
  fmt.Printf("✅ 集群 %s 已添加\n", name)
  return nil
 }
@@ -1223,22 +1223,22 @@ func (m *MultiClusterManager) AddCluster(name, kubeconfig string) error {
 func (m *MultiClusterManager) DeployToAllClusters(ctx context.Context, manifest string) map[string]error {
  m.mu.RLock()
  defer m.mu.RUnlock()
- 
+
  results := make(map[string]error)
  var wg sync.WaitGroup
  var mu sync.Mutex
- 
+
  for name, clientset := range m.clusters {
   wg.Add(1)
   go func(clusterName string, client *kubernetes.Clientset) {
    defer wg.Done()
-   
+
    err := m.deployToCluster(ctx, client, manifest)
-   
+
    mu.Lock()
    results[clusterName] = err
    mu.Unlock()
-   
+
    if err != nil {
     fmt.Printf("❌ 集群 %s 部署失败: %v\n", clusterName, err)
    } else {
@@ -1246,7 +1246,7 @@ func (m *MultiClusterManager) DeployToAllClusters(ctx context.Context, manifest 
    }
   }(name, clientset)
  }
- 
+
  wg.Wait()
  return results
 }
@@ -1255,24 +1255,24 @@ func (m *MultiClusterManager) DeployToAllClusters(ctx context.Context, manifest 
 func (m *MultiClusterManager) HealthCheckAll(ctx context.Context) map[string]ClusterHealth {
  m.mu.RLock()
  defer m.mu.RUnlock()
- 
+
  results := make(map[string]ClusterHealth)
  var wg sync.WaitGroup
  var mu sync.Mutex
- 
+
  for name, clientset := range m.clusters {
   wg.Add(1)
   go func(clusterName string, client *kubernetes.Clientset) {
    defer wg.Done()
-   
+
    health := m.checkClusterHealth(ctx, client)
-   
+
    mu.Lock()
    results[clusterName] = health
    mu.Unlock()
   }(name, clientset)
  }
- 
+
  wg.Wait()
  return results
 }
@@ -1283,7 +1283,7 @@ func (m *MultiClusterManager) checkClusterHealth(ctx context.Context, clientset 
   Healthy: true,
   Issues:  []string{},
  }
- 
+
  // 检查1: API Server可用性
  _, err := clientset.ServerVersion()
  if err != nil {
@@ -1291,7 +1291,7 @@ func (m *MultiClusterManager) checkClusterHealth(ctx context.Context, clientset 
   health.Issues = append(health.Issues, fmt.Sprintf("API Server不可用: %v", err))
   return health
  }
- 
+
  // 检查2: 节点健康
  nodes, err := clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
  if err != nil {
@@ -1299,7 +1299,7 @@ func (m *MultiClusterManager) checkClusterHealth(ctx context.Context, clientset 
   health.Issues = append(health.Issues, "无法获取节点列表")
   return health
  }
- 
+
  notReadyNodes := 0
  for _, node := range nodes.Items {
   for _, condition := range node.Status.Conditions {
@@ -1309,11 +1309,11 @@ func (m *MultiClusterManager) checkClusterHealth(ctx context.Context, clientset 
    }
   }
  }
- 
+
  if notReadyNodes > 0 {
   health.Issues = append(health.Issues, fmt.Sprintf("%d个节点未就绪", notReadyNodes))
  }
- 
+
  // 检查3: 系统Pod健康
  systemPods, err := clientset.CoreV1().Pods("kube-system").List(ctx, metav1.ListOptions{})
  if err != nil {
@@ -1321,25 +1321,25 @@ func (m *MultiClusterManager) checkClusterHealth(ctx context.Context, clientset 
  } else {
   crashLoopPods := 0
   for _, pod := range systemPods.Items {
-   if pod.Status.Phase == corev1.PodFailed || 
+   if pod.Status.Phase == corev1.PodFailed ||
       pod.Status.Phase == corev1.PodUnknown {
     crashLoopPods++
    }
   }
-  
+
   if crashLoopPods > 0 {
    health.Healthy = false
    health.Issues = append(health.Issues, fmt.Sprintf("%d个系统Pod异常", crashLoopPods))
   }
  }
- 
+
  // 检查4: 资源使用率
  // (可以集成Metrics Server获取资源使用情况)
- 
+
  health.TotalNodes = len(nodes.Items)
  health.ReadyNodes = len(nodes.Items) - notReadyNodes
  health.CheckTime = time.Now()
- 
+
  return health
 }
 ```
@@ -1358,39 +1358,39 @@ class FailoverManager:
     def __init__(self):
         self.mcm = MultiClusterManager()
         self.k8s_test = KubernetesAPITest()
-    
+
     def detect_and_failover(self):
         """检测故障并执行故障转移"""
         # 1. 健康检查所有集群
         health_status = self.mcm.health_check_all()
-        
+
         for cluster_name, health in health_status.items():
             if not health['healthy']:
                 print(f"⚠️ 集群 {cluster_name} 不健康: {health['issues']}")
-                
+
                 # 2. 识别受影响的服务
                 affected_services = self.identify_affected_services(cluster_name)
-                
+
                 # 3. 执行故障转移
                 for service in affected_services:
                     self.failover_service(service, cluster_name)
-    
+
     def failover_service(self, service_name, failed_cluster):
         """故障转移服务到健康集群"""
         print(f"🔄 开始故障转移: {service_name} from {failed_cluster}")
-        
+
         # 1. 选择目标集群
         target_cluster = self.select_failover_target(failed_cluster)
-        
+
         # 2. 获取服务配置
         service_config = self.get_service_config(service_name, failed_cluster)
-        
+
         # 3. 在目标集群部署
         self.deploy_to_cluster(service_config, target_cluster)
-        
+
         # 4. 更新DNS/负载均衡器
         self.update_traffic_routing(service_name, failed_cluster, target_cluster)
-        
+
         # 5. 验证服务可用性
         if self.verify_service_health(service_name, target_cluster):
             print(f"✅ 故障转移成功: {service_name} → {target_cluster}")
@@ -1487,7 +1487,7 @@ import (
  "encoding/json"
  "fmt"
  "log"
- 
+
  clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -1506,16 +1506,16 @@ func NewConfigManager(endpoints []string, prefix string) (*ConfigManager, error)
  if err != nil {
   return nil, err
  }
- 
+
  cm := &ConfigManager{
   etcdClient: cli,
   prefix:     prefix,
   callbacks:  make(map[string]func(string, string)),
  }
- 
+
  // 启动配置监听
  go cm.watchConfigs()
- 
+
  return cm, nil
 }
 
@@ -1526,11 +1526,11 @@ func (cm *ConfigManager) GetConfig(key string) (string, error) {
  if err != nil {
   return "", err
  }
- 
+
  if len(resp.Kvs) == 0 {
   return "", fmt.Errorf("配置不存在: %s", key)
  }
- 
+
  return string(resp.Kvs[0].Value), nil
 }
 
@@ -1551,16 +1551,16 @@ func (cm *ConfigManager) RegisterCallback(key string, callback func(string, stri
 func (cm *ConfigManager) watchConfigs() {
  ctx := context.Background()
  watchChan := cm.etcdClient.Watch(ctx, cm.prefix, clientv3.WithPrefix())
- 
+
  log.Printf("开始监听配置变更: %s", cm.prefix)
- 
+
  for watchResp := range watchChan {
   for _, event := range watchResp.Events {
    key := string(event.Kv.Key)
    value := string(event.Kv.Value)
-   
+
    log.Printf("配置变更: %s = %s", key, value)
-   
+
    // 触发回调
    for callbackKey, callback := range cm.callbacks {
     if key == cm.prefix+callbackKey {
@@ -1575,20 +1575,20 @@ func (cm *ConfigManager) watchConfigs() {
 func ExampleUsage() {
  // 创建配置管理器
  cm, _ := NewConfigManager([]string{"localhost:2379"}, "/myapp/config/")
- 
+
  // 注册配置变更回调
  cm.RegisterCallback("database.url", func(key, value string) {
   log.Printf("数据库连接更新: %s", value)
   // 重新连接数据库
   reconnectDatabase(value)
  })
- 
+
  cm.RegisterCallback("cache.ttl", func(key, value string) {
   log.Printf("缓存TTL更新: %s", value)
   // 更新缓存配置
   updateCacheTTL(value)
  })
- 
+
  // 获取配置
  dbUrl, _ := cm.GetConfig("database.url")
  log.Printf("当前数据库连接: %s", dbUrl)
@@ -1611,55 +1611,55 @@ class TestConfigHotReload(unittest.TestCase):
         self.etcd_test = EtcdAPITest()
         self.etcd_test.setUp()
         self.config_prefix = "/test/config/"
-    
+
     def test_config_watch_and_reload(self):
         """测试配置监听和热更新"""
         # 1. 设置初始配置
         key = self.config_prefix + "app.max_connections"
         initial_value = "100"
         self.etcd_test.test_put_key(key, initial_value)
-        
+
         # 2. 启动配置监听（模拟应用）
         watch_triggered = []
         def config_callback(event):
             watch_triggered.append(event.value.decode())
-        
+
         # 这里应该启动实际的watch，简化示例
-        
+
         # 3. 更新配置
         new_value = "200"
         self.etcd_test.test_put_key(key, new_value)
-        
+
         # 4. 等待回调触发
         time.sleep(1)
-        
+
         # 5. 验证配置已更新
         current_value = self.etcd_test.test_get_key(key)
         self.assertEqual(current_value, new_value)
-        
+
         # 6. 验证应用已收到通知
         # self.assertIn(new_value, watch_triggered)
-        
+
         print("✅ 配置热更新测试通过")
-    
+
     def test_config_rollback(self):
         """测试配置回滚"""
         key = self.config_prefix + "app.feature_flag"
-        
+
         # 1. 设置初始配置
         self.etcd_test.test_put_key(key, "enabled")
-        
+
         # 2. 更新配置
         self.etcd_test.test_put_key(key, "disabled")
-        
+
         # 3. 发现问题，回滚
         # （实际场景中，这会通过配置管理系统完成）
         self.etcd_test.test_put_key(key, "enabled")
-        
+
         # 4. 验证回滚成功
         current_value = self.etcd_test.test_get_key(key)
         self.assertEqual(current_value, "enabled")
-        
+
         print("✅ 配置回滚测试通过")
 ```
 
@@ -1764,7 +1764,7 @@ class TestConfigHotReload(unittest.TestCase):
 - [00_API测试完整梳理文档.md](./00_API测试完整梳理文档.md) - API测试指南
 - [03_API测试架构总览.md](./03_API测试架构总览.md) - 架构设计
 
-**最后更新**: 2025年10月23日  
+**最后更新**: 2025年10月23日
 **文档版本**: v1.0
 
 ---

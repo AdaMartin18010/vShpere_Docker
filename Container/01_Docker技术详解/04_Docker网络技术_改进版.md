@@ -1,9 +1,9 @@
 # Docker网络技术深度解析
 
-> **文档定位**: Docker网络技术完整指南，覆盖网络模式、CNM模型、跨主机互联、性能调优  
-> **技术版本**: Docker Engine 25.0, libnetwork 0.8, CNI v1.1.0  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [CNM Design][cnm-design], [CNI Spec v1.1][cni-spec], [VXLAN RFC 7348][vxlan-rfc]  
+> **文档定位**: Docker网络技术完整指南，覆盖网络模式、CNM模型、跨主机互联、性能调优
+> **技术版本**: Docker Engine 25.0, libnetwork 0.8, CNI v1.1.0
+> **最后更新**: 2025-10-21
+> **标准对齐**: [CNM Design][cnm-design], [CNI Spec v1.1][cni-spec], [VXLAN RFC 7348][vxlan-rfc]
 > **文档版本**: v2.0 (引用补充版)
 
 ---
@@ -1408,7 +1408,7 @@ Docker网络技术演进时间线[^docker-network-history]：
 
 ---
 
-**维护承诺**: 本文档每季度更新，确保与Docker最新版本保持一致。  
+**维护承诺**: 本文档每季度更新，确保与Docker最新版本保持一致。
 **下次计划更新**: 2026-01-21（Docker Engine 26.0发布后）
 
 **反馈渠道**: 如有问题或建议，请通过GitHub Issues提交。

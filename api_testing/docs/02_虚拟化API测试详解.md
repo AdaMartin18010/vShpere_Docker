@@ -88,7 +88,7 @@ API类型:
     - JSON格式
     - RESTful风格
     - 现代化、易用
-  
+
   SOAP API (vSphere Web Services):
     - 基于XML
     - WSDL定义
@@ -126,11 +126,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class vSphereClient:
     """vSphere REST API客户端"""
-    
+
     def __init__(self, vcenter_host: str, username: str, password: str, verify_ssl: bool = False):
         """
         初始化vSphere客户端
-        
+
         Args:
             vcenter_host: vCenter服务器地址
             username: 用户名 (如: administrator@vsphere.local)
@@ -145,13 +145,13 @@ class vSphereClient:
         self.verify_ssl = verify_ssl
         self.session_id: Optional[str] = None
         self.headers = {}
-    
+
     def create_session(self) -> bool:
         """创建vSphere会话"""
         url = f"{self.rest_url}/com/vmware/cis/session"
-        
+
         print(f"🔐 连接到vCenter: {self.vcenter_host}")
-        
+
         try:
             # 使用Basic Auth创建会话
             response = requests.post(
@@ -160,17 +160,17 @@ class vSphereClient:
                 verify=self.verify_ssl,
                 timeout=30
             )
-            
+
             if response.status_code == 201:
                 # 获取会话ID
                 self.session_id = response.json()['value']
-                
+
                 # 设置后续请求的Header
                 self.headers = {
                     'vmware-api-session-id': self.session_id,
                     'Content-Type': 'application/json'
                 }
-                
+
                 print(f"✅ 会话创建成功")
                 print(f"   Session ID: {self.session_id[:20]}...")
                 return True
@@ -178,21 +178,21 @@ class vSphereClient:
                 print(f"❌ 会话创建失败: {response.status_code}")
                 print(f"   {response.text}")
                 return False
-                
+
         except requests.exceptions.RequestException as e:
             print(f"❌ 连接错误: {e}")
             return False
-    
+
     def get_session_info(self) -> dict:
         """获取当前会话信息"""
         url = f"{self.rest_url}/com/vmware/cis/session"
-        
+
         response = requests.get(
             url,
             headers=self.headers,
             verify=self.verify_ssl
         )
-        
+
         if response.status_code == 200:
             session_info = response.json()['value']
             print(f"📊 会话信息:")
@@ -203,17 +203,17 @@ class vSphereClient:
         else:
             print(f"❌ 获取会话信息失败")
             return {}
-    
+
     def delete_session(self) -> bool:
         """删除会话（登出）"""
         url = f"{self.rest_url}/com/vmware/cis/session"
-        
+
         response = requests.delete(
             url,
             headers=self.headers,
             verify=self.verify_ssl
         )
-        
+
         if response.status_code == 204:
             print("✅ 会话已删除")
             self.session_id = None
@@ -231,14 +231,14 @@ if __name__ == "__main__":
         username="administrator@vsphere.local",
         password="your-password"
     )
-    
+
     # 创建会话
     if client.create_session():
         # 获取会话信息
         client.get_session_info()
-        
+
         # ... 执行其他API操作 ...
-        
+
         # 删除会话
         client.delete_session()
 ```
@@ -257,12 +257,12 @@ sequenceDiagram
     SSO-->>vCenter: 认证成功
     vCenter->>vCenter: 创建会话
     vCenter-->>Client: 201 Created {session_id}
-    
+
     Client->>API: GET /api/vcenter/vm (Session ID)
     API->>vCenter: 验证会话
     vCenter-->>API: 会话有效
     API-->>Client: 200 OK {vm_list}
-    
+
     Client->>vCenter: DELETE /rest/com/vmware/cis/session
     vCenter->>vCenter: 销毁会话
     vCenter-->>Client: 204 No Content
@@ -276,19 +276,19 @@ sequenceDiagram
 def list_vms(client: vSphereClient) -> list:
     """列出所有虚拟机"""
     url = f"{client.base_url}/vcenter/vm"
-    
+
     print("\n📋 获取虚拟机列表...")
-    
+
     response = requests.get(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 200:
         vms = response.json()
         print(f"✅ 找到 {len(vms)} 个虚拟机\n")
-        
+
         for vm in vms:
             print(f"虚拟机: {vm['name']}")
             print(f"  ID: {vm['vm']}")
@@ -296,7 +296,7 @@ def list_vms(client: vSphereClient) -> list:
             print(f"  CPU: {vm.get('cpu_count', 'N/A')} 核")
             print(f"  内存: {vm.get('memory_size_MiB', 'N/A')} MB")
             print()
-        
+
         return vms
     else:
         print(f"❌ 获取虚拟机列表失败: {response.status_code}")
@@ -309,18 +309,18 @@ def list_vms(client: vSphereClient) -> list:
 def get_vm_details(client: vSphereClient, vm_id: str) -> dict:
     """获取虚拟机详细信息"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}"
-    
+
     print(f"\n🔍 获取虚拟机详情: {vm_id}")
-    
+
     response = requests.get(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 200:
         vm_details = response.json()
-        
+
         print(f"✅ 虚拟机详情:")
         print(f"   名称: {vm_details.get('name')}")
         print(f"   电源状态: {vm_details.get('power_state')}")
@@ -328,15 +328,15 @@ def get_vm_details(client: vSphereClient, vm_id: str) -> dict:
         print(f"   内存: {vm_details.get('memory', {}).get('size_MiB')} MB")
         print(f"   Guest OS: {vm_details.get('guest_OS')}")
         print(f"   硬件版本: {vm_details.get('hardware', {}).get('version')}")
-        
+
         # 网络适配器
         if 'nics' in vm_details:
             print(f"   网卡数: {len(vm_details['nics'])}")
-        
+
         # 磁盘
         if 'disks' in vm_details:
             print(f"   磁盘数: {len(vm_details['disks'])}")
-        
+
         return vm_details
     else:
         print(f"❌ 获取虚拟机详情失败")
@@ -349,9 +349,9 @@ def get_vm_details(client: vSphereClient, vm_id: str) -> dict:
 def create_vm(client: vSphereClient, vm_name: str, datacenter: str = None) -> str:
     """创建新虚拟机"""
     url = f"{client.base_url}/vcenter/vm"
-    
+
     print(f"\n🔧 创建虚拟机: {vm_name}")
-    
+
     # 虚拟机配置
     vm_spec = {
         "spec": {
@@ -387,14 +387,14 @@ def create_vm(client: vSphereClient, vm_name: str, datacenter: str = None) -> st
             ]
         }
     }
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         json=vm_spec,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 201:
         vm_id = response.json()
         print(f"✅ 虚拟机创建成功")
@@ -412,15 +412,15 @@ def create_vm(client: vSphereClient, vm_name: str, datacenter: str = None) -> st
 def power_on_vm(client: vSphereClient, vm_id: str) -> bool:
     """启动虚拟机"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/power/start"
-    
+
     print(f"\n🚀 启动虚拟机: {vm_id}")
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 204:
         print("✅ 虚拟机启动成功")
         return True
@@ -431,15 +431,15 @@ def power_on_vm(client: vSphereClient, vm_id: str) -> bool:
 def power_off_vm(client: vSphereClient, vm_id: str) -> bool:
     """关闭虚拟机"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/power/stop"
-    
+
     print(f"\n⏹️  关闭虚拟机: {vm_id}")
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 204:
         print("✅ 虚拟机已关闭")
         return True
@@ -450,15 +450,15 @@ def power_off_vm(client: vSphereClient, vm_id: str) -> bool:
 def reset_vm(client: vSphereClient, vm_id: str) -> bool:
     """重启虚拟机（硬重启）"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/power/reset"
-    
+
     print(f"\n🔄 重启虚拟机: {vm_id}")
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 204:
         print("✅ 虚拟机重启成功")
         return True
@@ -473,9 +473,9 @@ def reset_vm(client: vSphereClient, vm_id: str) -> bool:
 def create_snapshot(client: vSphereClient, vm_id: str, name: str, description: str = "", memory: bool = True) -> str:
     """创建虚拟机快照"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/snapshot"
-    
+
     print(f"\n📸 创建快照: {name}")
-    
+
     snapshot_spec = {
         "spec": {
             "name": name,
@@ -484,14 +484,14 @@ def create_snapshot(client: vSphereClient, vm_id: str, name: str, description: s
             "quiesce": False   # 是否静默Guest OS
         }
     }
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         json=snapshot_spec,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 201:
         snapshot_id = response.json()
         print(f"✅ 快照创建成功")
@@ -504,23 +504,23 @@ def create_snapshot(client: vSphereClient, vm_id: str, name: str, description: s
 def list_snapshots(client: vSphereClient, vm_id: str) -> list:
     """列出虚拟机所有快照"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/snapshot"
-    
+
     print(f"\n📋 获取快照列表")
-    
+
     response = requests.get(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 200:
         snapshots = response.json()
         print(f"✅ 找到 {len(snapshots)} 个快照")
-        
+
         for snapshot in snapshots:
             print(f"  - {snapshot['name']} (ID: {snapshot['snapshot']})")
             print(f"    创建时间: {snapshot['create_time']}")
-        
+
         return snapshots
     else:
         print("❌ 获取快照列表失败")
@@ -529,15 +529,15 @@ def list_snapshots(client: vSphereClient, vm_id: str) -> list:
 def revert_snapshot(client: vSphereClient, vm_id: str, snapshot_id: str) -> bool:
     """恢复到指定快照"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/snapshot/{snapshot_id}?action=revert"
-    
+
     print(f"\n⏮️  恢复快照: {snapshot_id}")
-    
+
     response = requests.post(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 204:
         print("✅ 快照恢复成功")
         return True
@@ -548,15 +548,15 @@ def revert_snapshot(client: vSphereClient, vm_id: str, snapshot_id: str) -> bool
 def delete_snapshot(client: vSphereClient, vm_id: str, snapshot_id: str) -> bool:
     """删除快照"""
     url = f"{client.base_url}/vcenter/vm/{vm_id}/snapshot/{snapshot_id}"
-    
+
     print(f"\n🗑️  删除快照: {snapshot_id}")
-    
+
     response = requests.delete(
         url,
         headers=client.headers,
         verify=client.verify_sql
     )
-    
+
     if response.status_code == 204:
         print("✅ 快照删除成功")
         return True
@@ -573,19 +573,19 @@ def delete_snapshot(client: vSphereClient, vm_id: str, snapshot_id: str) -> bool
 def list_datastores(client: vSphereClient) -> list:
     """列出所有数据存储"""
     url = f"{client.base_url}/vcenter/datastore"
-    
+
     print("\n💾 获取数据存储列表...")
-    
+
     response = requests.get(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 200:
         datastores = response.json()
         print(f"✅ 找到 {len(datastores)} 个数据存储\n")
-        
+
         for ds in datastores:
             print(f"数据存储: {ds['name']}")
             print(f"  ID: {ds['datastore']}")
@@ -593,7 +593,7 @@ def list_datastores(client: vSphereClient) -> list:
             print(f"  容量: {ds.get('capacity', 0) / (1024**3):.2f} GB")
             print(f"  可用: {ds.get('free_space', 0) / (1024**3):.2f} GB")
             print()
-        
+
         return datastores
     else:
         print("❌ 获取数据存储列表失败")
@@ -606,25 +606,25 @@ def list_datastores(client: vSphereClient) -> list:
 def list_networks(client: vSphereClient) -> list:
     """列出所有网络"""
     url = f"{client.base_url}/vcenter/network"
-    
+
     print("\n🌐 获取网络列表...")
-    
+
     response = requests.get(
         url,
         headers=client.headers,
         verify=client.verify_ssl
     )
-    
+
     if response.status_code == 200:
         networks = response.json()
         print(f"✅ 找到 {len(networks)} 个网络\n")
-        
+
         for network in networks:
             print(f"网络: {network['name']}")
             print(f"  ID: {network['network']}")
             print(f"  类型: {network['type']}")
             print()
-        
+
         return networks
     else:
         print("❌ 获取网络列表失败")
@@ -649,17 +649,17 @@ libvirt架构:
     - Microsoft Hyper-V
     - VirtualBox
     - LXC (容器)
-  
+
   连接URI格式:
     本地:
       - qemu:///system (系统级QEMU)
       - qemu:///session (用户级QEMU)
-    
+
     远程:
       - qemu+ssh://user@host/system (SSH)
       - qemu+tcp://host:16509/system (TCP)
       - qemu+tls://host:16514/system (TLS)
-    
+
     其他:
       - xen:///system (Xen)
       - esx://vcenter.example.com/?no_verify=1 (VMware)
@@ -680,48 +680,48 @@ from xml.dom import minidom
 
 class LibvirtClient:
     """libvirt API客户端"""
-    
+
     def __init__(self, uri: str = 'qemu:///system'):
         """
         初始化libvirt客户端
-        
+
         Args:
             uri: 连接URI
         """
         self.uri = uri
         self.conn: Optional[libvirt.virConnect] = None
-    
+
     def connect(self) -> bool:
         """连接到libvirt"""
         print(f"🔗 连接到: {self.uri}")
-        
+
         try:
             self.conn = libvirt.open(self.uri)
-            
+
             if self.conn is None:
                 print("❌ 连接失败")
                 return False
-            
+
             print("✅ 连接成功")
             return True
-            
+
         except libvirt.libvirtError as e:
             print(f"❌ 连接错误: {e}")
             return False
-    
+
     def get_hypervisor_info(self) -> dict:
         """获取Hypervisor信息"""
         if not self.conn:
             return {}
-        
+
         print("\n📊 Hypervisor信息:")
-        
+
         # 基本信息
         print(f"  类型: {self.conn.getType()}")
         print(f"  版本: {self.conn.getVersion()}")
         print(f"  libvirt版本: {self.conn.getLibVersion()}")
         print(f"  主机名: {self.conn.getHostname()}")
-        
+
         # 节点信息
         nodeinfo = self.conn.getInfo()
         print(f"\n💻 节点信息:")
@@ -733,14 +733,14 @@ class LibvirtClient:
         print(f"  CPU Socket: {nodeinfo[5]}")
         print(f"  每Socket核数: {nodeinfo[6]}")
         print(f"  每核线程数: {nodeinfo[7]}")
-        
+
         return {
             'type': self.conn.getType(),
             'version': self.conn.getVersion(),
             'hostname': self.conn.getHostname(),
             'nodeinfo': nodeinfo
         }
-    
+
     def close(self):
         """关闭连接"""
         if self.conn:
@@ -757,19 +757,19 @@ def list_domains(client: LibvirtClient) -> list:
     """列出所有域"""
     if not client.conn:
         return []
-    
+
     print("\n📋 域列表:")
-    
+
     # 运行中的域
     running_domains = client.conn.listDomainsID()
     print(f"  运行中: {len(running_domains)} 个")
-    
+
     for dom_id in running_domains:
         try:
             dom = client.conn.lookupByID(dom_id)
             state, reason = dom.state()
             info = dom.info()
-            
+
             print(f"\n  虚拟机: {dom.name()}")
             print(f"    ID: {dom_id}")
             print(f"    UUID: {dom.UUIDString()}")
@@ -777,21 +777,21 @@ def list_domains(client: LibvirtClient) -> list:
             print(f"    CPU: {info[3]} 个")
             print(f"    内存: {info[1] / 1024:.0f} MB")
             print(f"    最大内存: {info[0] / 1024:.0f} MB")
-            
+
         except libvirt.libvirtError as e:
             print(f"    错误: {e}")
-    
+
     # 非活动域
     inactive_domains = client.conn.listDefinedDomains()
     print(f"\n  非活动: {len(inactive_domains)} 个")
-    
+
     for dom_name in inactive_domains:
         try:
             dom = client.conn.lookupByName(dom_name)
             print(f"  - {dom_name} (已定义)")
         except libvirt.libvirtError as e:
             print(f"    错误: {e}")
-    
+
     return running_domains + inactive_domains
 
 def get_state_name(state: int) -> str:
@@ -816,9 +816,9 @@ def create_domain(client: LibvirtClient, name: str, memory_mb: int = 1024, vcpus
     """创建新域"""
     if not client.conn:
         return False
-    
+
     print(f"\n🔧 创建域: {name}")
-    
+
     # XML定义
     xml_config = f"""
 <domain type='kvm'>
@@ -851,14 +851,14 @@ def create_domain(client: LibvirtClient, name: str, memory_mb: int = 1024, vcpus
   </devices>
 </domain>
     """
-    
+
     try:
         # 定义域
         dom = client.conn.defineXML(xml_config)
         print(f"✅ 域定义成功: {dom.name()}")
         print(f"   UUID: {dom.UUIDString()}")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 创建域失败: {e}")
         return False
@@ -871,20 +871,20 @@ def start_domain(client: LibvirtClient, name: str) -> bool:
     """启动域"""
     if not client.conn:
         return False
-    
+
     print(f"\n🚀 启动域: {name}")
-    
+
     try:
         dom = client.conn.lookupByName(name)
-        
+
         if dom.isActive():
             print("⚠️  域已经在运行")
             return True
-        
+
         dom.create()
         print("✅ 域启动成功")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 启动失败: {e}")
         return False
@@ -893,20 +893,20 @@ def shutdown_domain(client: LibvirtClient, name: str) -> bool:
     """关闭域（优雅关机）"""
     if not client.conn:
         return False
-    
+
     print(f"\n⏹️  关闭域: {name}")
-    
+
     try:
         dom = client.conn.lookupByName(name)
-        
+
         if not dom.isActive():
             print("⚠️  域已经关闭")
             return True
-        
+
         dom.shutdown()
         print("✅ 关机信号已发送")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 关闭失败: {e}")
         return False
@@ -915,20 +915,20 @@ def destroy_domain(client: LibvirtClient, name: str) -> bool:
     """销毁域（强制关机）"""
     if not client.conn:
         return False
-    
+
     print(f"\n💥 销毁域: {name}")
-    
+
     try:
         dom = client.conn.lookupByName(name)
-        
+
         if not dom.isActive():
             print("⚠️  域未运行")
             return True
-        
+
         dom.destroy()
         print("✅ 域已销毁")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 销毁失败: {e}")
         return False
@@ -937,15 +937,15 @@ def suspend_domain(client: LibvirtClient, name: str) -> bool:
     """挂起域"""
     if not client.conn:
         return False
-    
+
     print(f"\n⏸️  挂起域: {name}")
-    
+
     try:
         dom = client.conn.lookupByName(name)
         dom.suspend()
         print("✅ 域已挂起")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 挂起失败: {e}")
         return False
@@ -954,15 +954,15 @@ def resume_domain(client: LibvirtClient, name: str) -> bool:
     """恢复域"""
     if not client.conn:
         return False
-    
+
     print(f"\n▶️  恢复域: {name}")
-    
+
     try:
         dom = client.conn.lookupByName(name)
         dom.resume()
         print("✅ 域已恢复")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 恢复失败: {e}")
         return False
@@ -975,12 +975,12 @@ def create_domain_snapshot(client: LibvirtClient, domain_name: str, snapshot_nam
     """创建域快照"""
     if not client.conn:
         return False
-    
+
     print(f"\n📸 创建快照: {snapshot_name}")
-    
+
     try:
         dom = client.conn.lookupByName(domain_name)
-        
+
         # 快照XML定义
         snapshot_xml = f"""
 <domainsnapshot>
@@ -988,15 +988,15 @@ def create_domain_snapshot(client: LibvirtClient, domain_name: str, snapshot_nam
   <description>Snapshot created by API test</description>
 </domainsnapshot>
         """
-        
+
         snapshot = dom.snapshotCreateXML(
             snapshot_xml,
             libvirt.VIR_DOMAIN_SNAPSHOT_CREATE_ATOMIC
         )
-        
+
         print(f"✅ 快照创建成功: {snapshot.getName()}")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 创建快照失败: {e}")
         return False
@@ -1005,29 +1005,29 @@ def list_domain_snapshots(client: LibvirtClient, domain_name: str) -> list:
     """列出域的所有快照"""
     if not client.conn:
         return []
-    
+
     print(f"\n📋 快照列表 ({domain_name}):")
-    
+
     try:
         dom = client.conn.lookupByName(domain_name)
         snapshot_names = dom.snapshotListNames()
-        
+
         print(f"  找到 {len(snapshot_names)} 个快照")
-        
+
         for snap_name in snapshot_names:
             snapshot = dom.snapshotLookupByName(snap_name)
             xml_desc = snapshot.getXMLDesc()
-            
+
             # 解析XML获取详细信息
             dom_xml = minidom.parseString(xml_desc)
             creation_time = dom_xml.getElementsByTagName('creationTime')
-            
+
             print(f"  - {snap_name}")
             if creation_time:
                 print(f"    创建时间: {creation_time[0].firstChild.data}")
-        
+
         return snapshot_names
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 获取快照列表失败: {e}")
         return []
@@ -1036,18 +1036,18 @@ def revert_domain_snapshot(client: LibvirtClient, domain_name: str, snapshot_nam
     """恢复到指定快照"""
     if not client.conn:
         return False
-    
+
     print(f"\n⏮️  恢复快照: {snapshot_name}")
-    
+
     try:
         dom = client.conn.lookupByName(domain_name)
         snapshot = dom.snapshotLookupByName(snapshot_name)
-        
+
         dom.revertToSnapshot(snapshot)
-        
+
         print("✅ 快照恢复成功")
         return True
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 恢复快照失败: {e}")
         return False
@@ -1062,32 +1062,32 @@ def list_storage_pools(client: LibvirtClient) -> list:
     """列出所有存储池"""
     if not client.conn:
         return []
-    
+
     print("\n💾 存储池列表:")
-    
+
     try:
         # 活动存储池
         active_pools = client.conn.listStoragePools()
         print(f"  活动: {len(active_pools)} 个")
-        
+
         for pool_name in active_pools:
             pool = client.conn.storagePoolLookupByName(pool_name)
             info = pool.info()
-            
+
             print(f"\n  存储池: {pool_name}")
             print(f"    状态: {'活动' if info[0] == libvirt.VIR_STORAGE_POOL_RUNNING else '非活动'}")
             print(f"    容量: {info[1] / (1024**3):.2f} GB")
             print(f"    已分配: {info[2] / (1024**3):.2f} GB")
             print(f"    可用: {info[3] / (1024**3):.2f} GB")
-        
+
         # 非活动存储池
         inactive_pools = client.conn.listDefinedStoragePools()
         print(f"\n  非活动: {len(inactive_pools)} 个")
         for pool_name in inactive_pools:
             print(f"  - {pool_name}")
-        
+
         return active_pools + inactive_pools
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 获取存储池列表失败: {e}")
         return []
@@ -1100,30 +1100,30 @@ def list_networks(client: LibvirtClient) -> list:
     """列出所有网络"""
     if not client.conn:
         return []
-    
+
     print("\n🌐 网络列表:")
-    
+
     try:
         # 活动网络
         active_networks = client.conn.listNetworks()
         print(f"  活动: {len(active_networks)} 个")
-        
+
         for net_name in active_networks:
             network = client.conn.networkLookupByName(net_name)
-            
+
             print(f"\n  网络: {net_name}")
             print(f"    UUID: {network.UUIDString()}")
             print(f"    自动启动: {'是' if network.autostart() else '否'}")
             print(f"    持久化: {'是' if network.isPersistent() else '否'}")
-        
+
         # 非活动网络
         inactive_networks = client.conn.listDefinedNetworks()
         print(f"\n  非活动: {len(inactive_networks)} 个")
         for net_name in inactive_networks:
             print(f"  - {net_name}")
-        
+
         return active_networks + inactive_networks
-        
+
     except libvirt.libvirtError as e:
         print(f"❌ 获取网络列表失败: {e}")
         return []
@@ -1144,7 +1144,7 @@ QMP (QEMU Machine Protocol):
     - 设备热插拔
     - 快照管理
     - 迁移控制
-  
+
   连接方式:
     Unix Socket: /var/run/qemu-server/<vmid>.qmp
     TCP: qemu -qmp tcp:localhost:4444,server,nowait
@@ -1161,7 +1161,7 @@ def qmp_command(sock, command: str, arguments: dict = None):
     cmd = {"execute": command}
     if arguments:
         cmd["arguments"] = arguments
-    
+
     sock.sendall((json.dumps(cmd) + '\n').encode())
     response = sock.recv(4096)
     return json.loads(response)
@@ -1197,30 +1197,30 @@ sock.close()
 def deploy_test_environment(client, base_template: str, count: int = 3):
     """部署测试环境"""
     print(f"🚀 部署测试环境 ({count}个虚拟机)...")
-    
+
     vms = []
     for i in range(count):
         vm_name = f"test-vm-{i+1:02d}"
-        
+
         # 1. 克隆模板虚拟机
         vm_id = clone_vm(client, base_template, vm_name)
-        
+
         # 2. 自定义配置
         configure_vm(client, vm_id, {
             'cpu': 2,
             'memory': 2048,
             'network': 'test-network'
         })
-        
+
         # 3. 启动虚拟机
         power_on_vm(client, vm_id)
-        
+
         # 4. 等待就绪
         wait_for_vm_ready(client, vm_id)
-        
+
         vms.append(vm_id)
         print(f"✅ {vm_name} 部署完成")
-    
+
     print(f"\n✅ 测试环境部署完成 ({count}个虚拟机)")
     return vms
 ```
@@ -1233,21 +1233,21 @@ def deploy_test_environment(client, base_template: str, count: int = 3):
 def backup_vms(client, vm_list: list):
     """批量备份虚拟机"""
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    
+
     print(f"📸 开始备份 ({len(vm_list)}个虚拟机)...")
-    
+
     for vm_id in vm_list:
         snapshot_name = f"backup_{timestamp}"
-        
+
         # 创建快照
         create_snapshot(client, vm_id, snapshot_name, memory=True)
-        
+
         # 导出到备份存储
-        export_snapshot(client, vm_id, snapshot_name, 
+        export_snapshot(client, vm_id, snapshot_name,
                        f"/backup/{vm_id}_{timestamp}")
-        
+
         print(f"✅ {vm_id} 备份完成")
-    
+
     print("\n✅ 所有虚拟机备份完成")
 ```
 
@@ -1259,14 +1259,14 @@ def backup_vms(client, vm_list: list):
 def monitor_vm_resources(client, vm_id: str, duration: int = 60):
     """监控虚拟机资源使用"""
     print(f"📊 监控虚拟机: {vm_id} ({duration}秒)...")
-    
+
     metrics = []
     interval = 5  # 5秒采样一次
-    
+
     for i in range(duration // interval):
         # 获取资源使用情况
         stats = get_vm_stats(client, vm_id)
-        
+
         metrics.append({
             'timestamp': datetime.now(),
             'cpu_usage': stats['cpu_usage'],
@@ -1274,15 +1274,15 @@ def monitor_vm_resources(client, vm_id: str, duration: int = 60):
             'disk_io': stats['disk_io'],
             'network_io': stats['network_io']
         })
-        
+
         # 显示实时数据
         print(f"\r  CPU: {stats['cpu_usage']:.1f}% | "
               f"内存: {stats['memory_usage']:.1f}% | "
               f"磁盘: {stats['disk_io']} MB/s | "
               f"网络: {stats['network_io']} MB/s", end='')
-        
+
         time.sleep(interval)
-    
+
     print("\n✅ 监控完成")
     return metrics
 ```

@@ -215,7 +215,7 @@ Istiod是Istio的**单体控制平面**，整合了之前的Pilot、Citadel、Ga
      - 维护服务注册表
      - 生成Envoy配置
      - 推送xDS配置到数据平面
-   
+
    xDS API:
      - LDS (Listener Discovery Service): 监听器配置
      - RDS (Route Discovery Service): 路由配置
@@ -230,7 +230,7 @@ Istiod是Istio的**单体控制平面**，整合了之前的Pilot、Citadel、Ga
      - 管理工作负载身份 (SPIFFE)
      - 自动证书轮换
      - 支持外部CA集成
-   
+
    证书生命周期:
      - 生成工作负载证书
      - 默认有效期: 24小时
@@ -243,7 +243,7 @@ Istiod是Istio的**单体控制平面**，整合了之前的Pilot、Citadel、Ga
      - 处理Istio CRDs
      - 配置分发
      - 配置转换
-   
+
    CRD类型:
      - VirtualService
      - DestinationRule
@@ -829,7 +829,7 @@ metadata:
   name: istio-control-plane
 spec:
   profile: default
-  
+
   # 全局配置
   meshConfig:
     accessLogFile: /dev/stdout
@@ -842,11 +842,11 @@ spec:
       proxyMetadata:
         ISTIO_META_DNS_CAPTURE: "true"
         ISTIO_META_DNS_AUTO_ALLOCATE: "true"
-  
+
   # Hub和Tag配置
   hub: docker.io/istio
   tag: 1.21.0
-  
+
   # 组件配置
   components:
     # Pilot (Istiod)
@@ -874,7 +874,7 @@ spec:
         env:
         - name: PILOT_ENABLE_WORKLOAD_ENTRY_AUTO_REGISTRATION
           value: "true"
-    
+
     # Ingress Gateway
     ingressGateways:
     - name: istio-ingressgateway
@@ -918,7 +918,7 @@ spec:
           - name: tls
             port: 15443
             targetPort: 15443
-    
+
     # Egress Gateway (可选)
     egressGateways:
     - name: istio-egressgateway
@@ -931,14 +931,14 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-  
+
   # Values配置（额外配置）
   values:
     global:
       # 日志级别
       logging:
         level: "default:info"
-      
+
       # Proxy配置
       proxy:
         resources:
@@ -950,7 +950,7 @@ spec:
             memory: 1024Mi
         logLevel: warning
         componentLogLevel: "misc:error"
-        
+
         # Envoy访问日志格式
         accessLogFormat: |
           [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%"
@@ -960,7 +960,7 @@ spec:
           "%UPSTREAM_HOST%" %UPSTREAM_CLUSTER% %UPSTREAM_LOCAL_ADDRESS%
           %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS%
           %REQUESTED_SERVER_NAME% %ROUTE_NAME%
-      
+
       # 跟踪配置
       tracer:
         zipkin:
@@ -972,20 +972,20 @@ spec:
           maxNumberOfAttributes: 200
           maxNumberOfAnnotations: 200
           maxNumberOfMessageEvents: 200
-    
+
     pilot:
       # Pilot配置
       enableProtocolSniffingForOutbound: true
       enableProtocolSniffingForInbound: true
       traceSampling: 1.0  # 100% 采样 (生产环境建议1-5%)
-    
+
     gateways:
       istio-ingressgateway:
         # Ingress Gateway配置
         type: LoadBalancer
         loadBalancerIP: ""
         externalTrafficPolicy: Local
-        
+
         # 节点端口（NodePort模式）
         # nodePort:
         #   http2: 31380
@@ -1212,7 +1212,7 @@ spec:
     - destination:
         host: reviews
         subset: v2
-  
+
   # 规则2：如果Header包含x-version=v3，路由到v3
   - match:
     - headers:
@@ -1222,7 +1222,7 @@ spec:
     - destination:
         host: reviews
         subset: v3
-  
+
   # 默认规则：其他所有流量路由到v1
   - route:
     - destination:
@@ -1251,7 +1251,7 @@ spec:
         host: api-v1
         port:
           number: 8080
-  
+
   # /api/v2/* 路由到v2服务
   - match:
     - uri:
@@ -1261,7 +1261,7 @@ spec:
         host: api-v2
         port:
           number: 8080
-  
+
   # /admin/* 路由到admin服务
   - match:
     - uri:
@@ -1413,7 +1413,7 @@ spec:
       # simple: ROUND_ROBIN  # 轮询（默认）
       # simple: RANDOM  # 随机
       # simple: PASSTHROUGH  # 直通
-      
+
       # 一致性哈希
       # consistentHash:
       #   httpHeaderName: x-user-id  # 基于Header哈希
@@ -1569,7 +1569,7 @@ spec:
       credentialName: bookinfo-credential  # Kubernetes Secret名称
     hosts:
     - "bookinfo.example.com"
-  
+
   # HTTP重定向到HTTPS
   - port:
       number: 80
@@ -1939,7 +1939,7 @@ spec:
     - destination:
         host: reviews
         subset: v2
-  
+
   # 控制组：老用户使用v1
   - match:
     - headers:
@@ -1949,7 +1949,7 @@ spec:
     - destination:
         host: reviews
         subset: v1
-  
+
   # 默认：随机分配
   - route:
     - destination:
@@ -1981,7 +1981,7 @@ Istio提供了全面的安全功能，包括服务间通信加密、身份认证
 
 SPIFFE ID格式:
   spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>
-  
+
   示例:
   spiffe://cluster.local/ns/default/sa/productpage
 
@@ -2072,7 +2072,7 @@ STRICT (严格):
   - 只接受mTLS连接
   - 拒绝明文连接
   - 生产环境推荐
-  
+
 PERMISSIVE (宽松):
   - 同时接受mTLS和明文
   - 用于迁移阶段
@@ -2129,13 +2129,13 @@ spec:
     jwksUri: "https://www.googleapis.com/oauth2/v3/certs"
     audiences:
     - "api.example.com"
-  
+
   # Issuer 2: Auth0
   - issuer: "https://dev-example.auth0.com/"
     jwksUri: "https://dev-example.auth0.com/.well-known/jwks.json"
     audiences:
     - "https://api.example.com"
-  
+
   # Issuer 3: 内部Keycloak
   - issuer: "https://keycloak.internal.com/auth/realms/myrealm"
     jwksUri: "https://keycloak.internal.com/auth/realms/myrealm/protocol/openid-connect/certs"
@@ -2202,7 +2202,7 @@ spec:
   - when:
     - key: request.auth.claims[role]
       values: ["admin"]
-  
+
   # 规则2: 普通用户只能GET
   - when:
     - key: request.auth.claims[role]
@@ -2210,7 +2210,7 @@ spec:
     to:
     - operation:
         methods: ["GET"]
-  
+
   # 规则3: 特定用户访问自己的资源
   - when:
     - key: request.auth.claims[sub]
@@ -2266,7 +2266,7 @@ spec:
   - to:
     - operation:
         methods: ["DELETE"]
-  
+
   # 拒绝特定路径
   - to:
     - operation:
@@ -2439,18 +2439,18 @@ rate(istio_requests_total[5m])
 sum(rate(istio_requests_total[5m])) by (destination_service)
 
 # P99延迟
-histogram_quantile(0.99, 
+histogram_quantile(0.99,
   sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le, destination_service)
 )
 
 # 错误率
-sum(rate(istio_requests_total{response_code=~"5.*"}[5m])) by (destination_service) 
-/ 
+sum(rate(istio_requests_total{response_code=~"5.*"}[5m])) by (destination_service)
+/
 sum(rate(istio_requests_total[5m])) by (destination_service)
 
 # mTLS使用率
-sum(rate(istio_requests_total{connection_security_policy="mutual_tls"}[5m])) 
-/ 
+sum(rate(istio_requests_total{connection_security_policy="mutual_tls"}[5m]))
+/
 sum(rate(istio_requests_total[5m]))
 ```
 
@@ -2509,12 +2509,12 @@ import requests
 def call_service(url):
     # 从incoming request获取tracing headers
     tracing_headers = {}
-    for header in ['x-request-id', 'x-b3-traceid', 'x-b3-spanid', 
+    for header in ['x-request-id', 'x-b3-traceid', 'x-b3-spanid',
                    'x-b3-parentspanid', 'x-b3-sampled']:
         value = request.headers.get(header)
         if value:
             tracing_headers[header] = value
-    
+
     # 传播到下游服务
     response = requests.get(url, headers=tracing_headers)
     return response
@@ -2691,12 +2691,12 @@ Layer 4 (ztunnel):
   - 提供mTLS加密
   - 实现服务身份
   - 基本的可观测性 (Metrics)
-  
+
   优点:
     - 资源开销最小
     - 延迟最低
     - 自动mTLS
-  
+
   限制:
     - 仅L4功能
     - 无法实现复杂路由
@@ -2707,12 +2707,12 @@ Layer 7 (waypoint):
   - 处理L7流量 (HTTP/gRPC)
   - 高级路由策略
   - 完整的Istio功能
-  
+
   优点:
     - 完整L7功能
     - 按需启用
     - 资源共享
-  
+
   特点:
     - 可选组件
     - 只在需要L7功能时部署
@@ -2968,7 +2968,7 @@ spec:
           limits:
             cpu: 2000m     # 保留burst能力
             memory: 1024Mi
-        
+
         # 减少并发连接数
         concurrency: 2     # 默认为0(自动检测)，可设置为CPU核数
 ```
@@ -2990,7 +2990,7 @@ spec:
           limits:
             cpu: 4000m
             memory: 4096Mi
-        
+
         # HPA配置
         hpaSpec:
           minReplicas: 2
@@ -3002,7 +3002,7 @@ spec:
               target:
                 type: Utilization
                 averageUtilization: 80
-        
+
         # 环境变量优化
         env:
         - name: PILOT_PUSH_THROTTLE
@@ -3045,15 +3045,15 @@ spec:
   meshConfig:
     # 禁用访问日志（使用Telemetry API按需启用）
     accessLogFile: ""
-    
+
     # 降低追踪采样率
     defaultConfig:
       tracing:
         sampling: 1.0  # 生产环境改为1-5%
-    
+
     # 禁用协议自动检测（如果明确知道协议）
     enableAutoMtls: true  # 保持启用
-    
+
   components:
     pilot:
       k8s:
@@ -3107,7 +3107,7 @@ spec:
       # consistentHash:
       #   httpHeaderName: x-user-id
       #   minimumRingSize: 1024
-    
+
     # 异常检测优化
     outlierDetection:
       consecutive5xxErrors: 5
@@ -3299,8 +3299,35 @@ Istio发展趋势 (2025+):
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
-**作者**: vSphere & Container Technology Team  
-**字数**: 约16,000字  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
+**作者**: vSphere & Container Technology Team
+**字数**: 约16,000字
 **代码示例**: 60+个
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [服务网格概述与架构](./01_服务网格概述与架构.md) - 服务网格概述与架构
+- [Linkerd轻量级服务网格](./03_Linkerd轻量级服务网格.md) - Linkerd轻量级服务网格
+- [服务网格安全](./04_服务网格安全.md) - 服务网格安全
+- [流量管理与灰度发布](./05_流量管理与灰度发布.md) - 流量管理与灰度发布
+- [可观测性与监控](./06_可观测性与监控.md) - 可观测性与监控
+- [多集群服务网格](./07_多集群服务网格.md) - 多集群服务网格
+- [服务网格性能优化与故障排查](./08_服务网格性能优化与故障排查.md) - 性能优化与故障排查
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [eBPF网络技术](../16_eBPF技术详解/02_eBPF网络技术.md) - eBPF网络技术
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

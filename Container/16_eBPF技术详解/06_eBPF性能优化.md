@@ -30,6 +30,9 @@
   - [性能测试](#性能测试)
   - [最佳实践](#最佳实践)
   - [参考资料](#参考资料)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -69,17 +72,17 @@
      ✅ 在内核态过滤
      ✅ 在内核态聚合
      ✅ 减少用户态数据传输
-  
+
   2. 选择正确的数据结构
      ✅ Hash vs Array
      ✅ Per-CPU vs 共享
      ✅ LRU vs 固定大小
-  
+
   3. 避免不必要的操作
      ✅ 减少Map查找
      ✅ 减少helper调用
      ✅ 减少内存拷贝
-  
+
   4. 使用高效的算法
      ✅ 位操作代替除法
      ✅ 循环展开
@@ -99,17 +102,17 @@
     测量: perf, top
     目标: <2% CPU
     警戒: >5% CPU
-  
+
   内存使用:
     测量: /proc/meminfo, bpftool
     目标: <200MB
     警戒: >500MB
-  
+
   事件处理:
     吞吐量: 事件/秒
     丢失率: <0.1%
     延迟: P50/P95/P99
-  
+
   Map操作:
     查找延迟: <100ns
     更新延迟: <200ns
@@ -132,10 +135,10 @@ int trace_tcp_send(struct pt_regs *ctx)
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u32 pid = pid_tgid >> 32;
     u32 tid = pid_tgid & 0xFFFFFFFF;
-    
+
     // 重复调用
     struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-    
+
     // 多次Map查找
     u64 *count = bpf_map_lookup_elem(&stats, &pid);
     if (count) {
@@ -144,13 +147,13 @@ int trace_tcp_send(struct pt_regs *ctx)
         u64 init_count = 1;
         bpf_map_update_elem(&stats, &pid, &init_count, BPF_ANY);
     }
-    
+
     // 再次查找相同key
     u64 *bytes = bpf_map_lookup_elem(&bytes_map, &pid);
     if (bytes) {
         (*bytes) += PT_REGS_PARM3(ctx);
     }
-    
+
     return 0;
 }
 ```
@@ -164,13 +167,13 @@ int trace_tcp_send_optimized(struct pt_regs *ctx)
 {
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u32 pid = pid_tgid >> 32;
-    
+
     // 使用结构体减少Map查找
     struct stats_t {
         u64 count;
         u64 bytes;
     };
-    
+
     struct stats_t *stats = bpf_map_lookup_elem(&combined_stats, &pid);
     if (stats) {
         // 一次查找，两次更新
@@ -183,7 +186,7 @@ int trace_tcp_send_optimized(struct pt_regs *ctx)
         };
         bpf_map_update_elem(&combined_stats, &pid, &init_stats, BPF_NOEXIST);
     }
-    
+
     return 0;
 }
 ```
@@ -200,13 +203,13 @@ int trace_read(struct pt_regs *ctx)
 {
     char buf[MAX_BUFSIZE];
     char *user_buf = (char *)PT_REGS_PARM2(ctx);
-    
+
     // 危险: 可能无法通过验证器
     for (int i = 0; i < MAX_BUFSIZE; i++) {
         bpf_probe_read(&buf[i], 1, user_buf + i);
         if (buf[i] == '\0') break;
     }
-    
+
     return 0;
 }
 
@@ -216,16 +219,16 @@ int trace_read_optimized(struct pt_regs *ctx)
 {
     char buf[MAX_BUFSIZE];
     char *user_buf = (char *)PT_REGS_PARM2(ctx);
-    
+
     // 使用#pragma unroll展开循环
     #pragma unroll
     for (int i = 0; i < 16; i++) {  // 固定小循环
         bpf_probe_read(&buf[i * 16], 16, user_buf + i * 16);
     }
-    
+
     // 或者直接一次读取
     bpf_probe_read_user(buf, sizeof(buf), user_buf);
-    
+
     return 0;
 }
 ```
@@ -251,14 +254,14 @@ int trace_tcp(struct pt_regs *ctx)
 {
     char comm[16];
     bpf_get_current_comm(&comm, sizeof(comm));
-    
+
     // 使用内联函数
     if (!is_interesting_comm(comm))
         return 0;  // 提前返回
-    
+
     u64 ts = get_time_ns();
     // ... 处理逻辑
-    
+
     return 0;
 }
 ```
@@ -271,11 +274,11 @@ SEC("kprobe/example")
 int example_slow(struct pt_regs *ctx)
 {
     u64 value = PT_REGS_PARM1(ctx);
-    
+
     // 除法很慢
     u64 result = value / 1000;
     u64 remainder = value % 1000;
-    
+
     return 0;
 }
 
@@ -284,14 +287,14 @@ SEC("kprobe/example")
 int example_fast(struct pt_regs *ctx)
 {
     u64 value = PT_REGS_PARM1(ctx);
-    
+
     // 位移代替2的幂次除法
     u64 result = value >> 10;  // value / 1024
-    
+
     // 乘法代替除法 (如果可能)
     // value / 1000 ≈ (value * 1049) >> 20
     u64 approx = (value * 1049) >> 20;
-    
+
     return 0;
 }
 
@@ -300,21 +303,21 @@ SEC("kprobe/tcp_sendmsg")
 int trace_tcp_optimized(struct pt_regs *ctx)
 {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    
+
     // 快速过滤
     if (pid < 1000)  // 系统进程
         return 0;
-    
+
     char comm[16];
     bpf_get_current_comm(&comm, sizeof(comm));
-    
+
     // 提前检查
     if (comm[0] != 'n')  // 不是nginx
         return 0;
-    
+
     // 只有必要时才做复杂计算
     // ... 处理逻辑
-    
+
     return 0;
 }
 ```
@@ -331,24 +334,24 @@ Map类型性能对比:
     查找: O(1) 平均, O(n) 最坏
     适用: 动态key, 不可预测大小
     内存: key数量 * (key_size + value_size + 开销)
-  
+
   BPF_MAP_TYPE_ARRAY:
     查找: O(1) 确定
     适用: 固定大小, 连续索引
     内存: max_entries * value_size
     优势: 最快，最低开销
-  
+
   BPF_MAP_TYPE_PERCPU_HASH:
     查找: O(1) 无锁
     适用: 高并发写入
     内存: CPU数 * hash内存
-  
+
   BPF_MAP_TYPE_PERCPU_ARRAY:
     查找: O(1) 无锁
     适用: 高并发统计
     内存: CPU数 * array内存
     优势: 最快的统计聚合
-  
+
   BPF_MAP_TYPE_LRU_HASH:
     查找: O(1)
     适用: 固定内存，自动淘汰
@@ -427,14 +430,14 @@ int trace_tcp(struct pt_regs *ctx)
 {
     u32 key = 0;
     struct stats_t *stats;
-    
+
     // 每个CPU独立，无锁
     stats = bpf_map_lookup_elem(&percpu_stats, &key);
     if (stats) {
         stats->packets++;
         stats->bytes += PT_REGS_PARM3(ctx);
     }
-    
+
     return 0;
 }
 
@@ -444,9 +447,9 @@ void read_percpu_stats() {
     struct stats_t values[nr_cpus];
     struct stats_t total = {0};
     u32 key = 0;
-    
+
     bpf_map_lookup_elem(fd, &key, values);
-    
+
     for (int i = 0; i < nr_cpus; i++) {
         total.packets += values[i].packets;
         total.bytes += values[i].bytes;
@@ -473,10 +476,10 @@ int trace_connect(struct pt_regs *ctx)
         .timestamp = bpf_ktime_get_ns(),
         // ... 其他字段
     };
-    
+
     // 自动淘汰最久未使用的entry
     bpf_map_update_elem(&connections, &pid, &info, BPF_ANY);
-    
+
     return 0;
 }
 ```
@@ -495,7 +498,7 @@ int trace_connect(struct pt_regs *ctx)
     ✅ 更好的局部性
     ✅ 无需per-CPU buffer
     ✅ 动态大小调整
-  
+
   Perf Buffer (传统):
     ✅ 更广泛支持
     ❌ per-CPU buffer (内存多)
@@ -521,20 +524,20 @@ SEC("kprobe/tcp_sendmsg")
 int trace_tcp(struct pt_regs *ctx)
 {
     struct event_t *event;
-    
+
     // Reserve space
     event = bpf_ringbuf_reserve(&events, sizeof(*event), 0);
     if (!event)
         return 0;
-    
+
     // 填充数据
     event->pid = bpf_get_current_pid_tgid() >> 32;
     event->bytes = PT_REGS_PARM3(ctx);
     bpf_get_current_comm(&event->comm, sizeof(event->comm));
-    
+
     // Submit
     bpf_ringbuf_submit(event, 0);
-    
+
     return 0;
 }
 ```
@@ -571,19 +574,19 @@ int trace_tcp_batched(struct pt_regs *ctx)
     struct batch_t *batch = bpf_map_lookup_elem(&batch, &key);
     if (!batch)
         return 0;
-    
+
     // 添加到batch
     if (batch->count < 100) {
         batch->events[batch->count++] = (struct event_t){...};
     }
-    
+
     // 达到阈值时发送
     if (batch->count >= 100) {
-        bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, 
+        bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU,
                               batch, sizeof(*batch));
         batch->count = 0;
     }
-    
+
     return 0;
 }
 ```
@@ -608,28 +611,28 @@ SEC("kprobe/tcp_sendmsg")
 int trace_filtered(struct pt_regs *ctx)
 {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    
+
     // 过滤1: 只关注特定PID
     if (pid < 1000)
         return 0;
-    
+
     char comm[16];
     bpf_get_current_comm(&comm, sizeof(comm));
-    
+
     // 过滤2: 只关注特定进程
     if (comm[0] != 'n' || comm[1] != 'g')  // nginx
         return 0;
-    
+
     size_t bytes = PT_REGS_PARM3(ctx);
-    
+
     // 过滤3: 只关注大包
     if (bytes < 1024)
         return 0;
-    
+
     // 只有通过所有过滤器才发送
     struct event_t event = {...};
     bpf_ringbuf_output(&events, &event, sizeof(event), 0);
-    
+
     return 0;
 }
 
@@ -681,11 +684,11 @@ SEC("tracepoint/syscalls/sys_enter_read")
 int trace_read_optimized(struct trace_event_raw_sys_enter *ctx)
 {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    
+
     // 快速过滤
     if (pid < 1000)
         return 0;
-    
+
     // 内核态聚合
     struct stats_t *st = bpf_map_lookup_elem(&stats, &pid);
     if (st) {
@@ -695,12 +698,12 @@ int trace_read_optimized(struct trace_event_raw_sys_enter *ctx)
         struct stats_t init = {.count = 1, .bytes = ctx->args[2]};
         bpf_map_update_elem(&stats, &pid, &init, BPF_NOEXIST);
     }
-    
+
     // 采样: 只发送1%
     if ((bpf_get_prandom_u32() % 100) == 0) {
         // 发送采样事件
     }
-    
+
     return 0;
 }
 
@@ -751,12 +754,12 @@ watch -n 1 'bpftool prog show; bpftool map show'
     ✅ 循环展开
     ✅ 避免复杂计算
     ✅ 位操作代替算术
-  
+
   Maps:
     ✅ 选择合适类型
     ✅ 使用Per-CPU
     ✅ 使用LRU
-  
+
   数据传输:
     ✅ 优先Ringbuf
     ✅ 内核态过滤
@@ -778,8 +781,8 @@ watch -n 1 'bpftool prog show; bpftool map show'
 
 ---
 
-**文档版本**: v1.0  
-**最后更新**: 2025-10-19  
+**文档版本**: v1.0
+**最后更新**: 2025-10-19
 **维护者**: 虚拟化容器化技术知识库项目组
 
 **本章总结**:
@@ -800,3 +803,29 @@ watch -n 1 'bpftool prog show; bpftool map show'
 
 - [07_eBPF实战案例](./07_eBPF实战案例.md)
 - [08_eBPF最佳实践](./08_eBPF最佳实践.md)
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [eBPF概述与架构](./01_eBPF概述与架构.md) - eBPF概述与架构详解
+- [eBPF网络技术](./02_eBPF网络技术.md) - eBPF网络技术详解
+- [eBPF与容器技术](./03_eBPF与容器技术.md) - eBPF与容器技术详解
+- [eBPF可观测性](./04_eBPF可观测性.md) - eBPF可观测性详解
+- [eBPF安全技术](./05_eBPF安全技术.md) - eBPF安全技术详解
+- [eBPF实战案例](./07_eBPF实战案例.md) - eBPF实战案例详解
+- [eBPF最佳实践](./08_eBPF最佳实践.md) - eBPF最佳实践详解
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器性能调优](../06_容器监控与运维/03_容器性能调优.md) - 容器性能调优
+- [容器监控技术](../06_容器监控与运维/01_容器监控技术.md) - 容器监控技术
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

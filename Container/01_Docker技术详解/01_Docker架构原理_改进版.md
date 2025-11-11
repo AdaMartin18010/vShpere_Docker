@@ -1,9 +1,9 @@
 # Docker架构原理深度解析
 
-> **文档定位**: Docker技术架构与核心原理完整解析  
-> **技术版本**: Docker Engine 25.0, containerd 1.7, runc 1.1  
-> **最后更新**: 2025-10-21  
-> **标准对齐**: [OCI Image v1.0.2][oci-image-spec], [OCI Runtime v1.0.3][oci-runtime-spec]  
+> **文档定位**: Docker技术架构与核心原理完整解析
+> **技术版本**: Docker Engine 25.0, containerd 1.7, runc 1.1
+> **最后更新**: 2025-10-21
+> **标准对齐**: [OCI Image v1.0.2][oci-image-spec], [OCI Runtime v1.0.3][oci-runtime-spec]
 > **文档版本**: v2.0 (引用补充版)
 
 ---
@@ -231,7 +231,7 @@ Docker的核心特性基于Linux内核的容器技术[^linux-containers]：
 | 隔离性 | 强（硬件级） | 中等（OS级） |
 | 可移植性 | 差 | 优秀 |
 
-> **测试环境**[^perf-test]: Intel Xeon E5-2680 v4, 64GB RAM, Ubuntu 22.04 LTS,  
+> **测试环境**[^perf-test]: Intel Xeon E5-2680 v4, 64GB RAM, Ubuntu 22.04 LTS,
 > Docker 25.0.0 vs VMware ESXi 8.0, 100次测试平均值
 
 [^felter2015]: Felter, W., Ferreira, A., Rajamony, R., & Rubio, J. (2015). "An Updated Performance Comparison of Virtual Machines and Linux Containers". _IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)_. DOI: 10.1109/ISPASS.2015.7095802
@@ -1497,7 +1497,7 @@ ENTRYPOINT ["/usr/local/bin/app"]
 
 ---
 
-**维护承诺**: 本文档每季度更新，确保与Docker最新版本保持一致。  
+**维护承诺**: 本文档每季度更新，确保与Docker最新版本保持一致。
 **下次计划更新**: 2026-01-21（Docker Engine 26.0发布后）
 
 **反馈渠道**: 如有问题或建议，请通过GitHub Issues提交。

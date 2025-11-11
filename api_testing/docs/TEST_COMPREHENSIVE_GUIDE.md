@@ -551,7 +551,7 @@ func (s *MyTestSuite) Test01_Operation() {
     // Require: 失败时立即停止测试
     result, err := s.client.DoSomething()
     s.Require().NoError(err, "操作失败")
-    
+
     // Assert: 失败时继续执行
     assert.NotNil(s.T(), result)
     assert.Equal(s.T(), expected, result.Value)
@@ -565,7 +565,7 @@ func (s *MyTestSuite) Test01_Operation() {
 func (s *MyTestSuite) Test01_Operation() {
     ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
     defer cancel()
-    
+
     result, err := s.client.Operation(ctx)
     s.Require().NoError(err)
 }
@@ -578,9 +578,9 @@ func (s *MyTestSuite) Test01_Operation() {
 func (s *MyTestSuite) Test01_CreateResource() {
     resource, err := s.client.Create()
     s.Require().NoError(err)
-    
+
     defer s.client.Delete(resource.ID)  // 确保清理
-    
+
     // 测试逻辑...
 }
 ```
@@ -596,7 +596,7 @@ func (s *MyTestSuite) Test01_CreateContainer() {
         "nginx:alpine",
         WithContainerLabels(map[string]string{"test": "api"}),
     )
-    
+
     container, err := s.client.ContainerCreate(s.ctx, config, nil, nil, nil, "")
     s.Require().NoError(err)
 }
@@ -608,7 +608,7 @@ func (s *MyTestSuite) Test01_CreateContainer() {
 // ✅ 只读操作可以并行
 func (s *MyTestSuite) Test01_GetInfo() {
     s.T().Parallel()  // 安全的并行
-    
+
     info, err := s.client.GetInfo()
     s.Require().NoError(err)
 }
@@ -673,31 +673,31 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       docker:
         image: docker:dind
       etcd:
         image: quay.io/coreos/etcd:latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      
+
       - name: Run Tests
         run: |
           cd tools/api_testing/scripts
           make test
-      
+
       - name: Generate Report
         run: |
           cd tools/api_testing/scripts
           make report
-      
+
       - name: Upload Report
         uses: actions/upload-artifact@v4
         with:

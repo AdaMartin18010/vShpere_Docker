@@ -124,6 +124,9 @@
       - [10.2.3 容器运行时集成](#1023-容器运行时集成)
       - [10.2.4 插件和扩展系统](#1024-插件和扩展系统)
     - [10.3 生态系统发展](#103-生态系统发展)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ## 1. WebAssembly技术概述
 
@@ -279,7 +282,7 @@ impl WasmStack {
         self.stack.push(value);
         Ok(())
     }
-    
+
     pub fn pop(&mut self) -> Result<WasmValue, Error> {
         self.stack.pop().ok_or(Error::StackUnderflow)
     }
@@ -319,18 +322,18 @@ impl WasmMemory {
             current_pages: initial_pages,
         }
     }
-    
+
     pub fn grow(&mut self, pages: u32) -> Result<i32, Error> {
         let new_pages = self.current_pages + pages;
         if new_pages > self.max_pages {
             return Err(Error::MemoryGrowFailed);
         }
-        
+
         let page_size = 65536;
         let additional_size = pages as usize * page_size;
         self.data.resize(self.data.len() + additional_size, 0);
         self.current_pages = new_pages;
-        
+
         Ok(self.current_pages as i32)
     }
 }
@@ -360,7 +363,7 @@ impl WasmSandbox {
             globals: HashMap::new(),
         }
     }
-    
+
     pub fn execute(&mut self, module: &WasmModule) -> Result<(), Error> {
         // 在沙箱中执行WebAssembly模块
         for instruction in &module.code {
@@ -397,13 +400,13 @@ impl SecureWasmRuntime {
             permissions,
         }
     }
-    
+
     pub fn execute_with_permissions(&mut self, module: &WasmModule) -> Result<(), Error> {
         // 检查权限后执行
         if !self.permissions.can_import && !module.imports.is_empty() {
             return Err(Error::PermissionDenied);
         }
-        
+
         self.sandbox.execute(module)
     }
 }
@@ -427,21 +430,21 @@ impl TypeChecker {
         for func in &module.functions {
             self.validate_function(func)?;
         }
-        
+
         // 验证导入导出
         self.validate_imports(&module.imports)?;
         self.validate_exports(&module.exports)?;
-        
+
         Ok(())
     }
-    
+
     fn validate_function(&self, func: &Function) -> Result<(), Error> {
         let func_type = self.types.get(&func.type_index)
             .ok_or(Error::InvalidTypeIndex)?;
-        
+
         // 验证函数体类型
         self.validate_function_body(&func.body, func_type)?;
-        
+
         Ok(())
     }
 }
@@ -510,21 +513,21 @@ pub enum OptimizationLevel {
 impl WasmJITCompiler {
     pub fn compile_function(&mut self, func: &Function) -> Result<Vec<u8>, Error> {
         let func_hash = self.hash_function(func);
-        
+
         // 检查代码缓存
         if let Some(cached_code) = self.code_cache.get(&func_hash) {
             return Ok(cached_code.clone());
         }
-        
+
         // 编译函数
         let machine_code = self.compile_to_machine_code(func)?;
-        
+
         // 缓存编译结果
         self.code_cache.insert(func_hash, machine_code.clone());
-        
+
         Ok(machine_code)
     }
-    
+
     fn compile_to_machine_code(&self, func: &Function) -> Result<Vec<u8>, Error> {
         // 实现字节码到机器码的转换
         // 这里简化实现
@@ -553,10 +556,10 @@ impl InlineOptimizer {
         }
         Ok(())
     }
-    
+
     fn optimize_function(&self, func: &mut Function) -> Result<(), Error> {
         let mut optimized_body = Vec::new();
-        
+
         for instruction in &func.body {
             match instruction {
                 Instruction::Call(target_func) => {
@@ -570,7 +573,7 @@ impl InlineOptimizer {
                 _ => optimized_body.push(instruction.clone()),
             }
         }
-        
+
         func.body = optimized_body;
         Ok(())
     }
@@ -853,3 +856,25 @@ wasmtime --aot module.wasm
 - [Bytecode Alliance](https://bytecodealliance.org/)
 
 _本文档基于WebAssembly 2.0和WASI 2.0最新标准（2025年10月），提供完整的技术解析和实践指导。_
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [WebAssembly运行时技术](./02_WebAssembly运行时技术.md) - WebAssembly运行时技术详解
+- [WebAssembly安全机制](./03_WebAssembly安全机制.md) - WebAssembly安全机制详解
+- [WebAssembly 2.0新特性详解](./04_WebAssembly_2.0新特性详解.md) - WebAssembly 2.0新特性
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [Docker技术详解](../01_Docker技术详解/README.md) - Docker技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

@@ -1,6 +1,6 @@
 # 🚀 虚拟化测试快速入门指南
 
-> **5分钟快速上手** - vSphere & libvirt API测试  
+> **5分钟快速上手** - vSphere & libvirt API测试
 > **最后更新**: 2025年10月23日
 
 ---
@@ -123,8 +123,8 @@ libvirt:
 # 测试vSphere连接
 python3 -c "
 from pyVim.connect import SmartConnectNoSSL, Disconnect
-si = SmartConnectNoSSL(host='your-vcenter.example.com', 
-                       user='administrator@vsphere.local', 
+si = SmartConnectNoSSL(host='your-vcenter.example.com',
+                       user='administrator@vsphere.local',
                        pwd='YourPassword123!')
 print('vSphere连接成功!')
 Disconnect(si)
@@ -178,25 +178,25 @@ pytest vsphere_auth_test.py::vSphereAuthTestSuite::test_auth_valid_credentials -
 vsphere:
   host: "vcenter.example.com"
   port: 443
-  
+
   admin:
     username: "administrator@vsphere.local"
     password: "YourAdminPassword123!"
-  
+
   test_user:
     username: "testuser@vsphere.local"
     password: "YourTestPassword123!"
-  
+
   ssl:
     verify_cert: false  # 测试环境可设为false
     cert_path: ""       # 生产环境指定证书路径
-  
+
   test_environment:
     datacenter: "Datacenter1"
     cluster: "Cluster1"
     datastore: "datastore1"
     network: "VM Network"
-  
+
   timeouts:
     connection: 30
     power_on: 300
@@ -207,13 +207,13 @@ libvirt:
   uri: "qemu:///system"  # 本地连接
   # uri: "qemu+ssh://user@remote-host/system"  # SSH远程连接
   # uri: "qemu+tcp://remote-host/system"       # TCP远程连接
-  
+
   test_domain:
     name_prefix: "test-domain"
     vcpu_count: 2
     memory_mb: 1024
     disk_size_gb: 10
-  
+
   storage:
     pool_name: "default"
     pool_path: "/var/lib/libvirt/images"

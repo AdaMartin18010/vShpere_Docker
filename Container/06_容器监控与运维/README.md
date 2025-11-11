@@ -1,5 +1,27 @@
 # 容器监控与运维
 
+> **文档定位**: 容器监控与运维完整指南，涵盖监控、日志、性能调优、故障诊断、自动化运维
+> **技术版本**: Prometheus 2.50+, Grafana 10.0+, ELK 8.0+, Kubernetes 1.30+
+> **最后更新**: 2025-11-11
+> **标准对齐**: [CNCF Observability][cncf-obs], [Prometheus][prom], [OpenTelemetry][otel]
+> **文档版本**: v2.0 (标准化版)
+
+---
+
+## 文档元信息
+
+| 属性 | 值 |
+|------|-----|
+| **文档版本** | v2.0 (标准化版) |
+| **更新日期** | 2025-11-11 |
+| **技术基准** | Prometheus, Grafana, ELK, Jaeger, OpenTelemetry |
+| **状态** | 生产就绪 |
+| **适用场景** | 容器监控、日志管理、性能调优、故障诊断、自动化运维 |
+
+> **版本锚点**: 本文档对齐2025年容器监控与运维最佳实践与CNCF可观测性标准。
+
+---
+
 ## 目录
 
 - [概述](#概述)
@@ -7,6 +29,7 @@
 - [技术文档](#技术文档)
 - [学习路径](#学习路径)
 - [运维最佳实践](#运维最佳实践)
+- [相关文档](#相关文档)
 
 ## 概述
 
@@ -92,17 +115,6 @@
 - 自动化部署
 - 自动化测试
 
-### 6. 容器自动化运维工具集合
-
-**文件**: `05_容器自动化运维工具集合.md`
-
-**内容**:
-
-- 运维工具对比
-- 工具选型建议
-- 工具集成方案
-- 工具最佳实践
-
 ## 学习路径
 
 ### 基础阶段
@@ -169,11 +181,51 @@
 | Jaeger | 分布式追踪 | 分布式系统追踪 | 微服务追踪 |
 | Zabbix | 综合监控 | 企业级监控平台 | 企业级监控 |
 
-## 相关资源
+## 相关文档
 
-- [Prometheus官方文档](https://prometheus.io/docs/)
-- [Grafana官方文档](https://grafana.com/docs/)
-- [Kubernetes监控指南](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/)
+### 本模块相关
+
+- [容器监控技术](./01_容器监控技术.md) - 监控架构与指标定义
+- [容器日志管理](./02_容器日志管理.md) - 日志收集、存储、分析
+- [容器性能调优](./03_容器性能调优.md) - 性能分析与优化
+- [容器故障诊断](./04_容器故障诊断.md) - 故障定位与处理
+- [容器自动化运维](./05_容器自动化运维.md) - 自动化运维工具与实践
+
+### 其他模块相关
+
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes监控与日志
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排监控
+- [容器安全技术](../05_容器安全技术/README.md) - 安全监控与审计
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 监控运维实践案例
+
+---
+
+## 参考资源
+
+[cncf-obs]: https://landscape.cncf.io/card-mode?category=observability-and-analysis "CNCF可观测性全景"
+[prom]: https://prometheus.io/docs/ "Prometheus官方文档"
+[otel]: https://opentelemetry.io/ "OpenTelemetry官方文档"
+
+### 官方文档
+
+- [Prometheus官方文档](https://prometheus.io/docs/) - 指标收集与存储
+- [Grafana官方文档](https://grafana.com/docs/) - 可视化与告警
+- [ELK Stack文档](https://www.elastic.co/guide/) - 日志分析
+- [Jaeger文档](https://www.jaegertracing.io/docs/) - 分布式追踪
+- [OpenTelemetry文档](https://opentelemetry.io/docs/) - 可观测性标准
+- [Kubernetes监控指南](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/) - K8s监控
+
+### CNCF资源
+
+- [CNCF可观测性全景][cncf-obs] - 可观测性工具生态
+- [CNCF Observability Whitepaper](https://www.cncf.io/reports/) - 可观测性白皮书
+- [Prometheus Best Practices](https://prometheus.io/docs/practices/) - Prometheus最佳实践
+
+### 学习资源
+
+- [Prometheus Tutorial](https://prometheus.io/docs/introduction/overview/) - Prometheus教程
+- [Grafana Tutorial](https://grafana.com/tutorials/) - Grafana教程
+- [ELK Stack Tutorial](https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-elastic-stack.html) - ELK教程
 
 ---
 

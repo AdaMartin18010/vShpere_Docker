@@ -318,7 +318,7 @@ conmon(12345)
 # /etc/subuid
 testuser:100000:65536
 
-# /etc/subgid  
+# /etc/subgid
 testuser:100000:65536
 
 # 检查配置
@@ -652,8 +652,8 @@ systemctl --user enable --now mycontainer
 
 ---
 
-**文档完成度**: 100% ✅  
-**生产就绪状态**: ✅ Ready for Production  
+**文档完成度**: 100% ✅
+**生产就绪状态**: ✅ Ready for Production
 **推荐使用场景**: Podman架构学习、Docker迁移评估、Rootless容器部署、Kubernetes Pod管理
 
 ---

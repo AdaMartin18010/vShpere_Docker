@@ -1,8 +1,8 @@
 # 07 - Serverless CI/CD
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -39,6 +39,9 @@
     - [7.3 Terraform](#73-terraform)
   - [8. 最佳实践](#8-最佳实践)
   - [9. 总结](#9-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -209,7 +212,7 @@ Serverless CI/CD特点:
      - Lambda: 128MB内存
      - DynamoDB: 按需计费
      - 无Provisioned Concurrency
-   
+
 2. Staging (预发布):
    目的: 测试和QA
    特点:
@@ -220,7 +223,7 @@ Serverless CI/CD特点:
      - Lambda: 512MB内存
      - DynamoDB: 低预留容量
      - 1-2个Provisioned实例
-   
+
 3. Production (生产):
    目的: 服务真实用户
    特点:
@@ -235,7 +238,7 @@ Serverless CI/CD特点:
 
 4. (可选) QA:
    目的: 专门QA测试
-   
+
 5. (可选) Demo:
    目的: 演示和培训
 ```
@@ -255,7 +258,7 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  
+
   # 环境变量
   environment:
     STAGE: ${self:provider.stage}
@@ -265,13 +268,13 @@ provider:
 custom:
   # 表名: 按stage区分
   tableName: ${self:service}-${self:provider.stage}-users
-  
+
   # API URL: 不同环境
   apiUrl:
     dev: https://dev-api.example.com
     staging: https://staging-api.example.com
     prod: https://api.example.com
-  
+
   # 函数配置: 按环境
   functionConfig:
     dev:
@@ -378,7 +381,7 @@ env:
 exports.main = async (event) => {
     const body = JSON.parse(event.body)
     const result = calculateTotal(body.items)
-    
+
     return {
         statusCode: 200,
         body: JSON.stringify({ total: result })
@@ -402,14 +405,14 @@ describe('calculateTotal', () => {
             { price: 10, quantity: 2 },
             { price: 5, quantity: 3 }
         ]
-        
+
         expect(calculateTotal(items)).toBe(35)
     })
-    
+
     test('should handle empty array', () => {
         expect(calculateTotal([])).toBe(0)
     })
-    
+
     test('should handle single item', () => {
         const items = [{ price: 100, quantity: 1 }]
         expect(calculateTotal(items)).toBe(100)
@@ -459,12 +462,12 @@ describe('Integration Tests', () => {
         // 创建测试表
         await createTestTable()
     })
-    
+
     afterAll(async () => {
         // 清理
         await deleteTestTable()
     })
-    
+
     test('should create user and retrieve it', async () => {
         // 1. 创建用户
         const user = {
@@ -472,29 +475,29 @@ describe('Integration Tests', () => {
             name: 'Test User',
             email: 'test@example.com'
         }
-        
+
         await dynamodb.put({
             TableName: 'Users',
             Item: user
         }).promise()
-        
+
         // 2. 检索用户
         const result = await dynamodb.get({
             TableName: 'Users',
             Key: { id: '123' }
         }).promise()
-        
+
         expect(result.Item).toEqual(user)
     })
-    
+
     test('should call API endpoint', async () => {
         const apiUrl = process.env.API_URL || 'http://localhost:3000'
-        
+
         const response = await axios.post(`${apiUrl}/users`, {
             name: 'Test User',
             email: 'test@example.com'
         })
-        
+
         expect(response.status).toBe(201)
         expect(response.data).toHaveProperty('id')
     })
@@ -531,55 +534,55 @@ const API_URL = process.env.API_URL
 describe('E2E Tests', () => {
     let authToken
     let userId
-    
+
     test('1. User Registration', async () => {
         const response = await axios.post(`${API_URL}/auth/register`, {
             email: 'e2e@example.com',
             password: 'Test123!',
             name: 'E2E Test User'
         })
-        
+
         expect(response.status).toBe(201)
         expect(response.data).toHaveProperty('userId')
         userId = response.data.userId
     })
-    
+
     test('2. User Login', async () => {
         const response = await axios.post(`${API_URL}/auth/login`, {
             email: 'e2e@example.com',
             password: 'Test123!'
         })
-        
+
         expect(response.status).toBe(200)
         expect(response.data).toHaveProperty('token')
         authToken = response.data.token
     })
-    
+
     test('3. Get User Profile', async () => {
         const response = await axios.get(`${API_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${authToken}` }
         })
-        
+
         expect(response.status).toBe(200)
         expect(response.data.email).toBe('e2e@example.com')
     })
-    
+
     test('4. Update User Profile', async () => {
         const response = await axios.put(`${API_URL}/users/${userId}`, {
             name: 'Updated Name'
         }, {
             headers: { Authorization: `Bearer ${authToken}` }
         })
-        
+
         expect(response.status).toBe(200)
         expect(response.data.name).toBe('Updated Name')
     })
-    
+
     test('5. Delete User', async () => {
         const response = await axios.delete(`${API_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${authToken}` }
         })
-        
+
         expect(response.status).toBe(204)
     })
 })
@@ -628,7 +631,7 @@ Resources:
         S3Key: function-v2.zip
       # 自动发布版本
       AutoPublishAlias: live
-      
+
       # 部署偏好
       DeploymentPreference:
         Type: AllAtOnce  # 或 Canary10Percent5Minutes
@@ -637,7 +640,7 @@ Resources:
         Hooks:
           PreTraffic: !Ref PreTrafficHook
           PostTraffic: !Ref PostTrafficHook
-  
+
   # 错误告警
   MyFunctionErrorAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -695,7 +698,7 @@ Resources:
       Handler: index.handler
       Runtime: nodejs18.x
       AutoPublishAlias: live
-      
+
       DeploymentPreference:
         Type: Canary10Percent5Minutes
         # 可选类型:
@@ -707,14 +710,14 @@ Resources:
         # - Linear10PercentEvery3Minutes
         # - Linear10PercentEvery10Minutes
         # - AllAtOnce
-        
+
         Alarms:
           - !Ref CanaryErrorsAlarm
-        
+
         Hooks:
           PreTraffic: !Ref PreTrafficFunction
           PostTraffic: !Ref PostTrafficFunction
-  
+
   # 金丝雀错误告警
   CanaryErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -733,7 +736,7 @@ Resources:
       Threshold: 0
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
-  
+
   # 部署前钩子
   PreTrafficFunction:
     Type: AWS::Serverless::Function
@@ -743,7 +746,7 @@ Resources:
       Environment:
         Variables:
           NEW_VERSION: !Ref MyFunction.Version
-  
+
   # 部署后钩子
   PostTrafficFunction:
     Type: AWS::Serverless::Function
@@ -761,61 +764,61 @@ const codedeploy = new AWS.CodeDeploy()
 
 exports.preTraffic = async (event) => {
     console.log('PreTraffic Hook - Running pre-deployment tests')
-    
+
     const newVersion = process.env.NEW_VERSION
     const functionName = event.DeploymentId
-    
+
     try {
         // 运行烟雾测试
         await runSmokeTests(newVersion)
-        
+
         // 成功，继续部署
         await codedeploy.putLifecycleEventHookExecutionStatus({
             deploymentId: event.DeploymentId,
             lifecycleEventHookExecutionId: event.LifecycleEventHookExecutionId,
             status: 'Succeeded'
         }).promise()
-        
+
         return 'Deployment can proceed'
     } catch (error) {
         console.error('Pre-traffic tests failed:', error)
-        
+
         // 失败，停止部署
         await codedeploy.putLifecycleEventHookExecutionStatus({
             deploymentId: event.DeploymentId,
             lifecycleEventHookExecutionId: event.LifecycleEventHookExecutionId,
             status: 'Failed'
         }).promise()
-        
+
         throw error
     }
 }
 
 exports.postTraffic = async (event) => {
     console.log('PostTraffic Hook - Validating deployment')
-    
+
     try {
         // 验证部署
         await validateDeployment()
-        
+
         // 成功
         await codedeploy.putLifecycleEventHookExecutionStatus({
             deploymentId: event.DeploymentId,
             lifecycleEventHookExecutionId: event.LifecycleEventHookExecutionId,
             status: 'Succeeded'
         }).promise()
-        
+
         return 'Deployment validated successfully'
     } catch (error) {
         console.error('Post-traffic validation failed:', error)
-        
+
         // 失败，触发回滚
         await codedeploy.putLifecycleEventHookExecutionStatus({
             deploymentId: event.DeploymentId,
             lifecycleEventHookExecutionId: event.LifecycleEventHookExecutionId,
             status: 'Failed'
         }).promise()
-        
+
         throw error
     }
 }
@@ -833,7 +836,7 @@ exports.postTraffic = async (event) => {
      - CloudWatch告警触发
      - 错误率超过阈值
      - 延迟超过阈值
-   
+
    动作:
      - CodeDeploy自动回滚
      - 恢复到上一个版本
@@ -844,7 +847,7 @@ exports.postTraffic = async (event) => {
      - 发现业务逻辑错误
      - 性能下降
      - 用户投诉
-   
+
    步骤:
      - 确认回滚版本
      - 更新Alias
@@ -855,7 +858,7 @@ exports.postTraffic = async (event) => {
    场景:
      - 金丝雀发布失败
      - 流量切换过程中发现问题
-   
+
    策略:
      - 停止流量切换
      - 保持当前流量分配
@@ -876,33 +879,33 @@ async function rollback(functionName, aliasName) {
         FunctionName: functionName,
         Name: aliasName
     }).promise()
-    
+
     console.log(`Current version: ${alias.FunctionVersion}`)
-    
+
     // 2. 获取上一个版本
     const versions = await lambda.listVersionsByFunction({
         FunctionName: functionName,
         MaxItems: 10
     }).promise()
-    
+
     const currentIndex = versions.Versions.findIndex(v => v.Version === alias.FunctionVersion)
     const previousVersion = versions.Versions[currentIndex + 1]
-    
+
     if (!previousVersion) {
         throw new Error('No previous version found')
     }
-    
+
     console.log(`Rolling back to version: ${previousVersion.Version}`)
-    
+
     // 3. 更新Alias到上一个版本
     await lambda.updateAlias({
         FunctionName: functionName,
         Name: aliasName,
         FunctionVersion: previousVersion.Version
     }).promise()
-    
+
     console.log('Rollback completed successfully')
-    
+
     // 4. 发送通知
     await sendNotification({
         subject: `Rollback: ${functionName}`,
@@ -937,66 +940,66 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run linter
       run: npm run lint
-    
+
     - name: Run tests
       run: npm test
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
         files: ./coverage/lcov.info
-  
+
   deploy-dev:
     needs: test
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-    
+
     - name: Install Serverless Framework
       run: npm install -g serverless
-    
+
     - name: Deploy to Dev
       run: serverless deploy --stage dev --verbose
-    
+
     - name: Run integration tests
       run: npm run test:integration
       env:
         API_URL: ${{ steps.deploy.outputs.api-url }}
-  
+
   deploy-prod:
     needs: test
     if: github.ref == 'refs/heads/main'
@@ -1004,36 +1007,36 @@ jobs:
     environment:
       name: production
       url: ${{ steps.deploy.outputs.api-url }}
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ env.NODE_VERSION }}
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
         aws-region: ${{ env.AWS_REGION }}
-    
+
     - name: Install Serverless Framework
       run: npm install -g serverless
-    
+
     - name: Deploy to Production
       id: deploy
       run: |
         serverless deploy --stage prod --verbose
         API_URL=$(serverless info --stage prod --verbose | grep "GET" | awk '{print $3}')
         echo "api-url=$API_URL" >> $GITHUB_OUTPUT
-    
+
     - name: Notify Slack
       if: always()
       uses: 8398a7/action-slack@v3
@@ -1063,7 +1066,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
+
     - name: Deploy to Staging
       run: |
         npm ci
@@ -1072,12 +1075,12 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    
+
     - name: Run E2E tests
       run: npm run test:e2e
       env:
         API_URL: ${{ steps.get-url.outputs.url }}
-  
+
   approval:
     needs: deploy-staging
     runs-on: ubuntu-latest
@@ -1086,7 +1089,7 @@ jobs:
     steps:
     - name: Wait for approval
       run: echo "Waiting for manual approval..."
-  
+
   deploy-production:
     needs: approval
     runs-on: ubuntu-latest
@@ -1095,7 +1098,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
+
     - name: Deploy to Production (Canary)
       run: |
         npm ci
@@ -1104,11 +1107,11 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-    
+
     - name: Monitor deployment
       run: node scripts/monitor-deployment.js
       timeout-minutes: 30
-    
+
     - name: Rollback on failure
       if: failure()
       run: node scripts/rollback.js
@@ -1139,7 +1142,7 @@ jobs:
     strategy:
       matrix:
         function: [api, worker, scheduler]
-    
+
     steps:
     - uses: actions/checkout@v3
     - name: Deploy ${{ matrix.function }}
@@ -1318,7 +1321,7 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref UsersTable
-  
+
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -1361,14 +1364,14 @@ sam deploy --parameter-overrides Stage=prod --stack-name myapp-prod
 # main.tf
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
-  
+
   backend "s3" {
     bucket = "my-terraform-state"
     key    = "serverless/terraform.tfstate"
@@ -1400,14 +1403,14 @@ resource "aws_lambda_function" "api" {
   runtime       = "nodejs18.x"
   memory_size   = 512
   timeout       = 30
-  
+
   environment {
     variables = {
       STAGE      = var.stage
       TABLE_NAME = aws_dynamodb_table.users.name
     }
   }
-  
+
   tags = {
     Environment = var.stage
   }
@@ -1416,7 +1419,7 @@ resource "aws_lambda_function" "api" {
 # Lambda IAM Role
 resource "aws_iam_role" "lambda_role" {
   name = "${var.stage}-lambda-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -1434,12 +1437,12 @@ resource "aws_dynamodb_table" "users" {
   name         = "${var.stage}-users"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  
+
   attribute {
     name = "id"
     type = "S"
   }
-  
+
   tags = {
     Environment = var.stage
   }
@@ -1581,8 +1584,36 @@ IaC工具:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#ServerlessCI/CD` `#GitHubActions` `#Canary` `#BlueGreen` `#IaC` `#Testing`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Serverless概述与架构](./01_Serverless概述与架构.md) - Serverless概述与架构
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [OpenFaaS实战](./03_OpenFaaS实战.md) - OpenFaaS实战
+- [边缘Serverless](./04_边缘Serverless.md) - 边缘Serverless
+- [Serverless安全](./05_Serverless安全.md) - Serverless安全
+- [Serverless性能优化](./06_Serverless性能优化.md) - Serverless性能优化
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [容器技术实践案例](../08_容器技术实践案例/README.md) - 容器技术实践案例
+- [DevOps容器化实践](../08_容器技术实践案例/03_DevOps容器化实践.md) - DevOps容器化实践
+- [Kubernetes技术详解](../03_Kubernetes技术详解/README.md) - Kubernetes技术体系
+- [容器编排技术](../04_容器编排技术/README.md) - 容器编排技术
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新

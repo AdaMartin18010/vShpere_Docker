@@ -1,8 +1,8 @@
 # 04 - 边缘Serverless
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -43,6 +43,9 @@
     - [6.3 成本优化](#63-成本优化)
     - [6.4 监控与调试](#64-监控与调试)
   - [7. 总结](#7-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -55,7 +58,7 @@
 ```yaml
 边缘Serverless定义:
   在全球分布式边缘节点上运行的Serverless函数
-  
+
 核心特点:
   - 超低延迟 (< 50ms)
   - 全球分布
@@ -68,7 +71,7 @@ vs 传统Serverless:
     - 区域性数据中心
     - 延迟: 100-500ms
     - 冷启动: 100ms-数秒
-  
+
   边缘:
     - 全球200+边缘节点
     - 延迟: < 50ms
@@ -93,7 +96,7 @@ vs 传统Serverless:
    - 物理距离近
    - 减少网络往返
    - 改善用户体验
-   
+
    示例:
      美国用户访问亚洲服务器: 200-300ms
      美国用户访问本地边缘: 10-30ms
@@ -103,7 +106,7 @@ vs 传统Serverless:
    - 全球分布
    - 自动故障转移
    - 无单点故障
-   
+
    可用性: 99.99%+
 
 3. 零冷启动:
@@ -229,7 +232,7 @@ Cloudflare Workers:
     ✅ 最多边缘节点 (275+)
     ✅ KV/Durable Objects
     ✅ 慷慨免费额度
-  
+
   劣势:
     ❌ 语言支持较少
     ❌ CPU限制 (10-50ms)
@@ -240,7 +243,7 @@ AWS Lambda@Edge:
     ✅ AWS生态集成
     ✅ 更多资源 (128MB-10GB)
     ✅ 长执行时间 (30s)
-  
+
   劣势:
     ❌ 冷启动较慢
     ❌ 部署较慢 (5-15分钟)
@@ -251,7 +254,7 @@ Fastly Compute@Edge:
     ✅ WebAssembly (安全/快速)
     ✅ 多语言编译
     ✅ 零冷启动
-  
+
   劣势:
     ❌ 节点较少
     ❌ 学习曲线高
@@ -263,12 +266,12 @@ Fastly Compute@Edge:
     ✅ 低延迟要求
     ✅ 全球覆盖
     ✅ 预算有限
-  
+
   Lambda@Edge:
     ✅ AWS重度用户
     ✅ 复杂逻辑
     ✅ 长执行时间
-  
+
   Fastly Compute@Edge:
     ✅ 性能极致追求
     ✅ Rust开发者
@@ -289,7 +292,7 @@ V8 Isolates vs Containers:
 传统容器 (Lambda):
   进程隔离 → 启动慢 (100ms+)
   资源开销大
-  
+
 V8 Isolates (Workers):
   V8引擎内隔离 → 启动极快 (0ms)
   资源开销小
@@ -382,16 +385,16 @@ wrangler publish
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
-    
+
     // 路由处理
     if (url.pathname === '/api/hello') {
       return handleHello(request)
     }
-    
+
     if (url.pathname === '/api/user') {
       return handleUser(request)
     }
-    
+
     return new Response('Not Found', { status: 404 })
   }
 }
@@ -402,7 +405,7 @@ async function handleHello(request) {
     timestamp: new Date().toISOString(),
     cf: request.cf  // Cloudflare提供的请求信息
   }
-  
+
   return new Response(JSON.stringify(data, null, 2), {
     headers: {
       'Content-Type': 'application/json',
@@ -415,18 +418,18 @@ async function handleUser(request) {
   if (request.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 })
   }
-  
+
   try {
     const body = await request.json()
     const { name, age } = body
-    
+
     // 业务逻辑
     const response = {
       success: true,
       user: { name, age, id: crypto.randomUUID() },
       location: request.cf.city  // 用户所在城市
     }
-    
+
     return new Response(JSON.stringify(response), {
       headers: { 'Content-Type': 'application/json' }
     })
@@ -491,11 +494,11 @@ kv_namespaces = [
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
-    
+
     // GET /kv/:key
     if (url.pathname.startsWith('/kv/')) {
       const key = url.pathname.split('/kv/')[1]
-      
+
       if (request.method === 'GET') {
         const value = await env.MY_KV.get(key)
         if (value === null) {
@@ -503,21 +506,21 @@ export default {
         }
         return new Response(value)
       }
-      
+
       // PUT /kv/:key
       if (request.method === 'PUT') {
         const value = await request.text()
         await env.MY_KV.put(key, value)
         return new Response('OK')
       }
-      
+
       // DELETE /kv/:key
       if (request.method === 'DELETE') {
         await env.MY_KV.delete(key)
         return new Response('Deleted')
       }
     }
-    
+
     return new Response('Not Found', { status: 404 })
   }
 }
@@ -581,16 +584,16 @@ export class Counter {
   constructor(state, env) {
     this.state = state
   }
-  
+
   async fetch(request) {
     const url = new URL(request.url)
-    
+
     // 获取当前计数
     if (url.pathname === '/get') {
       let value = await this.state.storage.get('counter') || 0
       return new Response(value.toString())
     }
-    
+
     // 增加计数
     if (url.pathname === '/increment') {
       let value = await this.state.storage.get('counter') || 0
@@ -598,7 +601,7 @@ export class Counter {
       await this.state.storage.put('counter', value)
       return new Response(value.toString())
     }
-    
+
     return new Response('Not Found', { status: 404 })
   }
 }
@@ -608,11 +611,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
     const counterId = url.searchParams.get('id') || 'global'
-    
+
     // 获取Durable Object实例
     const id = env.COUNTER.idFromName(counterId)
     const stub = env.COUNTER.get(id)
-    
+
     // 转发请求到Durable Object
     return stub.fetch(request)
   }
@@ -627,30 +630,30 @@ export class ChatRoom {
     this.state = state
     this.sessions = []
   }
-  
+
   async fetch(request) {
     // WebSocket升级
     const upgradeHeader = request.headers.get('Upgrade')
     if (upgradeHeader !== 'websocket') {
       return new Response('Expected WebSocket', { status: 400 })
     }
-    
+
     const webSocketPair = new WebSocketPair()
     const [client, server] = Object.values(webSocketPair)
-    
+
     // 接受WebSocket连接
     await this.handleSession(server)
-    
+
     return new Response(null, {
       status: 101,
       webSocket: client
     })
   }
-  
+
   async handleSession(webSocket) {
     webSocket.accept()
     this.sessions.push(webSocket)
-    
+
     webSocket.addEventListener('message', async (event) => {
       // 广播消息给所有连接
       const message = event.data
@@ -663,7 +666,7 @@ export class ChatRoom {
         }
       }
     })
-    
+
     webSocket.addEventListener('close', () => {
       this.sessions = this.sessions.filter(s => s !== webSocket)
     })
@@ -681,28 +684,28 @@ export class ChatRoom {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
-    
+
     // 解析图片参数
     const width = parseInt(url.searchParams.get('w')) || null
     const quality = parseInt(url.searchParams.get('q')) || 85
     const format = url.searchParams.get('f') || 'auto'
-    
+
     // 原始图片URL
     const imageUrl = url.pathname.substring(1)
     if (!imageUrl) {
       return new Response('Missing image URL', { status: 400 })
     }
-    
+
     // 缓存键
     const cacheKey = `${imageUrl}?w=${width}&q=${quality}&f=${format}`
     const cache = caches.default
-    
+
     // 检查缓存
     let response = await cache.match(cacheKey)
     if (response) {
       return response
     }
-    
+
     // 获取原始图片
     const imageResponse = await fetch(imageUrl, {
       cf: {
@@ -710,29 +713,29 @@ export default {
         cacheTtl: 86400  // 24小时
       }
     })
-    
+
     if (!imageResponse.ok) {
       return new Response('Image not found', { status: 404 })
     }
-    
+
     // 图片优化选项
     const options = {
       quality: quality,
       format: format
     }
-    
+
     if (width) {
       options.width = width
     }
-    
+
     // Cloudflare图片优化
     response = new Response(imageResponse.body, imageResponse)
     response.headers.set('Cache-Control', 'public, max-age=86400')
     response.headers.set('CF-Polish', 'lossy')
-    
+
     // 存入缓存
     ctx.waitUntil(cache.put(cacheKey, response.clone()))
-    
+
     return response
   }
 }
@@ -827,7 +830,7 @@ export default {
 exports.handler = async (event) => {
     const request = event.Records[0].cf.request
     const headers = request.headers
-    
+
     // 1. 简单认证
     const authHeader = headers['authorization']
     if (!authHeader || authHeader[0].value !== 'Bearer secret-token') {
@@ -837,15 +840,15 @@ exports.handler = async (event) => {
             body: 'Unauthorized'
         }
     }
-    
+
     // 2. URL重写
     if (request.uri === '/old-page') {
         request.uri = '/new-page'
     }
-    
+
     // 3. 添加自定义头
     headers['x-custom-header'] = [{ value: 'custom-value' }]
-    
+
     return request
 }
 ```
@@ -906,11 +909,11 @@ aws lambda publish-version \
 exports.handler = async (event) => {
     const request = event.Records[0].cf.request
     const headers = request.headers
-    
+
     // 检查Cookie
     const cookieHeader = headers['cookie']
     let abTestGroup = null
-    
+
     if (cookieHeader) {
         const cookies = cookieHeader[0].value
         const match = cookies.match(/ab_test=([AB])/)
@@ -918,15 +921,15 @@ exports.handler = async (event) => {
             abTestGroup = match[1]
         }
     }
-    
+
     // 随机分配组 (如果没有Cookie)
     if (!abTestGroup) {
         abTestGroup = Math.random() < 0.5 ? 'A' : 'B'
     }
-    
+
     // 重写URL
     request.uri = `/version-${abTestGroup}${request.uri}`
-    
+
     return request
 }
 ```
@@ -939,20 +942,20 @@ exports.handler = async (event) => {
     const request = event.Records[0].cf.request
     const response = event.Records[0].cf.response
     const headers = response.headers
-    
+
     // 从请求中获取组
     const uri = request.uri
     const match = uri.match(/version-([AB])/)
     if (match) {
         const group = match[1]
-        
+
         // 设置Cookie (有效期30天)
         headers['set-cookie'] = [{
             key: 'Set-Cookie',
             value: `ab_test=${group}; Path=/; Max-Age=2592000; Secure; HttpOnly`
         }]
     }
-    
+
     return response
 }
 ```
@@ -968,21 +971,21 @@ exports.handler = async (event) => {
 exports.handler = async (event) => {
     const request = event.Records[0].cf.request
     const headers = request.headers
-    
+
     // 检查浏览器是否支持WebP
     const acceptHeader = headers['accept']
-    const supportsWebP = acceptHeader && 
+    const supportsWebP = acceptHeader &&
                          acceptHeader[0].value.includes('image/webp')
-    
+
     // 修改图片请求
     if (supportsWebP && request.uri.match(/\.(jpg|jpeg|png)$/)) {
         const ext = request.uri.split('.').pop()
         request.uri = request.uri.replace(new RegExp(`\\.${ext}$`), '.webp')
-        
+
         // 添加自定义头告知源服务器
         headers['x-original-format'] = [{ value: ext }]
     }
-    
+
     return request
 }
 ```
@@ -998,33 +1001,33 @@ exports.handler = async (event) => {
 exports.handler = async (event) => {
     const response = event.Records[0].cf.response
     const headers = response.headers
-    
+
     // 安全头
     headers['strict-transport-security'] = [{
         key: 'Strict-Transport-Security',
         value: 'max-age=63072000; includeSubdomains; preload'
     }]
-    
+
     headers['x-content-type-options'] = [{
         key: 'X-Content-Type-Options',
         value: 'nosniff'
     }]
-    
+
     headers['x-frame-options'] = [{
         key: 'X-Frame-Options',
         value: 'DENY'
     }]
-    
+
     headers['x-xss-protection'] = [{
         key: 'X-XSS-Protection',
         value: '1; mode=block'
     }]
-    
+
     headers['content-security-policy'] = [{
         key: 'Content-Security-Policy',
         value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
     }]
-    
+
     return response
 }
 ```
@@ -1094,12 +1097,12 @@ vs V8 Isolates vs Containers:
     - 启动: < 35μs
     - 内存: 少
     - 安全: 高
-  
+
   V8 Isolates:
     - 启动: < 5ms
     - 内存: 中
     - 安全: 高
-  
+
   Containers:
     - 启动: 100ms-3s
     - 内存: 多
@@ -1135,11 +1138,11 @@ fn main(req: Request) -> Result<Response, Error> {
     match (req.get_method(), req.get_path()) {
         (&Method::GET, "/") => Ok(Response::from_status(StatusCode::OK)
             .with_body_text_plain("Hello from Fastly Compute@Edge!\n")),
-        
+
         (&Method::GET, "/api/info") => handle_info(req),
-        
+
         (&Method::POST, "/api/echo") => handle_echo(req),
-        
+
         _ => Ok(Response::from_status(StatusCode::NOT_FOUND)
             .with_body_text_plain("Not Found\n")),
     }
@@ -1149,12 +1152,12 @@ fn handle_info(req: Request) -> Result<Response, Error> {
     // 获取请求信息
     let client_ip = req.get_client_ip_addr().unwrap_or_else(|| "unknown".parse().unwrap());
     let user_agent = req.get_header_str("User-Agent").unwrap_or("unknown");
-    
+
     let body = format!(
         "Client IP: {}\nUser-Agent: {}\n",
         client_ip, user_agent
     );
-    
+
     Ok(Response::from_status(StatusCode::OK)
         .with_body_text_plain(&body))
 }
@@ -1162,7 +1165,7 @@ fn handle_info(req: Request) -> Result<Response, Error> {
 fn handle_echo(mut req: Request) -> Result<Response, Error> {
     // 读取请求体
     let body = req.take_body_str();
-    
+
     Ok(Response::from_status(StatusCode::OK)
         .with_header("Content-Type", "application/json")
         .with_body_json(&serde_json::json!({
@@ -1205,30 +1208,30 @@ fn optimize_image(req: Request) -> Result<Response, Error> {
         .split('&')
         .find(|s| s.starts_with("w="))
         .and_then(|s| s[2..].parse().ok());
-    
+
     let quality: u8 = query
         .split('&')
         .find(|s| s.starts_with("q="))
         .and_then(|s| s[2..].parse().ok())
         .unwrap_or(85);
-    
+
     // 获取原始图片
     let backend = Backend::from_name("origin").unwrap();
     let mut bereq = Request::get(req.get_path())
         .with_header("Host", "example.com");
-    
+
     let mut beresp = bereq.send(backend)?;
-    
+
     if !beresp.get_status().is_success() {
         return Ok(beresp);
     }
-    
+
     // 这里可以集成图片处理库 (如image crate)
     // 实际生产中需要编译到WASM的图片处理库
-    
+
     // 添加缓存头
     beresp.set_header("Cache-Control", "public, max-age=86400");
-    
+
     Ok(beresp)
 }
 ```
@@ -1252,7 +1255,7 @@ import { includeBytes } from "fastly:experimental"
 async function handleRequest(event) {
   const req = event.request
   const url = new URL(req.url)
-  
+
   // 路由
   if (url.pathname === '/') {
     return new Response('Hello from Fastly Compute@Edge!', {
@@ -1260,11 +1263,11 @@ async function handleRequest(event) {
       headers: { 'Content-Type': 'text/plain' }
     })
   }
-  
+
   if (url.pathname === '/api/data') {
     return handleData(req)
   }
-  
+
   // 代理到后端
   return fetch(req, {
     backend: "origin"
@@ -1282,7 +1285,7 @@ async function handleData(req) {
       city: req.headers.get('fastly-geo-city')
     }
   }
-  
+
   return new Response(JSON.stringify(data, null, 2), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
@@ -1306,11 +1309,11 @@ use fastly::kv_store::KVStore;
 fn main(req: Request) -> Result<Response, Error> {
     // 打开KV存储
     let kv = KVStore::open("my_store")?;
-    
+
     match req.get_path() {
         "/kv/get" => {
             let key = req.get_query_parameter("key").unwrap_or("default");
-            
+
             match kv.lookup(key) {
                 Ok(Some(value)) => {
                     Ok(Response::from_status(StatusCode::OK)
@@ -1345,7 +1348,7 @@ WASI (WebAssembly System Interface):
     - 网络
     - 环境变量
     - 随机数
-  
+
   特点:
     ✅ 可移植
     ✅ 安全沙箱
@@ -1412,7 +1415,7 @@ wasmtime target/wasm32-wasi/release/myapp.wasm
 // src/main.rs
 fn main() {
     println!("Hello from Rust WASM!");
-    
+
     // 读取环境变量
     if let Ok(name) = std::env::var("NAME") {
         println!("Hello, {}!", name);
@@ -1651,12 +1654,12 @@ fn handle_request(req: Request) -> Response {
     ✅ 慷慨免费额度
     ✅ 简单易用
     ✅ 全球275+节点
-  
+
   AWS Lambda@Edge:
     ✅ AWS生态集成
     ✅ 企业级支持
     ✅ 灵活触发点
-  
+
   Fastly Compute@Edge:
     ✅ 极致性能
     ✅ WebAssembly
@@ -1692,8 +1695,36 @@ fn handle_request(req: Request) -> Response {
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#EdgeServerless` `#CloudflareWorkers` `#LambdaEdge` `#WebAssembly` `#FastlyCompute`
+
+---
+
+## 相关文档
+
+### 本模块相关
+
+- [Serverless概述与架构](./01_Serverless概述与架构.md) - Serverless概述与架构
+- [Knative深度解析](./02_Knative深度解析.md) - Knative深度解析
+- [OpenFaaS实战](./03_OpenFaaS实战.md) - OpenFaaS实战
+- [Serverless安全](./05_Serverless安全.md) - Serverless安全
+- [Serverless性能优化](./06_Serverless性能优化.md) - Serverless性能优化
+- [Serverless CI/CD](./07_Serverless_CICD.md) - Serverless CI/CD
+- [Serverless实战案例](./08_Serverless实战案例.md) - Serverless实战案例
+- [Serverless最佳实践](./09_Serverless最佳实践.md) - Serverless最佳实践
+- [README.md](./README.md) - 本模块导航
+
+### 其他模块相关
+
+- [边缘计算技术详解](../17_边缘计算技术详解/README.md) - 边缘计算技术
+- [边缘AI与推理优化](../17_边缘计算技术详解/06_边缘AI与推理优化.md) - 边缘AI与推理优化
+- [WebAssembly技术详解](../10_WebAssembly技术详解/README.md) - WebAssembly技术
+- [容器技术发展趋势](../09_容器技术发展趋势/README.md) - 容器技术发展趋势
+
+---
+
+**最后更新**: 2025年11月11日
+**维护状态**: 持续更新
