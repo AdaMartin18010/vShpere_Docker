@@ -10,7 +10,7 @@
 | **Buildah版本** | Buildah 1.34+ |
 | **Skopeo版本** | Skopeo 1.14+ |
 | **标准对齐** | OCI Image Spec v1.1, OCI Distribution Spec v1.0 |
-| **最后更新** | 2025-10-21 |
+| **最后更新** | 2025年11月11日 |
 | **文档版本** | v2.0 (改进版) |
 | **状态** | 生产就绪 |
 

@@ -9,7 +9,7 @@
 | **Podman版本** | Podman 5.0.0 |
 | **containers/storage版本** | containers/storage 1.51+ |
 | **标准对齐** | OCI Image Spec v1.1, Linux VFS, Btrfs, ZFS |
-| **最后更新** | 2025-10-21 |
+| **最后更新** | 2025年11月11日 |
 | **文档版本** | v2.0 (改进版) |
 | **状态** | 生产就绪 |
 

@@ -10,7 +10,7 @@
 | **Netavark版本** | Netavark 1.9+ |
 | **Aardvark-DNS版本** | Aardvark-DNS 1.9+ |
 | **标准对齐** | CNI Spec v1.0, IPv6, Kubernetes NetworkPolicy |
-| **最后更新** | 2025-10-21 |
+| **最后更新** | 2025年11月11日 |
 | **文档版本** | v2.0 (改进版) |
 | **状态** | 生产就绪 |
 

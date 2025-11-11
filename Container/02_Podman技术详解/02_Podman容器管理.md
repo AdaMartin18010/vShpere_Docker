@@ -9,7 +9,7 @@
 | **Podman版本** | Podman 5.0.0 |
 | **兼容版本** | Podman 4.x, 5.x |
 | **标准对齐** | Kubernetes Pod Spec, OCI Runtime Spec v1.1, systemd |
-| **最后更新** | 2025-10-21 |
+| **最后更新** | 2025年11月11日 |
 | **文档版本** | v2.0 (改进版) |
 | **状态** | 生产就绪 |
 
