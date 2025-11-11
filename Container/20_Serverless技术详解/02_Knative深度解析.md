@@ -1,8 +1,8 @@
 # 02 - Knative深度解析
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -42,6 +42,9 @@
     - [6.3 安全加固](#63-安全加固)
     - [6.4 监控告警](#64-监控告警)
   - [7. 总结](#7-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -149,7 +152,7 @@ Knative核心组件:
      - 流量管理
      - 灰度发布
      - 版本管理
-   
+
    核心资源:
      - Service: 服务定义
      - Route: 路由规则
@@ -162,7 +165,7 @@ Knative核心组件:
      - 事件源管理
      - 事件路由
      - 事件订阅
-   
+
    核心资源:
      - Source: 事件源
      - Broker: 事件代理
@@ -176,7 +179,7 @@ Knative核心组件:
      - 多语言支持
      - 本地开发
      - 快速部署
-   
+
    CLI:
      - func create
      - func deploy
@@ -313,7 +316,7 @@ Knative Service:
     - 最高层抽象
     - 包含Configuration + Route
     - 自动管理版本
-  
+
   特点:
     - 声明式
     - 自动扩缩容
@@ -359,7 +362,7 @@ Configuration:
   定义:
     - 定义Service的期望状态
     - 包含容器镜像、环境变量、资源限制
-  
+
   特点:
     - 每次更新创建新Revision
     - 不可变
@@ -390,7 +393,7 @@ Revision:
     - Configuration的不可变快照
     - 每次Configuration更新自动创建
     - 代表应用的特定版本
-  
+
   特点:
     - 不可变
     - 永久保留 (除非手动删除)
@@ -415,7 +418,7 @@ Route:
     - 管理流量分配
     - 将流量路由到不同Revision
     - 支持灰度发布
-  
+
   特点:
     - 动态流量分割
     - 蓝绿部署
@@ -457,7 +460,7 @@ Knative Autoscaling:
      - 默认指标
      - 每Pod并发请求数
      - target: 100 (默认)
-  
+
   2. RPS (请求数/秒):
      - 可选指标
      - 每秒请求数
@@ -492,37 +495,37 @@ spec:
         # 扩缩容类别
         autoscaling.knative.dev/class: "kpa.autoscaling.knative.dev"
         # 或使用HPA: "hpa.autoscaling.knative.dev"
-        
+
         # 指标类型
         autoscaling.knative.dev/metric: "concurrency"
         # 或: "rps" (requests per second)
-        
+
         # 目标值
         autoscaling.knative.dev/target: "50"
         # concurrency: 并发数, rps: 请求数
-        
+
         # 利用率
         autoscaling.knative.dev/target-utilization-percentage: "70"
         # 仅用于RPS指标
-        
+
         # 最小副本数
         autoscaling.knative.dev/min-scale: "0"
         # 0表示支持Scale to Zero
-        
+
         # 最大副本数
         autoscaling.knative.dev/max-scale: "10"
-        
+
         # 初始副本数
         autoscaling.knative.dev/initial-scale: "1"
-        
+
         # Scale to Zero配置
         autoscaling.knative.dev/scale-to-zero-pod-retention-period: "10m"
         # Pod保留时间
-        
+
         # 扩缩容窗口
         autoscaling.knative.dev/window: "60s"
         # 评估窗口
-        
+
         # Panic模式 (快速扩容)
         autoscaling.knative.dev/panic-window-percentage: "10.0"
         autoscaling.knative.dev/panic-threshold-percentage: "200.0"
@@ -574,19 +577,19 @@ metadata:
 data:
   # 是否启用Scale to Zero
   enable-scale-to-zero: "true"
-  
+
   # 缩容到0的宽限期
   scale-to-zero-grace-period: "30s"
-  
+
   # Pod保留时间
   scale-to-zero-pod-retention-period: "0s"
-  
+
   # Stable窗口 (稳定窗口)
   stable-window: "60s"
-  
+
   # Panic窗口 (快速扩容窗口)
   panic-window-percentage: "10.0"
-  
+
   # Panic阈值
   panic-threshold-percentage: "200.0"
 ```
@@ -598,12 +601,12 @@ Panic Mode:
   触发:
     - 并发数超过target的2倍 (默认200%)
     - 在panic-window内 (6秒, 默认stable-window的10%)
-  
+
   行为:
     - 快速扩容
     - 不等待stable-window
     - 立即增加副本
-  
+
   目的:
     - 应对流量突增
     - 避免请求堆积
@@ -612,7 +615,7 @@ Panic Mode:
 示例:
   target: 100
   panic-threshold: 200% → 200并发
-  
+
   当前并发: 250
   触发Panic Mode
   立即扩容到 ceil(250 / 100) = 3个Pod
@@ -696,11 +699,11 @@ spec:
 示例:
   Service: hello
   Tag: canary
-  
+
   主域名:
     https://hello.default.example.com
     (按traffic.percent分配)
-  
+
   标签域名:
     https://canary-hello.default.example.com
     (100%流量到canary标签的Revision)
@@ -750,9 +753,9 @@ kubectl get revisions
 
 # 输出示例:
 # NAME              SERVICE   READY   REASON
-# hello-00001       hello     True    
-# hello-00002       hello     True    
-# hello-00003       hello     True    
+# hello-00001       hello     True
+# hello-00002       hello     True
+# hello-00003       hello     True
 
 # 查看详情
 kubectl describe revision hello-00001
@@ -778,13 +781,13 @@ metadata:
 data:
   # 保留最近N个Revision
   retain-since-create-time: "48h"
-  
+
   # 保留最近使用的N个Revision
   retain-since-last-active-time: "15h"
-  
+
   # 最少保留N个Revision
   min-non-active-revisions: "2"
-  
+
   # 最多保留N个Revision
   max-non-active-revisions: "1000"
 
@@ -807,7 +810,7 @@ CloudEvents 1.0:
     - CNCF标准
     - 统一事件格式
     - 跨平台互操作
-  
+
   核心属性:
     - id: 事件唯一标识
     - source: 事件源
@@ -840,33 +843,33 @@ CloudEvents 1.0:
 ```yaml
 1. Source to Sink (简单模式):
    Event Source → Knative Service
-   
+
    优点:
      - 简单直接
      - 低延迟
-   
+
    缺点:
      - 紧耦合
      - 难以扩展
 
 2. Broker/Trigger (推荐模式):
    Event Source → Broker → Trigger → Knative Service
-   
+
    优点:
      - 解耦
      - 灵活过滤
      - 多订阅者
-   
+
    缺点:
      - 略微增加延迟
 
 3. Channel/Subscription:
    Event Source → Channel → Subscription → Knative Service
-   
+
    优点:
      - 持久化
      - 支持多后端 (Kafka/NATS)
-   
+
    缺点:
      - 配置复杂
 ```
@@ -1916,7 +1919,7 @@ spec:
         severity: critical
       annotations:
         summary: "Knative Service {{ $labels.service }} is down"
-    
+
     - alert: KnativeHighLatency
       expr: |
         histogram_quantile(0.99, revision_request_latencies_bucket) > 1000
@@ -1925,7 +1928,7 @@ spec:
         severity: warning
       annotations:
         summary: "High latency on {{ $labels.service }}"
-    
+
     - alert: KnativeScalingIssue
       expr: |
         abs(autoscaler_actual_pods - autoscaler_desired_pods) > 2
@@ -1991,8 +1994,8 @@ Knative核心价值:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#Knative` `#Serving` `#Eventing` `#Serverless` `#Kubernetes`
@@ -2022,5 +2025,5 @@ Knative核心价值:
 
 ---
 
-**最后更新**: 2025年11月11日  
+**最后更新**: 2025年11月11日
 **维护状态**: 持续更新
