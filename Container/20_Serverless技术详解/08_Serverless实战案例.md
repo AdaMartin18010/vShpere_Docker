@@ -1,8 +1,8 @@
 # 08 - Serverless实战案例
 
-**作者**: 云原生专家团队  
-**创建日期**: 2025-10-19  
-**最后更新**: 2025-10-19  
+**作者**: 云原生专家团队
+**创建日期**: 2025-10-19
+**最后更新**: 2025-10-19
 **版本**: v1.0
 
 ---
@@ -22,6 +22,9 @@
   - [5. 事件驱动架构](#5-事件驱动架构)
     - [场景: 电商订单处理](#场景-电商订单处理)
   - [6. 总结](#6-总结)
+  - [相关文档](#相关文档)
+    - [本模块相关](#本模块相关)
+    - [其他模块相关](#其他模块相关)
 
 ---
 
@@ -48,7 +51,7 @@ provider:
   environment:
     USERS_TABLE: ${self:service}-${self:provider.stage}-users
     JWT_SECRET: ${ssm:/${self:service}/${self:provider.stage}/jwt-secret~true}
-  
+
   iam:
     role:
       statements:
@@ -72,7 +75,7 @@ functions:
           path: /auth/register
           method: post
           cors: true
-  
+
   # 登录
   login:
     handler: src/auth/login.handler
@@ -81,7 +84,7 @@ functions:
           path: /auth/login
           method: post
           cors: true
-  
+
   # 获取用户列表 (需认证)
   listUsers:
     handler: src/users/list.handler
@@ -93,7 +96,7 @@ functions:
           authorizer:
             name: authorizerFunc
             resultTtlInSeconds: 300
-  
+
   # 获取用户详情
   getUser:
     handler: src/users/get.handler
@@ -103,7 +106,7 @@ functions:
           method: get
           cors: true
           authorizer: authorizerFunc
-  
+
   # 更新用户
   updateUser:
     handler: src/users/update.handler
@@ -113,7 +116,7 @@ functions:
           method: put
           cors: true
           authorizer: authorizerFunc
-  
+
   # 删除用户
   deleteUser:
     handler: src/users/delete.handler
@@ -123,7 +126,7 @@ functions:
           method: delete
           cors: true
           authorizer: authorizerFunc
-  
+
   # JWT Authorizer
   authorizerFunc:
     handler: src/auth/authorizer.handler
@@ -176,11 +179,11 @@ provider:
   runtime: nodejs18.x
   memorySize: 1024
   timeout: 300
-  
+
   environment:
     SOURCE_BUCKET: ${self:service}-${self:provider.stage}-source
     DEST_BUCKET: ${self:service}-${self:provider.stage}-processed
-  
+
   iam:
     role:
       statements:
@@ -212,7 +215,7 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:provider.environment.SOURCE_BUCKET}
-    
+
     DestBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -254,7 +257,7 @@ functions:
             - suffix: .csv
     environment:
       DYNAMODB_TABLE: ProcessedData
-  
+
   processData:
     handler: src/transform.handler
     events:
@@ -264,7 +267,7 @@ functions:
               - DataQueue
               - Arn
           batchSize: 10
-  
+
   loadData:
     handler: src/load.handler
     events:
@@ -283,7 +286,7 @@ resources:
       Properties:
         QueueName: ${self:service}-${self:provider.stage}-queue
         VisibilityTimeout: 300
-    
+
     ProcessedDataTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -321,19 +324,19 @@ functions:
     events:
       - websocket:
           route: $connect
-  
+
   disconnect:
     handler: src/disconnect.handler
     events:
       - websocket:
           route: $disconnect
-  
+
   sendMessage:
     handler: src/sendMessage.handler
     events:
       - websocket:
           route: sendMessage
-  
+
   broadcast:
     handler: src/broadcast.handler
     events:
@@ -383,7 +386,7 @@ functions:
       - http:
           path: /orders
           method: post
-  
+
   processPayment:
     handler: src/payments/process.handler
     events:
@@ -394,7 +397,7 @@ functions:
               - order.service
             detail-type:
               - OrderCreated
-  
+
   updateInventory:
     handler: src/inventory/update.handler
     events:
@@ -404,7 +407,7 @@ functions:
               - payment.service
             detail-type:
               - PaymentProcessed
-  
+
   sendNotification:
     handler: src/notifications/send.handler
     events:
@@ -475,8 +478,8 @@ resources:
 
 ---
 
-**完成日期**: 2025-10-19  
-**版本**: v1.0  
+**完成日期**: 2025-10-19
+**版本**: v1.0
 **作者**: 云原生专家团队
 
 **Tags**: `#ServerlessCases` `#RESTAPI` `#WebSocket` `#EventDriven` `#RealWorld`
@@ -506,5 +509,5 @@ resources:
 
 ---
 
-**最后更新**: 2025年11月11日  
+**最后更新**: 2025年11月11日
 **维护状态**: 持续更新
